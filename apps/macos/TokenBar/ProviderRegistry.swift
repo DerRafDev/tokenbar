@@ -27,6 +27,6 @@ enum ProviderRegistry {
         }
         #endif
         // Every real provider starts disabled; the user enables it in Settings (see docs/roadmap.md).
-        return Configuration(providers: [ClaudeProvider()], defaults: .standard, initiallyEnabled: [])
+        return Configuration(providers: [ClaudeProvider(), CodexProvider()], defaults: .standard, initiallyEnabled: [])
     }
 }
