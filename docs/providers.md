@@ -27,7 +27,18 @@ ships (see [Verification](#verification)).
 | **Not available** | **Message counts** (e.g. "34 / 200 messages"). Claude limits are compute-based, not fixed message quotas, and no source exposes a count. TokenBar shows percentages only. |
 | **Known limitations** | Undocumented and can change without notice. Persistent HTTP 429 responses have been reported, particularly without a Claude Code `User-Agent`. Requires Claude Code to be installed and logged in. One community report says the "weekly" window does not always reset on a 7-day cadence, so TokenBar trusts `resets_at` rather than computing windows itself. |
 | **Security considerations** | macOS shows an access prompt the first time TokenBar reads another app's Keychain item; the user stays in control. TokenBar **never refreshes** the token (refresh rotates it and could sign Claude Code out), **never copies** it into its own storage, and **never logs** it. An expired token means "open Claude Code to sign in again". |
-| **Policy risk** | Anthropic's Consumer Terms restrict OAuth tokens to Claude Code and Claude.ai, and a community issue flags calling this endpoint from third-party tools as a possible conflict. **Unresolved — must be decided before shipping the real provider.** |
+| **Policy risk** | Anthropic's Consumer Terms restrict OAuth tokens to Claude Code and Claude.ai, and a community issue flags calling this endpoint from third-party tools as a possible conflict. See the decision below. |
+
+### Decision (2026-10-22)
+
+Claude ships as an **experimental, opt-in** provider:
+
+- Disabled by default. TokenBar never reads the Claude Code sign-in until the user
+  enables the provider and confirms a warning that it relies on an undocumented
+  mechanism that may change or stop working.
+- Labeled "Experimental" wherever it appears.
+- Isolated behind `UsageProvider`, so the data source can be replaced (or the provider
+  removed) without touching the UI, refresh logic, or other providers.
 
 ### Alternatives considered
 
@@ -39,7 +50,7 @@ ships (see [Verification](#verification)).
 
 ---
 
-## ChatGPT (Plus / Pro)
+## Codex (ChatGPT plans)
 
 | | |
 |---|---|
@@ -48,6 +59,7 @@ ships (see [Verification](#verification)).
 | **Available metrics** | *Observed*: `plan_type`; `rate_limit.primary_window` and `rate_limit.secondary_window`, each with `used_percent`, `limit_window_seconds`, and `reset_at` (Unix seconds); optional `additional_rate_limits[]` (per-model) and `code_review_rate_limit`. The window type is identified by its length (18000 s = 5 hours, 604800 s = weekly), **not** by primary/secondary position. |
 | **Reset information** | Absolute Unix timestamps. |
 | **Not available** | **ChatGPT chat message limits** (for example GPT-5 messages per 3 hours in the ChatGPT app). There is no endpoint, documented or otherwise, that reports them. **What we can show is the ChatGPT plan's *Codex* usage**, not chat-message usage. Message counts are not available either. |
+| **Window semantics** | To be verified against a live capture: whether the 5-hour window is rolling or starts with first use. TokenBar models whatever the source actually represents (`LimitWindow.rolling` vs `.session`) and never relabels it to match another provider. |
 | **Known limitations** | Undocumented. One report shows the endpoint reporting 0% while a model-specific weekly limit was exhausted, so per-model limits must be parsed separately. Tokens from the newer "Sign in with ChatGPT" token-sharing flow are rejected (401); only a Codex login works ([openai/codex#54219](https://github.com/openai/codex/issues/54219), open, no maintainer response). |
 | **Security considerations** | TokenBar reads the file at fetch time and never copies, refreshes, or logs the token. Reading `~/.codex` is incompatible with App Sandbox unless the user grants access to the folder (security-scoped bookmark). |
 
@@ -56,12 +68,19 @@ ships (see [Verification](#verification)).
 ## Consequences for the product
 
 1. **Mockup change:** remove the "N / M mensagens" lines. Keep percentage + reset.
-2. **Naming honesty:** the "ChatGPT" provider reports *Codex limits on the ChatGPT
-   plan*. The UI must say so (for example "ChatGPT · Codex limits"), or the
-   provider should simply be called **Codex**. *Open decision.*
-3. **Every provider can return partial data.** The domain model allows any limit
+2. **Naming honesty (decided 2026-10-22):** the provider is called **Codex** (id
+   `codex`), because it reports Codex limits on a ChatGPT plan, not ChatGPT message
+   limits. Nothing in the UI may imply otherwise. The id `chatgpt` stays free for a
+   separate ChatGPT provider if a reliable source for chat limits ever appears.
+3. **Semantic limits:** each limit is modeled as the window the provider actually
+   reports (session, rolling window of a given length, daily, weekly, monthly,
+   optionally scoped to a model). Providers are never forced into a common
+   "session + weekly" shape to look consistent.
+4. **Every provider can return partial data.** The domain model allows any limit
    to be missing and allows usage with no percentage.
-4. **Prerequisites are visible.** If Claude Code / Codex is not installed or not
+5. **Consent first.** Every provider that reads another app's credentials is
+   disabled until the user enables it in Settings.
+6. **Prerequisites are visible.** If Claude Code / Codex is not installed or not
    signed in, the provider shows "Not connected" with a one-line instruction. It
    never shows an empty bar that looks like 0%.
 

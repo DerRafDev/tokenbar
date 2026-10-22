@@ -24,7 +24,7 @@ body:
     id: provider
     attributes:
       label: Provider
-      options: [Claude, ChatGPT, Not provider-specific]
+      options: [Claude, Codex, Not provider-specific]
     validations:
       required: true
   - type: input

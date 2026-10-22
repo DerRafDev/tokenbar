@@ -42,7 +42,7 @@ to `packages/` when a **second consumer actually exists**. Until then a top-leve
           ┌────────┴─────────┐
           ▼                  ▼
    ┌─────────────┐   ┌──────────────────┐
-   │ TokenBarUI  │   │ TokenBarProviders│  Claude, ChatGPT, mocks, HTTP, credentials
+   │ TokenBarUI  │   │ TokenBarProviders│  Claude, Codex, HTTP, credentials
    └──────┬──────┘   └────────┬─────────┘
           └────────┬──────────┘
                    ▼

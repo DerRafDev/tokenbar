@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/assets/mockup.png" alt="TokenBar popover showing Claude and ChatGPT session and weekly usage" width="720">
+  <img src="docs/assets/mockup.png" alt="TokenBar popover showing Claude and Codex usage limits" width="720">
   <br>
   <sub>Design mockup. TokenBar is in early development.</sub>
 </p>
@@ -30,8 +30,8 @@
 
 | Provider | Status | What is shown | Requires |
 |---|---|---|---|
-| Claude (Pro/Max) | Planned | Session (5 h) and weekly limits | Claude Code signed in |
-| ChatGPT (Plus/Pro) | Planned | Codex session and weekly limits on your plan | Codex CLI signed in |
+| Claude (Pro/Max) | Planned · experimental, opt-in | Session (5 h) and weekly limits | Claude Code signed in |
+| Codex (ChatGPT plans) | Planned | Codex 5-hour and weekly limits on your plan. **Not** ChatGPT chat message limits. | Codex CLI signed in |
 
 Neither Anthropic nor OpenAI publishes an API for subscription limits. Read
 [docs/providers.md](docs/providers.md) for exactly where the data comes from and
@@ -83,5 +83,5 @@ Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). TokenBar is not affiliated with Anthropic or OpenAI. Claude and
-ChatGPT are trademarks of their respective owners.
+[MIT](LICENSE). TokenBar is not affiliated with Anthropic or OpenAI. Claude, ChatGPT,
+and Codex are trademarks of their respective owners.
