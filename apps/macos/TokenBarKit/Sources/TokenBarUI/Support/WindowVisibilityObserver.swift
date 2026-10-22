@@ -42,7 +42,9 @@ struct WindowVisibilityObserver: NSViewRepresentable {
             ) { [weak self] _ in
                 MainActor.assumeIsolated { self?.report() }
             }
-            report()
+            // AppKit moves the view into the window during a layout pass. Reporting synchronously
+            // would change SwiftUI state mid-layout and trigger a nested -layoutSubtreeIfNeeded.
+            DispatchQueue.main.async { [weak self] in self?.report() }
         }
 
         private func report() {
