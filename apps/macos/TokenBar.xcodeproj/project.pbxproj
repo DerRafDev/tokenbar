@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		7B0000000000000000000013 /* TokenBarCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7B0000000000000000000011 /* TokenBarCore */; };
 		7B0000000000000000000014 /* TokenBarUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7B0000000000000000000012 /* TokenBarUI */; };
+		7B0000000000000000000019 /* TokenBarProviders in Frameworks */ = {isa = PBXBuildFile; productRef = 7B0000000000000000000018 /* TokenBarProviders */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 			files = (
 				7B0000000000000000000013 /* TokenBarCore in Frameworks */,
 				7B0000000000000000000014 /* TokenBarUI in Frameworks */,
+				7B0000000000000000000019 /* TokenBarProviders in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,6 +88,7 @@
 			packageProductDependencies = (
 				7B0000000000000000000011 /* TokenBarCore */,
 				7B0000000000000000000012 /* TokenBarUI */,
+				7B0000000000000000000018 /* TokenBarProviders */,
 			);
 			productName = TokenBar;
 			productReference = 7B0000000000000000000004 /* TokenBar.app */;
@@ -238,6 +241,10 @@
 		7B0000000000000000000012 /* TokenBarUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TokenBarUI;
+		};
+		7B0000000000000000000018 /* TokenBarProviders */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TokenBarProviders;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
