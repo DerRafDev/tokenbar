@@ -20,7 +20,7 @@ jobs:
       HAS_SIGNING: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 != '' }}
       HAS_NOTARY: ${{ secrets.NOTARY_KEY_P8_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Check tag matches app version
         run: |
