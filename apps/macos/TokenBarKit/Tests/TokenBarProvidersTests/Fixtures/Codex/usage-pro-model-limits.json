@@ -1,0 +1,49 @@
+{
+  "plan_type": "pro",
+  "rate_limit": {
+    "allowed": true,
+    "limit_reached": false,
+    "primary_window": {
+      "used_percent": 0,
+      "limit_window_seconds": 604800,
+      "reset_after_seconds": 374400,
+      "reset_at": 1800374400
+    },
+    "secondary_window": {
+      "used_percent": 5,
+      "limit_window_seconds": 18000,
+      "reset_after_seconds": 8520,
+      "reset_at": 1800008520
+    }
+  },
+  "additional_rate_limits": [
+    {
+      "limit_name": "GPT-5.3-Codex-Spark",
+      "metered_feature": "codex_bengalfox",
+      "normal_model_slug": "gpt-5.3-codex",
+      "rate_limit": {
+        "allowed": false,
+        "limit_reached": true,
+        "primary_window": {
+          "used_percent": 31,
+          "limit_window_seconds": 18000,
+          "reset_after_seconds": 3600,
+          "reset_at": 1800003600
+        },
+        "secondary_window": {
+          "used_percent": 100,
+          "limit_window_seconds": 604800,
+          "reset_after_seconds": 172800,
+          "reset_at": 1800172800
+        }
+      }
+    },
+    {
+      "limit_name": "Without limits",
+      "metered_feature": "codex_unmetered",
+      "rate_limit": null
+    }
+  ],
+  "rate_limit_reached_type": { "type": "rate_limit_reached" },
+  "future_field": { "anything": [1, 2, 3] }
+}

@@ -6,9 +6,9 @@ import os
 @testable import TokenBarProviders
 
 enum Fixture {
-    static func data(_ name: String) throws -> Data {
+    static func data(_ name: String, in folder: String = "Claude") throws -> Data {
         let url = try #require(
-            Bundle.module.url(forResource: name, withExtension: "json", subdirectory: "Fixtures/Claude")
+            Bundle.module.url(forResource: name, withExtension: "json", subdirectory: "Fixtures/\(folder)")
         )
         return try Data(contentsOf: url)
     }
@@ -59,6 +59,18 @@ struct FakeCredentials: ClaudeCredentialSource {
     }
 
     func credentials() throws -> ClaudeCodeCredentials {
+        try result.get()
+    }
+}
+
+struct FakeCodexCredentials: CodexCredentialSource {
+    var result: Result<CodexCredentials, ProviderError>
+
+    static func valid(accountID: String? = "test-account") -> FakeCodexCredentials {
+        FakeCodexCredentials(result: .success(CodexCredentials(accessToken: "test-token", accountID: accountID)))
+    }
+
+    func credentials() throws -> CodexCredentials {
         try result.get()
     }
 }
