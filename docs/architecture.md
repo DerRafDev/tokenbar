@@ -59,7 +59,12 @@ to `packages/` when a **second consumer actually exists**. Until then a top-leve
 | App target | Wiring | Business logic |
 
 The `TokenBarUI ↛ TokenBarProviders` rule is enforced by the compiler: the UI module
-does not depend on the providers module.
+does not depend on the providers module. (`TokenBarProviders` is created together with
+the first real provider. Until then the debug-only `MockUsageProvider` lives in
+`TokenBarCore`, so SwiftUI previews can use it.)
+
+Provider-specific presentation (name, SF Symbol, demo flag) comes from
+`ProviderDescriptor`, so the UI never switches on provider IDs.
 
 ## Domain model
 
@@ -112,6 +117,16 @@ ProviderState = connection + last good snapshot + last error + isRefreshing
 - Countdowns ("in 2h 50min") are computed locally from `resetsAt` and re-rendered
   with `TimelineView(.everyMinute)` only while the popover is open. No network
   request is made to update a countdown.
+- The scheduler sleeps on the continuous clock, so after the Mac wakes from sleep the
+  overdue refresh runs right away without a separate wake observer.
+- The menu bar label is rendered into a template image (MenuBarExtra drops symbols
+  embedded in text), only when its values change.
+
+## Mock data
+
+Debug builds can run with demo providers: the shared scheme passes
+`-TokenBarUseMocks YES`. Mock code is wrapped in `#if DEBUG` and absent from Release
+builds, and the popover labels demo data with a "Demo" badge.
 
 ## Security boundaries
 
