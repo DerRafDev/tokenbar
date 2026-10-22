@@ -10,12 +10,16 @@ struct TokenBarApp: App {
         MenuBarExtra {
             UsagePopover(store: appDelegate.store)
         } label: {
-            MenuBarLabel(store: appDelegate.store)
+            MenuBarLabel(store: appDelegate.store, settings: appDelegate.settings)
         }
         .menuBarExtraStyle(.window)
 
         Settings {
-            SettingsView()
+            SettingsView(
+                settings: appDelegate.settings,
+                store: appDelegate.store,
+                launchAtLogin: appDelegate.launchAtLogin
+            )
         }
     }
 }

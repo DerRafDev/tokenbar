@@ -39,10 +39,10 @@ public struct UsagePopover: View {
 
     private func content(now: Date) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            if store.descriptors.isEmpty {
+            if store.enabledDescriptors.isEmpty {
                 emptyState
             }
-            ForEach(Array(store.descriptors.enumerated()), id: \.element.id) { index, descriptor in
+            ForEach(Array(store.enabledDescriptors.enumerated()), id: \.element.id) { index, descriptor in
                 if index > 0 {
                     Divider().padding(.vertical, 16)
                 }

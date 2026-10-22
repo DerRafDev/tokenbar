@@ -8,17 +8,17 @@ import TokenBarCore
 /// and dark menu bars. The image is only re-rendered when the summary changes.
 public struct MenuBarLabel: View {
     let store: UsageStore
-    let showsUsage: Bool
+    let settings: AppSettings
     let formatter: UsageFormatter
 
-    public init(store: UsageStore, showsUsage: Bool = true, formatter: UsageFormatter = UsageFormatter()) {
+    public init(store: UsageStore, settings: AppSettings, formatter: UsageFormatter = UsageFormatter()) {
         self.store = store
-        self.showsUsage = showsUsage
+        self.settings = settings
         self.formatter = formatter
     }
 
     public var body: some View {
-        let items = showsUsage ? self.items : []
+        let items = settings.showsUsageInMenuBar ? self.items : []
         if items.isEmpty {
             Image(systemName: "gauge.with.dots.needle.33percent")
                 .accessibilityLabel(Text(verbatim: "TokenBar"))
@@ -35,8 +35,9 @@ public struct MenuBarLabel: View {
     }
 
     private var items: [Item] {
-        store.descriptors.compactMap { descriptor in
-            guard let snapshot = store.state(for: descriptor.id).snapshot,
+        store.enabledDescriptors.compactMap { descriptor in
+            guard settings.showsInMenuBar(descriptor.id),
+                let snapshot = store.state(for: descriptor.id).snapshot,
                 let summary = MenuBarSummary.text(for: snapshot, formatter: formatter)
             else { return nil }
             return Item(name: descriptor.displayName, symbolName: descriptor.symbolName, summary: summary)
