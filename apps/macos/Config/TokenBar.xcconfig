@@ -1,0 +1,30 @@
+// Build settings for the TokenBar app target. Kept here instead of project.pbxproj so
+// changes are reviewable.
+#include "Version.xcconfig"
+
+PRODUCT_NAME = TokenBar
+PRODUCT_BUNDLE_IDENTIFIER = io.github.derrafdev.TokenBar
+MACOSX_DEPLOYMENT_TARGET = 14.0
+SWIFT_VERSION = 6.0
+
+// Menu-bar-only: no Dock icon, no main window.
+GENERATE_INFOPLIST_FILE = YES
+INFOPLIST_KEY_LSUIElement = YES
+INFOPLIST_KEY_CFBundleDisplayName = TokenBar
+INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.utilities
+INFOPLIST_KEY_NSHumanReadableCopyright = © 2026 TokenBar contributors. MIT License.
+
+// Distributed outside the Mac App Store: hardened runtime (required for notarization),
+// no App Sandbox (providers read credentials owned by other apps; see docs/providers.md).
+ENABLE_HARDENED_RUNTIME = YES
+ENABLE_APP_SANDBOX = NO
+
+// Local builds are ad-hoc signed so contributors need no Apple Developer account.
+// The release workflow overrides these with a Developer ID identity.
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+DEAD_CODE_STRIPPING = YES
+COMBINE_HIDPI_IMAGES = YES

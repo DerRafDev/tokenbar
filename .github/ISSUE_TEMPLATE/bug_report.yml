@@ -1,0 +1,36 @@
+name: Bug report
+description: Something is wrong or broken.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste tokens, cookies, or raw provider responses.** Security issues go to
+        [private vulnerability reporting](https://github.com/DerRafDev/tokenbar/security/advisories/new).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options: [Claude, Codex, Not provider-specific]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: TokenBar and macOS versions
+      placeholder: TokenBar 0.1.0, macOS 15.1
+    validations:
+      required: true

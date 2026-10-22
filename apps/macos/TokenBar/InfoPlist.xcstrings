@@ -1,0 +1,14 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSHumanReadableCopyright" : {
+      "comment" : "Also declares the app's supported languages: macOS only uses a translation in TokenBarKit if the app bundle itself has that language.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "© 2026 TokenBar contributors. MIT License." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "© 2026 colaboradores do TokenBar. Licença MIT." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
