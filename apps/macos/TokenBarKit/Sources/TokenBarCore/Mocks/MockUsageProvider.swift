@@ -38,8 +38,14 @@ public struct MockUsageProvider: UsageProvider {
     let behavior: Behavior
     let latency: Duration
 
-    public init(id: ProviderID, name: String, behavior: Behavior, latency: Duration = .milliseconds(300)) {
-        self.descriptor = ProviderDescriptor(id: id, displayName: name, isDemo: true)
+    public init(
+        id: ProviderID,
+        name: String,
+        symbolName: String = "sparkle",
+        behavior: Behavior,
+        latency: Duration = .milliseconds(300)
+    ) {
+        self.descriptor = ProviderDescriptor(id: id, displayName: name, symbolName: symbolName, isDemo: true)
         self.behavior = behavior
         self.latency = latency
     }
@@ -83,6 +89,7 @@ extension MockUsageProvider {
         MockUsageProvider(
             id: "claude",
             name: "Claude",
+            symbolName: "asterisk",
             behavior: behavior
                 ?? .success(
                     plan: "Pro",
@@ -99,6 +106,7 @@ extension MockUsageProvider {
         MockUsageProvider(
             id: "chatgpt",
             name: "ChatGPT",
+            symbolName: "circle.hexagongrid",
             behavior: behavior
                 ?? .success(
                     plan: "Plus",

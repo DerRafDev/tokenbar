@@ -1,6 +1,32 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ %@" : {
+      "shouldTranslate" : false
+    },
+    "%@   %@" : {
+      "shouldTranslate" : false
+    },
+    "%@ used" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "%@ usado" } }
+      }
+    },
+    "Current session" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sessão atual" } }
+      }
+    },
+    "Demo" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Demo" } }
+      }
+    },
+    "Enable a provider in Settings." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ative um provedor nos Ajustes." } }
+      }
+    },
     "General" : {
       "localizations" : {
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Geral" } }
@@ -11,14 +37,119 @@
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "As configurações gerais aparecerão aqui." } }
       }
     },
-    "No providers connected" : {
+    "Loading…" : {
       "localizations" : {
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum provedor conectado" } }
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Carregando…" } }
+      }
+    },
+    "Monthly" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Uso mensal" } }
+      }
+    },
+    "No providers enabled" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum provedor ativado" } }
+      }
+    },
+    "No usage limits reported." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum limite de uso informado." } }
+      }
+    },
+    "Not connected. Connect it in Settings." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não conectado. Conecte nos Ajustes." } }
+      }
+    },
+    "Not updated yet" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ainda não atualizado" } }
       }
     },
     "Quit TokenBar" : {
       "localizations" : {
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Encerrar TokenBar" } }
+      }
+    },
+    "Refresh now" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atualizar agora" } }
+      }
+    },
+    "Reset due, updating soon" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Redefinição pendente, atualizando em breve" } }
+      }
+    },
+    "Resets at %@ (in %@)" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Redefine às %1$@ (em %2$@)" } }
+      }
+    },
+    "Resets in %@ (%@)" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reseta em %1$@ (%2$@)" } }
+      }
+    },
+    "Settings…" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ajustes…" } }
+      }
+    },
+    "Sign-in expired. Sign in again to resume updates." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sessão expirada. Entre novamente para retomar as atualizações." } }
+      }
+    },
+    "Something went wrong." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Algo deu errado." } }
+      }
+    },
+    "The service returned an error (%lld)." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O serviço retornou um erro (%lld)." } }
+      }
+    },
+    "The service took too long to respond." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O serviço demorou demais para responder." } }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Hoje" } }
+      }
+    },
+    "Too many requests. Will retry later." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Muitas solicitações. Tentaremos novamente mais tarde." } }
+      }
+    },
+    "Unexpected response. TokenBar may need an update." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Resposta inesperada. O TokenBar pode precisar de uma atualização." } }
+      }
+    },
+    "Updated %@ ago" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atualizado há %@" } }
+      }
+    },
+    "Updated just now" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atualizado agora" } }
+      }
+    },
+    "Weekly" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Uso semanal" } }
+      }
+    },
+    "You're offline." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Você está offline." } }
       }
     }
   },
