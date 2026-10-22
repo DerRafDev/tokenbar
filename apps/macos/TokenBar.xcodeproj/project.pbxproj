@@ -1,0 +1,245 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7B0000000000000000000013 /* TokenBarCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7B0000000000000000000011 /* TokenBarCore */; };
+		7B0000000000000000000014 /* TokenBarUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7B0000000000000000000012 /* TokenBarUI */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		7B0000000000000000000004 /* TokenBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TokenBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B0000000000000000000015 /* TokenBar.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TokenBar.xcconfig; sourceTree = "<group>"; };
+		7B0000000000000000000017 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		7B0000000000000000000005 /* TokenBar */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TokenBar;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7B0000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B0000000000000000000013 /* TokenBarCore in Frameworks */,
+				7B0000000000000000000014 /* TokenBarUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7B0000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				7B0000000000000000000005 /* TokenBar */,
+				7B0000000000000000000016 /* Config */,
+				7B0000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7B0000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7B0000000000000000000004 /* TokenBar.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7B0000000000000000000016 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				7B0000000000000000000015 /* TokenBar.xcconfig */,
+				7B0000000000000000000017 /* Version.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7B0000000000000000000006 /* TokenBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B000000000000000000000D /* Build configuration list for PBXNativeTarget "TokenBar" */;
+			buildPhases = (
+				7B0000000000000000000007 /* Sources */,
+				7B0000000000000000000008 /* Frameworks */,
+				7B0000000000000000000009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7B0000000000000000000005 /* TokenBar */,
+			);
+			name = TokenBar;
+			packageProductDependencies = (
+				7B0000000000000000000011 /* TokenBarCore */,
+				7B0000000000000000000012 /* TokenBarUI */,
+			);
+			productName = TokenBar;
+			productReference = 7B0000000000000000000004 /* TokenBar.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7B0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 7B000000000000000000000A /* Build configuration list for PBXProject "TokenBar" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				"pt-BR",
+				Base,
+			);
+			mainGroup = 7B0000000000000000000002;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7B0000000000000000000010 /* XCLocalSwiftPackageReference "TokenBarKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7B0000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7B0000000000000000000006 /* TokenBar */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7B0000000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7B0000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7B000000000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		7B000000000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		7B000000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7B0000000000000000000015 /* TokenBar.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7B000000000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7B0000000000000000000015 /* TokenBar.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7B000000000000000000000A /* Build configuration list for PBXProject "TokenBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B000000000000000000000B /* Debug */,
+				7B000000000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7B000000000000000000000D /* Build configuration list for PBXNativeTarget "TokenBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B000000000000000000000E /* Debug */,
+				7B000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		7B0000000000000000000010 /* XCLocalSwiftPackageReference "TokenBarKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = TokenBarKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7B0000000000000000000011 /* TokenBarCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TokenBarCore;
+		};
+		7B0000000000000000000012 /* TokenBarUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TokenBarUI;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 7B0000000000000000000001 /* Project object */;
+}

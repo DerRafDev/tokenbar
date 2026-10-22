@@ -1,0 +1,4 @@
+// Single source of truth for the app version. The release workflow fails if the
+// pushed tag (vX.Y.Z) does not match MARKETING_VERSION. Bump with scripts/bump-version.sh.
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1

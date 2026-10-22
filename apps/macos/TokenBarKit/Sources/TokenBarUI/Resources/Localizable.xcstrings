@@ -1,0 +1,26 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "General" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Geral" } }
+      }
+    },
+    "General settings will appear here." : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "As configurações gerais aparecerão aqui." } }
+      }
+    },
+    "No providers connected" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum provedor conectado" } }
+      }
+    },
+    "Quit TokenBar" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Encerrar TokenBar" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
