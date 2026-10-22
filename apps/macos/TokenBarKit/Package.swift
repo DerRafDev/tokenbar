@@ -17,5 +17,6 @@ let package = Package(
         .target(name: "TokenBarUI", dependencies: ["TokenBarCore"]),
 
         .testTarget(name: "TokenBarCoreTests", dependencies: ["TokenBarCore"]),
+        .testTarget(name: "TokenBarUITests", dependencies: ["TokenBarUI", "TokenBarCore"]),
     ]
 )
