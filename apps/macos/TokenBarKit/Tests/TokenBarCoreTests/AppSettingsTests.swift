@@ -58,4 +58,38 @@ struct AppSettingsTests {
         #expect(settings.showsUsageInMenuBar)
         #expect(settings.enabledProviders.isEmpty)
     }
+
+    @Test func usesInitialSelectionUntilUserChangesIt() {
+        let settings = AppSettings(defaults: defaults, initiallyEnabled: ["claude", "codex"])
+        #expect(settings.enabledProviders == ["claude", "codex"])
+
+        settings.setEnabled(false, for: "codex")
+        let reloaded = AppSettings(defaults: defaults, initiallyEnabled: ["claude", "codex"])
+        #expect(reloaded.enabledProviders == ["claude"])
+    }
+
+    @Test func storeFollowsSettings() async {
+        let clock = TestClock()
+        let provider = StubProvider(clock: clock, results: [.success([.session(0.1)])])
+        let settings = AppSettings(defaults: defaults)
+        let store = UsageStore(providers: [provider], now: { clock.now })
+
+        store.follow(settings)
+        #expect(store.enabledProviders.isEmpty)
+        #expect(store.policy.interval == settings.refreshInterval)
+
+        settings.setEnabled(true, for: "stub")
+        settings.refreshInterval = 15 * 60
+        await waitUntil { store.enabledProviders == ["stub"] && store.policy.interval == 15 * 60 }
+
+        settings.setEnabled(false, for: "stub")
+        await waitUntil { store.enabledProviders.isEmpty }
+    }
+
+    private func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0..<100 where !condition() {
+            await Task.yield()
+        }
+        #expect(condition())
+    }
 }

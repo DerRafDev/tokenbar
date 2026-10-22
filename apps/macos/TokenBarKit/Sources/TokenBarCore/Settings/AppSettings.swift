@@ -38,13 +38,17 @@ public final class AppSettings {
 
     @ObservationIgnored private let defaults: UserDefaults
 
-    public init(defaults: UserDefaults = .standard) {
+    /// - Parameter initiallyEnabled: Providers enabled until the user changes the selection.
+    ///   Empty for real use; demo mode passes its mock providers.
+    public init(defaults: UserDefaults = .standard, initiallyEnabled: Set<ProviderID> = []) {
         self.defaults = defaults
         let interval = defaults.double(forKey: Key.refreshInterval)
         refreshInterval =
             RefreshPolicy.intervalChoices.contains(interval) ? interval : RefreshPolicy.default.interval
         showsUsageInMenuBar = defaults.object(forKey: Key.showsUsageInMenuBar) as? Bool ?? true
-        enabledProviders = Self.providerIDs(defaults, Key.enabledProviders)
+        enabledProviders =
+            defaults.object(forKey: Key.enabledProviders) == nil
+            ? initiallyEnabled : Self.providerIDs(defaults, Key.enabledProviders)
         providersHiddenFromMenuBar = Self.providerIDs(defaults, Key.providersHiddenFromMenuBar)
     }
 

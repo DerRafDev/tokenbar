@@ -52,10 +52,18 @@ public struct MockUsageProvider: UsageProvider {
         id: ProviderID,
         name: String,
         symbolName: String = "sparkle",
+        isExperimental: Bool = false,
         behavior: Behavior,
         latency: Duration = .milliseconds(300)
     ) {
-        self.descriptor = ProviderDescriptor(id: id, displayName: name, symbolName: symbolName, isDemo: true)
+        self.descriptor = ProviderDescriptor(
+            id: id,
+            displayName: name,
+            symbolName: symbolName,
+            isDemo: true,
+            isExperimental: isExperimental,
+            accessDescription: "Demo data. Nothing is read from your Mac."
+        )
         self.behavior = behavior
         self.latency = latency
     }
@@ -94,12 +102,13 @@ extension MockUsageProvider {
     private static let hour: TimeInterval = 60 * minute
     private static let day: TimeInterval = 24 * hour
 
-    /// Claude-like sample data matching the design mockup.
+    /// Claude-like sample data matching the design mockup. Experimental, like the real provider.
     public static func claude(_ behavior: Behavior? = nil) -> MockUsageProvider {
         MockUsageProvider(
             id: "claude",
             name: "Claude",
             symbolName: "asterisk",
+            isExperimental: true,
             behavior: behavior
                 ?? .success(
                     plan: "Pro",
