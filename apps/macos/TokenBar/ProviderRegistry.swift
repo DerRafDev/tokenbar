@@ -12,10 +12,10 @@ enum ProviderRegistry {
         let initiallyEnabled: Set<ProviderID>
     }
 
-    static func make() -> Configuration {
+    static func make(environment: [String: String] = ProcessInfo.processInfo.environment) -> Configuration {
         #if DEBUG
-        // Opt-in demo data for UI work: pass `-TokenBarUseMocks YES` (enabled in the shared scheme).
-        if UserDefaults.standard.bool(forKey: "TokenBarUseMocks"),
+        // Opt-in demo data for UI work: launch with `TOKENBAR_DEMO=1` (off in the shared scheme).
+        if DemoMode.isRequested(in: environment),
             let defaults = UserDefaults(suiteName: "io.github.derrafdev.TokenBar.demo")
         {
             let providers = [MockUsageProvider.claude(), MockUsageProvider.codex()]

@@ -147,9 +147,11 @@ Settings window ──edits──▶ AppSettings (UserDefaults) ──follow─�
 
 ## Mock data
 
-Debug builds can run with demo providers: the shared scheme passes
-`-TokenBarUseMocks YES`. Demo mode keeps its settings in a separate defaults suite, so it
-never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
+Every build, Debug included, runs the real providers. Debug builds can opt into demo
+providers by launching with the environment variable `TOKENBAR_DEMO=1` (the shared scheme
+lists it, unchecked; tick it in Edit Scheme › Run › Arguments). A test fails if the shared
+scheme enables it, so ⌘R never silently runs on mock data. Demo mode keeps its settings in a
+separate defaults suite, so it never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
 builds, and the popover labels demo data with a "Demo" badge.
 
 ## Security boundaries

@@ -1,4 +1,5 @@
 import AppKit
+import OSLog
 import TokenBarCore
 import TokenBarUI
 
@@ -11,6 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     override init() {
         let registry = ProviderRegistry.make()
+        // Type names and IDs only, so a console shows whether real or demo providers are running.
+        let providers = registry.providers.map { "\(type(of: $0))(\($0.descriptor.id.rawValue))" }
+        Logger(subsystem: Log.subsystem, category: "app")
+            .notice("Registered providers: \(providers.joined(separator: ", "), privacy: .public)")
         settings = AppSettings(defaults: registry.defaults, initiallyEnabled: registry.initiallyEnabled)
         store = UsageStore(providers: registry.providers, enabledProviders: [])
         super.init()
