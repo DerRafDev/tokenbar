@@ -59,9 +59,9 @@ to `packages/` when a **second consumer actually exists**. Until then a top-leve
 | App target | Wiring | Business logic |
 
 The `TokenBarUI ↛ TokenBarProviders` rule is enforced by the compiler: the UI module
-does not depend on the providers module. (`TokenBarProviders` is created together with
-the first real provider. Until then the debug-only `MockUsageProvider` lives in
-`TokenBarCore`, so SwiftUI previews can use it.)
+does not depend on the providers module. (`TokenBarProviders` holds the Keychain
+`CredentialStore` today; real providers join it from Milestone 5. The debug-only
+`MockUsageProvider` lives in `TokenBarCore`, so SwiftUI previews can use it.)
 
 Provider-specific presentation (name, SF Symbol, demo flag) comes from
 `ProviderDescriptor`, so the UI never switches on provider IDs.
@@ -138,8 +138,9 @@ builds, and the popover labels demo data with a "Demo" badge.
 
 - Third-party credentials (Claude Code, Codex) are **read at fetch time** and never
   copied, refreshed, or persisted by TokenBar.
-- Credentials TokenBar owns go through `CredentialStore` (Keychain). Nothing
-  sensitive goes in `UserDefaults`, files, or logs.
+- Credentials TokenBar owns go through `CredentialStore`: generic password items in
+  the login Keychain, scoped to TokenBar's service, `AfterFirstUnlockThisDeviceOnly`,
+  never synced to iCloud. Nothing sensitive goes in `UserDefaults`, files, or logs.
 - Logging uses `os.Logger` with privacy annotations. Tokens, cookies, account IDs,
   authenticated URLs, and response bodies are never logged.
 - No TokenBar backend. The app talks only to provider endpoints.

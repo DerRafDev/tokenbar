@@ -9,14 +9,18 @@ let package = Package(
     products: [
         .library(name: "TokenBarCore", targets: ["TokenBarCore"]),
         .library(name: "TokenBarUI", targets: ["TokenBarUI"]),
+        .library(name: "TokenBarProviders", targets: ["TokenBarProviders"]),
     ],
     targets: [
         // Domain model, provider protocol, refresh policy. No UI, no networking.
         .target(name: "TokenBarCore"),
         // SwiftUI views. Must never depend on TokenBarProviders.
         .target(name: "TokenBarUI", dependencies: ["TokenBarCore"]),
+        // Concrete providers, networking, and credentials. No UI.
+        .target(name: "TokenBarProviders", dependencies: ["TokenBarCore"]),
 
         .testTarget(name: "TokenBarCoreTests", dependencies: ["TokenBarCore"]),
         .testTarget(name: "TokenBarUITests", dependencies: ["TokenBarUI", "TokenBarCore"]),
+        .testTarget(name: "TokenBarProvidersTests", dependencies: ["TokenBarProviders"]),
     ]
 )
