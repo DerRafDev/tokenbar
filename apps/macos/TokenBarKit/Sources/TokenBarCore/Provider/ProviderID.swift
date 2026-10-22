@@ -1,4 +1,4 @@
-/// Stable identifier of a usage provider, such as `claude` or `chatgpt`.
+/// Stable identifier of a usage provider, such as `claude` or `codex`.
 ///
 /// The raw value is persisted in user settings, so it must never change once shipped.
 public struct ProviderID: RawRepresentable, Hashable, Sendable, Codable {

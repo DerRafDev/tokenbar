@@ -54,4 +54,20 @@ struct UsageLimitTests {
         #expect(snapshot.limit(.weekly, scope: "Opus")?.id == "weekly.opus")
         #expect(snapshot.limit(.session) == nil)
     }
+
+    @Test func distinguishesRollingWindowsFromSessionsAndByLength() {
+        let fiveHours = LimitWindow.rolling(length: .seconds(5 * 3600))
+        #expect(fiveHours != .session)
+        #expect(fiveHours != .rolling(length: .seconds(3600)))
+        #expect(fiveHours == .rolling(length: .seconds(18_000)))
+
+        let snapshot = UsageSnapshot(
+            provider: "codex",
+            plan: nil,
+            limits: [UsageLimit(id: "rolling", window: fiveHours, usedFraction: 0.1, resetsAt: nil)],
+            fetchedAt: resetDate
+        )
+        #expect(snapshot.limit(.session) == nil)
+        #expect(snapshot.limit(fiveHours)?.id == "rolling")
+    }
 }

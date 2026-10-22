@@ -54,12 +54,16 @@ public struct UsageLimit: Identifiable, Hashable, Sendable {
     }
 }
 
-/// The period a limit covers.
+/// The period a limit covers, as the provider defines it.
 ///
-/// Add a case only when a provider actually reports a new kind of window.
-public enum LimitWindow: String, Hashable, Sendable, CaseIterable {
-    /// Short rolling window, such as Claude's and Codex's 5-hour session.
+/// Model what the provider actually reports. Never relabel a window to make providers look
+/// alike: a rolling 5-hour window is not a session, even when both last five hours.
+/// Add a case only when a provider reports a kind of window not covered here.
+public enum LimitWindow: Hashable, Sendable {
+    /// Starts with the first request and lasts a fixed time, such as Claude's 5-hour session.
     case session
+    /// Counts usage within the trailing `length`, such as "the last 5 hours".
+    case rolling(length: Duration)
     case daily
     case weekly
     case monthly

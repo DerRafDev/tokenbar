@@ -92,6 +92,11 @@
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reseta em %1$@ (%2$@)" } }
       }
     },
+    "Rolling window (%@)" : {
+      "localizations" : {
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Janela móvel (%@)" } }
+      }
+    },
     "Settings…" : {
       "localizations" : {
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ajustes…" } }

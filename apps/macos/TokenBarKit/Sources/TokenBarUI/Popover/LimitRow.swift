@@ -39,6 +39,8 @@ struct LimitRow: View {
         let base =
             switch limit.window {
             case .session: String(localized: "Current session", bundle: .module)
+            case .rolling(let length):
+                String(localized: "Rolling window (\(formatter.duration(length.timeInterval)))", bundle: .module)
             case .daily: String(localized: "Today", bundle: .module)
             case .weekly: String(localized: "Weekly", bundle: .module)
             case .monthly: String(localized: "Monthly", bundle: .module)

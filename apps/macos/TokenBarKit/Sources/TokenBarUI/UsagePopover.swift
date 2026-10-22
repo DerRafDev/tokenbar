@@ -111,7 +111,7 @@ public struct UsagePopover: View {
 
 #if DEBUG
 #Preview("Demo data") {
-    let store = UsageStore(providers: [MockUsageProvider.claude(), MockUsageProvider.chatGPT()])
+    let store = UsageStore(providers: [MockUsageProvider.claude(), MockUsageProvider.codex()])
     UsagePopover(store: store)
         .task { await store.refreshAll(.manual) }
 }
@@ -119,7 +119,7 @@ public struct UsagePopover: View {
 #Preview("Errors") {
     let store = UsageStore(providers: [
         MockUsageProvider.claude(.failure(.notConnected)),
-        MockUsageProvider.chatGPT(.failure(.offline)),
+        MockUsageProvider.codex(.failure(.offline)),
     ])
     UsagePopover(store: store)
         .task { await store.refreshAll(.manual) }

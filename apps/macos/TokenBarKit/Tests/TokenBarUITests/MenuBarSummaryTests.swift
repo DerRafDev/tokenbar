@@ -11,15 +11,27 @@ struct MenuBarSummaryTests {
         UsageSnapshot(provider: "claude", plan: "Pro", limits: limits, fetchedAt: .now)
     }
 
-    @Test func labelsEveryNumber() {
+    @Test func labelsEveryNumberInProviderOrder() {
         let text = MenuBarSummary.text(
             for: snapshot([
-                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.79, resetsAt: nil),
                 UsageLimit(id: "session", window: .session, usedFraction: 0.17, resetsAt: nil),
+                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.79, resetsAt: nil),
             ]),
             formatter: formatter
         )
         #expect(text == "S 17% | W 79%")
+    }
+
+    @Test func labelsRollingWindowByLengthNotAsSession() {
+        let text = MenuBarSummary.text(
+            for: snapshot([
+                UsageLimit(
+                    id: "rolling", window: .rolling(length: .seconds(5 * 3600)), usedFraction: 0.12, resetsAt: nil),
+                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.42, resetsAt: nil),
+            ]),
+            formatter: formatter
+        )
+        #expect(text == "5h 12% | W 42%")
     }
 
     @Test func ignoresModelSpecificLimits() {

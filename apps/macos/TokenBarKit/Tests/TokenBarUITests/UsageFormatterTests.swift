@@ -47,6 +47,12 @@ struct UsageFormatterTests {
         #expect(english.countdown(interval) == expected)
     }
 
+    @Test func spellsOutWindowLength() {
+        #expect(english.duration(5 * 3600) == "5 hours")
+        #expect(english.duration(7 * 86400) == "7 days")
+        #expect(portuguese.duration(5 * 3600) == "5 horas")
+    }
+
     @Test func describesResetWithinADay() {
         let reset = now.addingTimeInterval(2 * 3600 + 50 * 60)
         #expect(normalized(english.resetDescription(reset, now: now)) == "Resets at 7:10 PM (in 2h 50m)")

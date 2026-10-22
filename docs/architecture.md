@@ -83,7 +83,7 @@ public struct UsageSnapshot {
 
 public struct UsageLimit {
     let id: String                 // stable per provider: "session", "weekly", "weekly.opus"
-    let window: LimitWindow        // .session, .daily, .weekly, .monthly, .other
+    let window: LimitWindow        // .session, .rolling(length:), .daily, .weekly, .monthly
     let scope: String?             // model name for model-specific limits
     let usedFraction: Double?      // 0…1; nil when the provider gives no percentage
     let resetsAt: Date?            // absolute; nil when unknown
@@ -91,10 +91,16 @@ public struct UsageLimit {
 ```
 
 Why a **list of limits** instead of fixed `sessionUsage` / `weeklyUsage` fields:
-providers differ (5-hour session, weekly, model-specific weekly, daily, monthly), and
-a fixed struct would grow an optional field per provider. A list with a small
-`LimitWindow` enum covers all known cases and stays readable. The menu bar picks the
-unscoped `session` and `weekly` limits for its compact `S 17% | W 79%` summary.
+providers differ (5-hour session, rolling 5-hour window, weekly, model-specific weekly,
+daily, monthly), and a fixed struct would grow an optional field per provider. A list
+with a small `LimitWindow` enum covers all known cases and stays readable.
+
+**A metric is never relabeled to make providers look consistent.** Each limit is the
+window the provider actually reports: a Claude session (starts with the first message)
+is `.session`; a window counting the trailing 5 hours is `.rolling(length: 5h)`, even
+though both last five hours. The menu bar shows every unscoped limit in provider order
+with a compact label (`S 17% | W 79%`, `5h 12% | W 42%`); the popover spells it out
+("Current session", "Rolling window (5 hours)").
 
 `usedFraction` is optional because "no percentage available" is different from "0%".
 The UI never renders a missing value as an empty bar.

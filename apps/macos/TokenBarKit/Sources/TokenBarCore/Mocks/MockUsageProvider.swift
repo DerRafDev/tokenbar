@@ -21,11 +21,21 @@ public struct MockUsageProvider: UsageProvider {
             resetsIn: TimeInterval?,
             id: String? = nil
         ) {
-            self.id = id ?? [window.rawValue, scope?.lowercased()].compactMap(\.self).joined(separator: ".")
+            self.id = id ?? [Self.key(for: window), scope?.lowercased()].compactMap(\.self).joined(separator: ".")
             self.window = window
             self.scope = scope
             self.usedFraction = used
             self.resetsIn = resetsIn
+        }
+
+        private static func key(for window: LimitWindow) -> String {
+            switch window {
+            case .session: "session"
+            case .rolling(let length): "rolling.\(length.components.seconds)s"
+            case .daily: "daily"
+            case .weekly: "weekly"
+            case .monthly: "monthly"
+            }
         }
     }
 
@@ -101,17 +111,17 @@ extension MockUsageProvider {
         )
     }
 
-    /// ChatGPT-like sample data matching the design mockup.
-    public static func chatGPT(_ behavior: Behavior? = nil) -> MockUsageProvider {
+    /// Codex-like sample data: a rolling 5-hour window and a weekly limit.
+    public static func codex(_ behavior: Behavior? = nil) -> MockUsageProvider {
         MockUsageProvider(
-            id: "chatgpt",
-            name: "ChatGPT",
-            symbolName: "circle.hexagongrid",
+            id: "codex",
+            name: "Codex",
+            symbolName: "chevron.left.forwardslash.chevron.right",
             behavior: behavior
                 ?? .success(
                     plan: "Plus",
                     limits: [
-                        Limit(.session, used: 0.12, resetsIn: 2 * hour + 22 * minute),
+                        Limit(.rolling(length: .seconds(5 * hour)), used: 0.12, resetsIn: 2 * hour + 22 * minute),
                         Limit(.weekly, used: 0.42, resetsIn: 4 * day + 8 * hour),
                     ]
                 )

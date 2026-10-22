@@ -55,6 +55,16 @@ public struct UsageFormatter: Sendable {
         return formatter.string(from: components) ?? ""
     }
 
+    /// Spelled-out length of a window, for example "5 hours" or "7 days".
+    public func duration(_ interval: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.calendar = calendar
+        formatter.unitsStyle = .full
+        formatter.allowedUnits = [.day, .hour, .minute]
+        formatter.maximumUnitCount = 2
+        return formatter.string(from: max(interval, 0)) ?? ""
+    }
+
     /// Describes when a limit resets.
     ///
     /// - Within 24 hours: "Resets at 19:10 (in 2h 50m)".

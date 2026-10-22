@@ -10,7 +10,7 @@ struct ProviderIDTests {
     }
 
     @Test func decodesFromPlainString() throws {
-        let id = try JSONDecoder().decode(ProviderID.self, from: Data("\"chatgpt\"".utf8))
-        #expect(id == "chatgpt")
+        let id = try JSONDecoder().decode(ProviderID.self, from: Data("\"codex\"".utf8))
+        #expect(id == "codex")
     }
 }
