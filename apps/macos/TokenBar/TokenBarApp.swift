@@ -1,14 +1,16 @@
 import SwiftUI
 import TokenBarUI
 
-/// Composition root. Builds dependencies and declares scenes; contains no logic.
+/// Composition root. Declares scenes; dependencies live in `AppDelegate`.
 @main
 struct TokenBarApp: App {
+    @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
+
     var body: some Scene {
         MenuBarExtra {
-            UsagePopover()
+            UsagePopover(store: appDelegate.store)
         } label: {
-            Image(systemName: "gauge.with.dots.needle.33percent")
+            MenuBarLabel(store: appDelegate.store)
         }
         .menuBarExtraStyle(.window)
 
