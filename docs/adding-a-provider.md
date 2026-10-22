@@ -3,8 +3,9 @@
 A provider is one type that conforms to `UsageProvider` and returns a normalized
 `UsageSnapshot`. Adding one should not require changes to the UI or the refresh logic.
 
-> `TokenBarProviders/Claude/` is the reference implementation: credential source,
-> response decoding, provider, and tests with sanitized fixtures.
+> `TokenBarProviders/Claude/` and `TokenBarProviders/Codex/` are the reference
+> implementations: credential source (another app's Keychain item / file), response
+> decoding, provider, and tests with sanitized fixtures.
 
 ## 1. Document the data source first
 

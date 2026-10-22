@@ -31,7 +31,7 @@
 | Provider | Status | What is shown | Requires |
 |---|---|---|---|
 | Claude (Pro/Max) | Experimental, opt-in | Session (5 h), weekly, and model-specific weekly limits | Claude Code signed in |
-| Codex (ChatGPT plans) | Planned | Codex 5-hour and weekly limits on your plan. **Not** ChatGPT chat message limits. | Codex CLI signed in |
+| Codex (ChatGPT plans) | Experimental, opt-in | Codex 5-hour session and weekly limits on your plan, plus model-specific limits when the plan has them. **Not** ChatGPT chat message limits. | Codex signed in with ChatGPT |
 
 Neither Anthropic nor OpenAI publishes an API for subscription limits. Read
 [docs/providers.md](docs/providers.md) for exactly where the data comes from and

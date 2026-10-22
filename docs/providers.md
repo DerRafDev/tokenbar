@@ -12,7 +12,7 @@ the provider code and must be kept current when a source changes.
 
 Research date: 2026-10-22. Field names marked *observed* come from community
 reports and must be confirmed against a sanitized live capture before a provider
-ships (see [Verification](#verification)).
+ships (see [Verification](#verification)). Both providers below are *verified*.
 
 ---
 
@@ -70,18 +70,57 @@ Claude ships as an **experimental, opt-in** provider:
 
 ---
 
-## Codex (ChatGPT plans)
+## Codex (ChatGPT plans) — experimental
+
+Verified against live responses and Codex's own session logs on 2026-10-22 (Plus plan),
+and against the open-source Codex client ([openai/codex](https://github.com/openai/codex),
+`codex-rs/backend-client`).
 
 | | |
 |---|---|
-| **Authentication** | Reuse the Codex CLI login (`~/.codex/auth.json`, mode `0600`, or the system keyring when Codex is configured with `cli_auth_credentials_store = "keyring"`). It contains a ChatGPT access token and account ID. |
-| **Usage source** | `GET https://chatgpt.com/backend-api/wham/usage` with `Authorization: Bearer <token>` and `ChatGPT-Account-Id: <id>`. This is the internal endpoint the Codex clients use. |
-| **Available metrics** | *Observed*: `plan_type`; `rate_limit.primary_window` and `rate_limit.secondary_window`, each with `used_percent`, `limit_window_seconds`, and `reset_at` (Unix seconds); optional `additional_rate_limits[]` (per-model) and `code_review_rate_limit`. The window type is identified by its length (18000 s = 5 hours, 604800 s = weekly), **not** by primary/secondary position. |
-| **Reset information** | Absolute Unix timestamps. |
-| **Not available** | **ChatGPT chat message limits** (for example GPT-5 messages per 3 hours in the ChatGPT app). There is no endpoint, documented or otherwise, that reports them. **What we can show is the ChatGPT plan's *Codex* usage**, not chat-message usage. Message counts are not available either. |
-| **Window semantics** | To be verified against a live capture: whether the 5-hour window is rolling or starts with first use. TokenBar models whatever the source actually represents (`LimitWindow.rolling` vs `.session`) and never relabels it to match another provider. |
-| **Known limitations** | Undocumented. One report shows the endpoint reporting 0% while a model-specific weekly limit was exhausted, so per-model limits must be parsed separately. Tokens from the newer "Sign in with ChatGPT" token-sharing flow are rejected (401); only a Codex login works ([openai/codex#54219](https://github.com/openai/codex/issues/54219), open, no maintainer response). |
-| **Security considerations** | TokenBar reads the file at fetch time and never copies, refreshes, or logs the token. Reading `~/.codex` is incompatible with App Sandbox unless the user grants access to the folder (security-scoped bookmark). |
+| **Usage source** | `GET https://chatgpt.com/backend-api/wham/usage` with `Authorization: Bearer <token>` and `ChatGPT-Account-Id: <id>`. This is the endpoint Codex calls for `/status` and its usage warnings. The account header is optional for a personal account (verified) and selects the workspace for team accounts; TokenBar sends it like Codex does. TokenBar sends its own `User-Agent` (`TokenBar/<version>`), which the endpoint accepts (verified), and never impersonates Codex. |
+| **Response** (*verified*) | JSON object: `plan_type`; `rate_limit` with `primary_window` / `secondary_window`, each `{ "used_percent": 0–100 (integer), "limit_window_seconds", "reset_after_seconds", "reset_at": Unix seconds }` or `null`; `additional_rate_limits` (`null` on Plus; per Codex's client: `[{ "limit_name", "metered_feature", "rate_limit": {…same shape…} }]` for models with their own quota); plus `credits`, `spend_control`, `rate_limit_reached_type`, `rate_limit_reset_credits`, `model_usage`, `promo`, and the account's **email, user ID and account ID**. TokenBar declares only `plan_type`, `rate_limit` and `additional_rate_limits`; the identifiers are never decoded. `code_review_rate_limit` is present but no longer read by Codex, so TokenBar ignores it. |
+| **Window types** | Identified by `limit_window_seconds` (`18000` = 5 hours, `604800` = 7 days), never by primary/secondary position. Observed: primary = 5 h, secondary = 7 d. Lengths TokenBar cannot name are skipped, not mislabeled. |
+| **What the 5-hour window is** | A **session-like fixed window**, not a rolling one. It starts with the first request after the previous window ended and resets at a fixed time. Evidence from Codex's own per-turn logs: usage rose 3 → 48 % over 4.5 hours while `reset_at` stayed at the same second; after it expired, the next response showed 0 % with `reset_at` = request time + 5 h, and that value moved with every request until usage started a new window. Mapped to `LimitWindow.session`. Codex itself just calls it the "5h limit". |
+| **What the weekly window is** | The same mechanism over 7 days: anchored at the first use after the previous week ended, not a calendar week. Mapped to `.weekly`. It can also reset early: one observation went from 9 % to a new window two days before its `reset_at` (consistent with an OpenAI-side reset or a redeemed reset credit). TokenBar shows whatever the latest response says. |
+| **Reset information** | `reset_at` as absolute Unix seconds (stable to the second; ±3 s jitter between the idle and started values). TokenBar uses `reset_at`, falls back to `reset_after_seconds` relative to the fetch time, and **hides** the reset of a window that has not started (0 % and a full window left), because that value is only "now + length". |
+| **Model-specific limits** | `additional_rate_limits[]` → limits scoped to `limit_name` (id `<window>.<metered_feature>`). None on the verified Plus account; the shape comes from Codex's client models. A community report shows a model limit exhausted while the main windows read 0 %, so they are parsed separately. |
+| **Plan** | `plan_type` from the response (`plus` verified; `free`, `go`, `pro`, `team`, `business`, `enterprise`, `edu` named; unknown values hidden). The JWT also carries the plan, but TokenBar does not decode the token. |
+| **Not available** | **ChatGPT chat message limits.** This endpoint reports **Codex** limits on a ChatGPT plan. Message counts are not available either (`credits.approx_*_messages` belongs to purchased credits in Codex's client, not to plan limits; TokenBar ignores it). |
+| **Errors** (*verified*) | Invalid or missing token → HTTP 401 with a JSON `detail` body. 403, 429 and `Retry-After` were not observed; they follow the shared rules (403 → "Sign-in expired", 429 → back off, honoring `Retry-After` in seconds or as an HTTP date). TokenBar never reads error bodies. The response sets cookies; the provider session stores none. |
+| **Known limitations** | Undocumented; can change without notice. Requires Codex (CLI or app) signed in with ChatGPT on the same Mac. Tokens from the newer "Sign in with ChatGPT" token-sharing flow are rejected (401); only a Codex login works ([openai/codex#54219](https://github.com/openai/codex/issues/54219)). |
+| **Policy risk** | OpenAI does not offer this endpoint to third-party apps. Shown to the user before enabling. |
+
+### Authentication
+
+| Question | Answer |
+|---|---|
+| Where does authentication originate? | Codex's own "Sign in with ChatGPT" (CLI `codex login` or the Codex app). TokenBar has no sign-in flow. |
+| Where is it stored? | By default `$CODEX_HOME/auth.json` (`~/.codex/auth.json`), mode `0600`, owned by the user. Codex can instead use the Keychain (`cli_auth_credentials_store = "keyring"` or `"auto"`: service `Codex Auth`, account `cli|<first 16 hex of SHA-256 of the Codex home path>`). |
+| What does TokenBar read? | The file only, read-only, on every refresh while the provider is enabled. Never before the user enables it. It holds JSON with `auth_mode`, an optional API key, `tokens` (`id_token`, `access_token`, `refresh_token`, `account_id`) and `last_refresh`. TokenBar decodes **only** `tokens.access_token` and `tokens.account_id`. The refresh token, ID token (email, name) and API key are never decoded. |
+| Do credentials enter TokenBar's memory? | Yes, the access token and account ID, for the duration of one refresh: put in two request headers to `chatgpt.com` and released. Their `description` is redacted. |
+| Is anything persisted? | No. No copy in TokenBar's Keychain, `UserDefaults`, or files. Requests use the ephemeral provider session (no cache, cookies, or credential storage). |
+| Who grants access? | The user, by enabling the provider. Unlike Keychain items, a file in the user's home folder has no per-app macOS prompt (TokenBar is not sandboxed). An unreadable file is reported as "Access was not allowed". |
+| Codex logged out? | `codex logout` deletes `auth.json` → "Not connected". Signed in with an API key instead of ChatGPT (no `tokens`) → "Not connected": API-key usage has no plan limits. |
+| Keychain storage mode? | Not supported yet: no file → "Not connected". See the open decision below. |
+| Credentials expired? | The access token is a JWT valid ~10 days; Codex refreshes it when it is within minutes of expiring or `last_refresh` is older than 8 days. TokenBar does not decode the expiry; an expired token gets HTTP 401 → "Sign-in expired". TokenBar never refreshes the token (that would rotate Codex's refresh token and could sign Codex out). Running Codex renews it, and TokenBar picks up the new file on its next refresh. |
+
+### Least invasive option
+
+| Option | Verdict |
+|---|---|
+| **Read `auth.json` at fetch time, two fields** | **Chosen.** No copy, no refresh, always current, same file Codex reads. |
+| Read Codex's session logs (`~/.codex/sessions/**/*.jsonl` carry `rate_limits` per turn) | Zero network and no token, but only updates while Codex is used, misses usage from other devices, and parses an internal log format. Used here as evidence, not as a source. |
+| Run `codex` and parse `/status` | Rejected: a process per refresh, breaks on any output change. |
+| Copy the token into TokenBar's Keychain | Rejected: a second copy that goes stale when Codex refreshes it. |
+
+### Decision (2026-10-22)
+
+Codex ships as an **experimental, opt-in** provider, isolated in `TokenBarProviders/Codex/`
+and referenced in one line of `ProviderRegistry`. Disabled by default; enabling it shows a
+Codex-specific warning (undocumented endpoint, may change, may not be covered by OpenAI's
+terms, Codex limits only) and what is read. The 5-hour limit is shown as a session
+(`S 12% | W 42%`, "Current session") because that is how the source behaves.
 
 ---
 
@@ -121,6 +160,7 @@ Before a provider's parser is merged:
 - [Claude-Code-Usage-Monitor#202 — OAuth usage API headers and Keychain item](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor/issues/202)
 - [claude-hud#287 — Consumer Terms concern](https://github.com/jarrodwatts/claude-hud/issues/287)
 - [Gist — weekly window cadence observation](https://gist.github.com/monperrus/3ac4b303a84946bbeaf2b1123ee99491)
+- [openai/codex — `codex-rs/backend-client` (usage request and response models)](https://github.com/openai/codex/tree/main/codex-rs/backend-client)
 - [openai/codex#54219 — no plan-usage API for token-sharing apps](https://github.com/openai/codex/issues/54219)
 - [ajhochy/Rhythm#1568 — `wham/usage` structure](https://github.com/ajhochy/Rhythm/issues/1568)
 - [codenotch#286 — model-level limit not reflected](https://github.com/vinzdg/codenotch/issues/286)
