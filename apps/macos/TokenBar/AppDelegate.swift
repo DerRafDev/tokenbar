@@ -5,13 +5,12 @@ import TokenBarCore
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = UsageStore(providers: ProviderRegistry.makeProviders())
-    private var refreshTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        refreshTask = Task { [store] in await store.runScheduledRefreshes() }
+        store.startScheduledRefreshes()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        refreshTask?.cancel()
+        store.stopScheduledRefreshes()
     }
 }

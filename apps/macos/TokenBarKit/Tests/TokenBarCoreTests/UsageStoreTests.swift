@@ -169,4 +169,43 @@ struct UsageStoreTests {
         #expect(provider.callCount == 0)
         #expect(store.states.isEmpty)
     }
+
+    @Test func neverRefreshesDisabledProviders() async {
+        let provider = StubProvider(clock: clock, results: [.success([.session(0.1)])])
+        let store = UsageStore(
+            providers: [provider], enabledProviders: [], policy: policy, now: { [clock] in clock.now })
+
+        await store.refresh("stub", .manual)
+        await store.refreshAll(.manual)
+
+        #expect(provider.callCount == 0)
+        #expect(store.enabledDescriptors.isEmpty)
+        #expect(store.descriptors.map(\.id) == ["stub"])
+    }
+
+    @Test func disablingDropsDataAndEnablingRefreshes() async {
+        let provider = StubProvider(clock: clock, results: [.success([.session(0.1)])])
+        let store = makeStore(provider)
+        await store.refresh("stub", .manual)
+
+        store.enabledProviders = []
+        #expect(store.states["stub"] == nil)
+
+        store.enabledProviders = ["stub"]
+        await store.refresh("stub", .manual)  // joins the refresh started by enabling
+        #expect(provider.callCount == 2)
+        #expect(store.state(for: "stub").snapshot != nil)
+    }
+
+    @Test func discardsResultOfProviderDisabledMidRefresh() async {
+        let provider = StubProvider(clock: clock, latency: .milliseconds(100), results: [.success([.session(0.1)])])
+        let store = makeStore(provider)
+
+        async let refresh: Void = store.refresh("stub", .manual)
+        try? await Task.sleep(for: .milliseconds(20))
+        store.enabledProviders = []
+        await refresh
+
+        #expect(store.states["stub"] == nil)
+    }
 }
