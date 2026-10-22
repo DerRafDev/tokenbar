@@ -46,6 +46,10 @@ squash-merged, the **PR title** becomes the commit message and must follow this 
 - Swift 6 language mode with strict concurrency.
 - Follow the module rules in [docs/architecture.md](docs/architecture.md). In
   particular, `TokenBarUI` must not import `TokenBarProviders`.
+- User-facing text is English in code (`String(localized:bundle: .module)`) with a
+  Portuguese (Brazil) translation in `TokenBarUI/Resources/pt-BR.lproj/Localizable.strings`.
+  Plain `.strings` files are used instead of a String Catalog because SwiftPM's
+  command-line build on Xcode 26 does not compile catalogs.
 
 ## Tests
 

@@ -10,7 +10,9 @@ struct UsageFormatterTests {
     let saoPaulo = TimeZone(identifier: "America/Sao_Paulo")!
     var english: UsageFormatter { UsageFormatter(locale: Locale(identifier: "en_US"), timeZone: saoPaulo) }
     var portuguese: UsageFormatter {
-        let path = Bundle.tokenBarUI.path(forResource: "pt-BR", ofType: "lproj")!
+        // SwiftPM's native build system lowercases the folder name; Swift Build and Xcode keep it.
+        let path = ["pt-BR", "pt-br"].lazy.compactMap { Bundle.tokenBarUI.path(forResource: $0, ofType: "lproj") }
+            .first!
         return UsageFormatter(locale: Locale(identifier: "pt_BR"), timeZone: saoPaulo, strings: Bundle(path: path)!)
     }
 
