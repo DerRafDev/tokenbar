@@ -1,0 +1,3 @@
+/* English is the development language: the keys used in code are the English strings,
+   so no entries are needed. This file declares the localization so English users never
+   fall back to another language. */

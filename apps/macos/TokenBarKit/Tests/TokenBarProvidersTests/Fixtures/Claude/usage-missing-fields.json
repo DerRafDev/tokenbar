@@ -1,0 +1,10 @@
+{
+  "five_hour": {},
+  "seven_day": {
+    "utilization": 30.0
+  },
+  "seven_day_sonnet": {
+    "utilization": 5.0,
+    "resets_at": "not a date"
+  }
+}

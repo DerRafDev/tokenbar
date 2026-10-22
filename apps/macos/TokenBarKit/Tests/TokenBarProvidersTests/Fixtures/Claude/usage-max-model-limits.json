@@ -1,0 +1,37 @@
+{
+  "five_hour": {
+    "utilization": 12.5,
+    "resets_at": "2026-01-15T14:00:00.000431+00:00",
+    "limit_dollars": null,
+    "used_dollars": null,
+    "remaining_dollars": null,
+    "locked_reason": null
+  },
+  "seven_day": {
+    "utilization": 61.0,
+    "resets_at": "2026-01-17T09:00:00.000431+00:00",
+    "limit_dollars": null,
+    "used_dollars": null,
+    "remaining_dollars": null,
+    "locked_reason": null
+  },
+  "seven_day_opus": {
+    "utilization": 93.0,
+    "resets_at": "2026-01-17T09:00:00.000431+00:00",
+    "limit_dollars": null,
+    "used_dollars": null,
+    "remaining_dollars": null,
+    "locked_reason": null
+  },
+  "seven_day_sonnet": {
+    "utilization": 40.0,
+    "resets_at": "2026-01-17T09:00:00.000431+00:00",
+    "limit_dollars": null,
+    "used_dollars": null,
+    "remaining_dollars": null,
+    "locked_reason": null
+  },
+  "some_future_window": {
+    "utilization": 1.0
+  }
+}
