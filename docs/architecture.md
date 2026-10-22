@@ -128,10 +128,28 @@ ProviderState = connection + last good snapshot + last error + isRefreshing
 - The menu bar label is rendered into a template image (MenuBarExtra drops symbols
   embedded in text), only when its values change.
 
+## Settings
+
+```text
+Settings window ──edits──▶ AppSettings (UserDefaults) ──follow──▶ UsageStore
+```
+
+- `AppSettings` is the single source of truth for preferences: refresh interval,
+  menu bar visibility, and which providers are enabled or hidden from the menu bar.
+  Stored values are validated on load. Nothing sensitive is stored there.
+- The Settings window only edits `AppSettings`; `UsageStore.follow(_:)` applies the
+  enabled providers and the interval (restarting the schedule when it changes).
+- **Every provider starts disabled.** Enabling one is the user's consent to read the
+  credentials it needs. Experimental providers (undocumented data source) also show a
+  warning and what they read, and must be confirmed.
+- Launch at login uses `SMAppService.mainApp`. The system owns that state (the user can
+  change it in System Settings › Login Items), so TokenBar reads it instead of storing it.
+
 ## Mock data
 
 Debug builds can run with demo providers: the shared scheme passes
-`-TokenBarUseMocks YES`. Mock code is wrapped in `#if DEBUG` and absent from Release
+`-TokenBarUseMocks YES`. Demo mode keeps its settings in a separate defaults suite, so it
+never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
 builds, and the popover labels demo data with a "Demo" badge.
 
 ## Security boundaries
