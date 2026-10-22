@@ -3,6 +3,7 @@ import TokenBarCore
 
 @testable import TokenBarUI
 
+@MainActor
 struct ProvidersSettingsTests {
     @Test func consentWarnsAboutUndocumentedSourceAndNamesWhatIsRead() {
         let descriptor = ProviderDescriptor(
