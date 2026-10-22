@@ -1,0 +1,13 @@
+# TokenBar has no third-party Swift dependencies, so only GitHub Actions are tracked.
+# Add a "swift" ecosystem entry if a package dependency is ever introduced.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
