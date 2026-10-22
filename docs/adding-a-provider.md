@@ -3,8 +3,8 @@
 A provider is one type that conforms to `UsageProvider` and returns a normalized
 `UsageSnapshot`. Adding one should not require changes to the UI or the refresh logic.
 
-> **Status:** the provider module (`TokenBarProviders`) arrives with the first real
-> provider (Milestone 5). Steps 3 and 6 will be finalized then; the rest is stable.
+> `TokenBarProviders/Claude/` is the reference implementation: credential source,
+> response decoding, provider, and tests with sanitized fixtures.
 
 ## 1. Document the data source first
 
@@ -51,7 +51,10 @@ Mapping rules:
 ## 3. Credentials
 
 - Credentials owned by another app (a CLI login, for example): read them at fetch time.
-  Never copy, refresh, or log them.
+  Never copy, refresh, or log them. Give the credential type a redacted `description`.
+- Undocumented source? Set `experimentalNotice` on the descriptor with **this provider's**
+  source and risk, and `accessDescription` with exactly what is read. The user confirms both
+  before the provider is enabled.
 - Credentials TokenBar stores: use `CredentialStore` (Keychain). Never `UserDefaults` or files.
 
 ## 4. Logging
@@ -65,11 +68,13 @@ status codes, and counts may be `.public`. See [SECURITY.md](../SECURITY.md).
   timestamps), and save it under the provider's test folder as `<name>.json`.
 - Test parsing, mapping to `UsageLimit`, and each error path (401, 429 with and
   without `Retry-After`, invalid JSON, missing fields).
-- Inject the HTTP layer so tests never touch the network.
+- Inject `HTTPClient` so tests never touch the network. Use `URLSession.providerSession()`
+  in production: it never caches authenticated responses on disk.
 
 ## 6. Register it
 
 Add the provider to `ProviderRegistry` in `apps/macos/TokenBar/ProviderRegistry.swift`.
+Every real provider starts disabled; the user enables it in Settings.
 That is the only app-level change.
 
 ## 7. Open the PR

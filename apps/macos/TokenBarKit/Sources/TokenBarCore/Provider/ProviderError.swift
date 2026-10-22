@@ -9,6 +9,9 @@ public enum ProviderError: Error, Hashable, Sendable {
     case notConnected
     /// Credentials exist but were rejected or have expired.
     case unauthorized
+    /// The user declined TokenBar access to the credentials (for example in a Keychain prompt).
+    /// Never retried automatically, so the user is not asked again on every refresh.
+    case accessDenied
     /// The provider asked us to slow down. `retryAfter` comes from `Retry-After` when present.
     case rateLimited(retryAfter: TimeInterval?)
     case offline

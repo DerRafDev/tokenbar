@@ -31,6 +31,8 @@ public struct ProviderState: Hashable, Sendable {
 
     func shouldRefresh(for trigger: RefreshTrigger, at now: Date, policy: RefreshPolicy) -> Bool {
         if let retryNotBefore, retryNotBefore > now { return false }
+        // Retrying would show the permission prompt again; only the user may ask for that.
+        if error == .accessDenied, trigger != .manual { return false }
         guard let snapshot, error == nil else { return true }
         let age = now.timeIntervalSince(snapshot.fetchedAt)
         switch trigger {

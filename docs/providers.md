@@ -16,37 +16,57 @@ ships (see [Verification](#verification)).
 
 ---
 
-## Claude (Pro / Max)
+## Claude (Pro / Max) — experimental
+
+Verified against live responses on 2026-10-22 (Claude Code 2.1.116, Pro plan).
 
 | | |
 |---|---|
-| **Authentication** | Reuse the OAuth credential that Claude Code stores in the macOS Keychain (generic password, service `Claude Code-credentials`). The item holds JSON with an access token, refresh token, expiry, and subscription type. |
-| **Usage source** | `GET https://api.anthropic.com/api/oauth/usage` with `Authorization: Bearer <token>` and `anthropic-beta: oauth-2025-04-20`. This is the endpoint behind Claude Code's `/usage` command. |
-| **Available metrics** | *Observed*: `five_hour`, `seven_day`, and model-scoped weekly windows (for example `seven_day_opus`, `seven_day_sonnet`), each `{ utilization: 0–100, resets_at: ISO-8601 \| null }`. |
-| **Reset information** | Absolute timestamps (`resets_at`). No string parsing needed. |
-| **Not available** | **Message counts** (e.g. "34 / 200 messages"). Claude limits are compute-based, not fixed message quotas, and no source exposes a count. TokenBar shows percentages only. |
-| **Known limitations** | Undocumented and can change without notice. Persistent HTTP 429 responses have been reported, particularly without a Claude Code `User-Agent`. Requires Claude Code to be installed and logged in. One community report says the "weekly" window does not always reset on a 7-day cadence, so TokenBar trusts `resets_at` rather than computing windows itself. |
-| **Security considerations** | macOS shows an access prompt the first time TokenBar reads another app's Keychain item; the user stays in control. TokenBar **never refreshes** the token (refresh rotates it and could sign Claude Code out), **never copies** it into its own storage, and **never logs** it. An expired token means "open Claude Code to sign in again". |
-| **Policy risk** | Anthropic's Consumer Terms restrict OAuth tokens to Claude Code and Claude.ai, and a community issue flags calling this endpoint from third-party tools as a possible conflict. See the decision below. |
+| **Usage source** | `GET https://api.anthropic.com/api/oauth/usage` with `Authorization: Bearer <token>` and `anthropic-beta: oauth-2025-04-20`. This is the endpoint behind Claude Code's `/usage` command (Claude Code calls it with a 5 s timeout and skips it when its token has expired). TokenBar sends its own `User-Agent` (`TokenBar/<version>`) and never impersonates Claude Code. |
+| **Response** (*verified*) | JSON object. Windows `five_hour`, `seven_day`, `seven_day_opus`, `seven_day_sonnet` (and others), each `{ "utilization": 0–100, "resets_at": "2026-10-22T23:09:59.987225+00:00", … }` or `null` when the window does not apply to the plan. Also: a normalized `limits[]` list (`kind`, `group`, `percent`, `resets_at`, `scope`), `extra_usage`, `spend`, a per-product `seven_day_breakdown`, and many internal codenamed keys. TokenBar reads only the four named windows and ignores the rest. |
+| **What `five_hour` is** | A **session**, not a rolling window. Evidence: (1) the server's own `limits[]` entry for it has `kind: "session"`; (2) Claude Code labels it "session limit" (`windowSeconds: 18000`); (3) in two captures 19 s apart, utilization rose 45 → 46 % while `resets_at` stayed at 23:10:00 — a rolling window's reset would have moved. Mapped to `LimitWindow.session`. |
+| **What `seven_day` is** | A fixed weekly window: `seven_day_breakdown.window_started_at` is exactly 7 days before `resets_at`. Mapped to `.weekly`. `seven_day_opus` / `seven_day_sonnet` → `.weekly` with scope "Opus" / "Sonnet". |
+| **Reset information** | ISO 8601 with microseconds and sub-second jitter around the real boundary (`23:09:59.987`, then `23:10:00.278`). TokenBar rounds to the second. |
+| **Not available** | Message counts. Limits are percentages only. |
+| **Errors** (*verified*) | Invalid or missing token → HTTP 401 with a JSON error body. TokenBar never reads error bodies. |
+| **Known limitations** | Undocumented; can change without notice. Requires Claude Code installed and signed in on the same Mac. Persistent HTTP 429s have been reported by other tools; TokenBar honors `Retry-After` and backs off. |
+| **Policy risk** | Anthropic's Consumer Terms restrict OAuth tokens to Claude Code and Claude.ai, and a community issue flags calling this endpoint from third-party tools as a possible conflict. Shown to the user before enabling. See the decision below. |
+
+### Authentication
+
+| Question | Answer |
+|---|---|
+| Where does authentication originate? | Claude Code's own OAuth sign-in (`claude auth login`). TokenBar has no sign-in flow. |
+| Does TokenBar read the Keychain? | Yes, **one item**: generic password, service `Claude Code-credentials`, owned by Claude Code. Read-only, with `SecItemCopyMatching`, on every refresh while the provider is enabled. Never before the user enables the provider. |
+| What exactly is read? | The item holds JSON with an access token, refresh token, expiries, scopes, plan, and organization ID. TokenBar decodes **only** `claudeAiOauth.accessToken`, `expiresAt`, and `subscriptionType` (shown as the plan badge). The refresh token and organization ID are never decoded. |
+| Do credentials enter TokenBar's memory? | Yes, the access token, for the duration of one refresh: it is parsed, put in one request header to `api.anthropic.com`, and released. Its `description` is redacted so it cannot leak through logging or string interpolation. |
+| Is anything persisted? | No. No copy in TokenBar's Keychain, `UserDefaults`, or files. Requests use an ephemeral `URLSession` with no URL cache, cookies, or credential storage, so the response never reaches the disk either. |
+| Who grants access? | macOS. The first read shows "TokenBar wants to use your confidential information stored in 'Claude Code-credentials'". *Deny* → TokenBar shows "Access was not allowed" and does not ask again until the user refreshes manually. *Always Allow* is tied to TokenBar's code signature: Developer ID builds keep it across updates; ad-hoc local builds are asked again after each rebuild. |
+| Claude Code logged out? | The item is gone → "Not connected". Old numbers are cleared. |
+| Credentials expired? | TokenBar checks `expiresAt` and does **not** call the endpoint with an expired token; it shows "Sign-in expired". TokenBar never refreshes the token (that would rotate Claude Code's refresh token and could sign it out). Claude Code renews it the next time it runs, and TokenBar picks up the new token on its next refresh. |
+| Credentials changed? | Claude Code updates the item in place (creation date unchanged), so the user's Keychain decision survives; the new token is read on the next refresh. |
+
+### Least invasive option
+
+| Option | Verdict |
+|---|---|
+| **Read Claude Code's Keychain item at fetch time** | **Chosen.** No copy, no refresh, user-visible macOS consent, always current. |
+| Claude Code `statusLine` hook (its input JSON has `rate_limits.five_hour/seven_day`) | Zero credential access, but requires replacing the user's status line command, only updates while Claude Code is running (claude.ai usage is missed), and lacks model-specific limits. Possible future fallback. |
+| Ask the user to paste a `claude.ai` session cookie | Rejected: grants full account access and would have to be stored. |
+| Read rate-limit headers from a real API request | Rejected: costs usage. |
+| Run `claude` and parse `/usage` | Rejected: a process per refresh, breaks on any output change. |
 
 ### Decision (2026-10-22)
 
 Claude ships as an **experimental, opt-in** provider:
 
 - Disabled by default. TokenBar never reads the Claude Code sign-in until the user
-  enables the provider and confirms a warning that it relies on an undocumented
-  mechanism that may change or stop working.
+  enables the provider and confirms a Claude-specific warning: undocumented endpoint,
+  may change or stop working, may not be covered by Anthropic's terms, and what is read.
 - Labeled "Experimental" wherever it appears.
-- Isolated behind `UsageProvider`, so the data source can be replaced (or the provider
-  removed) without touching the UI, refresh logic, or other providers.
-
-### Alternatives considered
-
-| Source | Verdict |
-|---|---|
-| `claude.ai/api/organizations/{org}/usage` with a browser `sessionKey` cookie | Rejected as default. It requires the user to paste a cookie that grants full account access. Could be an opt-in "manual" mode stored in Keychain. |
-| Run `claude` in a pseudo-terminal and parse `/usage` output | Rejected. It spawns a process per refresh, is slow, and breaks on any output change. |
-| Anthropic Admin / Usage & Cost API | Wrong data: API billing only. |
+- Isolated behind `UsageProvider` in `TokenBarProviders/Claude/`, so the data source can
+  be replaced (or the provider removed) without touching the UI, refresh logic, or
+  other providers. The app references it in one line of `ProviderRegistry`.
 
 ---
 

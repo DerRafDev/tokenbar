@@ -1,7 +1,7 @@
 /* Portuguese (Brazil). Keys are the English source strings used in code. */
 
-"%@ support is experimental. It relies on an undocumented mechanism that may change or stop working at any time." = "O suporte a %@ é experimental. Ele depende de um mecanismo não documentado que pode mudar ou deixar de funcionar a qualquer momento.";
 "%@ used" = "%@ usado";
+"Access was not allowed. Refresh to be asked again." = "Acesso não permitido. Atualize para ser perguntado de novo.";
 "Allow TokenBar in Login Items to open it at login." = "Permita o TokenBar em Itens de Início para abri-lo ao iniciar sessão.";
 "Cancel" = "Cancelar";
 "Checking…" = "Verificando…";

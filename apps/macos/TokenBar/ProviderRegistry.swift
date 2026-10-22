@@ -1,5 +1,6 @@
 import Foundation
 import TokenBarCore
+import TokenBarProviders
 
 /// The single place that decides which providers the app runs.
 enum ProviderRegistry {
@@ -25,7 +26,7 @@ enum ProviderRegistry {
             )
         }
         #endif
-        // Real providers are added here as they ship (see docs/roadmap.md).
-        return Configuration(providers: [], defaults: .standard, initiallyEnabled: [])
+        // Every real provider starts disabled; the user enables it in Settings (see docs/roadmap.md).
+        return Configuration(providers: [ClaudeProvider()], defaults: .standard, initiallyEnabled: [])
     }
 }

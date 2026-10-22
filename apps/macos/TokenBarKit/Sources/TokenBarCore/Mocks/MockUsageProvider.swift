@@ -52,7 +52,7 @@ public struct MockUsageProvider: UsageProvider {
         id: ProviderID,
         name: String,
         symbolName: String = "sparkle",
-        isExperimental: Bool = false,
+        experimental: Bool = false,
         behavior: Behavior,
         latency: Duration = .milliseconds(300)
     ) {
@@ -61,7 +61,8 @@ public struct MockUsageProvider: UsageProvider {
             displayName: name,
             symbolName: symbolName,
             isDemo: true,
-            isExperimental: isExperimental,
+            experimentalNotice: experimental
+                ? "Demo of an experimental provider. The real one relies on an undocumented source." : nil,
             accessDescription: "Demo data. Nothing is read from your Mac."
         )
         self.behavior = behavior
@@ -108,7 +109,7 @@ extension MockUsageProvider {
             id: "claude",
             name: "Claude",
             symbolName: "asterisk",
-            isExperimental: true,
+            experimental: true,
             behavior: behavior
                 ?? .success(
                     plan: "Pro",
@@ -120,12 +121,13 @@ extension MockUsageProvider {
         )
     }
 
-    /// Codex-like sample data: a rolling 5-hour window and a weekly limit.
+    /// Codex-like sample data: a rolling 5-hour window and a weekly limit. Experimental, like the real provider.
     public static func codex(_ behavior: Behavior? = nil) -> MockUsageProvider {
         MockUsageProvider(
             id: "codex",
             name: "Codex",
             symbolName: "chevron.left.forwardslash.chevron.right",
+            experimental: true,
             behavior: behavior
                 ?? .success(
                     plan: "Plus",
