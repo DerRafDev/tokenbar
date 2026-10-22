@@ -71,6 +71,8 @@ struct ProviderSection: View {
             String(localized: "Not connected. Connect it in Settings.", bundle: .module)
         case .unauthorized:
             String(localized: "Sign-in expired. Sign in again to resume updates.", bundle: .module)
+        case .accessDenied:
+            String(localized: "Access was not allowed. Refresh to be asked again.", bundle: .module)
         case .rateLimited:
             String(localized: "Too many requests. Will retry later.", bundle: .module)
         case .offline:
@@ -90,6 +92,7 @@ struct ProviderSection: View {
         switch error {
         case .notConnected: "link"
         case .unauthorized: "person.crop.circle.badge.exclamationmark"
+        case .accessDenied: "lock"
         case .offline: "wifi.slash"
         default: "exclamationmark.triangle"
         }

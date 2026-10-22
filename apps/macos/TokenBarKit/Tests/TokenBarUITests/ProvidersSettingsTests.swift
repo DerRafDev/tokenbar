@@ -5,18 +5,18 @@ import TokenBarCore
 
 @MainActor
 struct ProvidersSettingsTests {
-    @Test func consentWarnsAboutUndocumentedSourceAndNamesWhatIsRead() {
+    @Test func consentShowsProviderNoticeThenWhatIsRead() {
         let descriptor = ProviderDescriptor(
             id: "claude",
             displayName: "Claude",
-            isExperimental: true,
+            experimentalNotice: "Uses an undocumented endpoint.",
             accessDescription: "Reads the Claude Code sign-in from your Keychain."
         )
 
-        let message = ProvidersSettingsView.consentMessage(for: descriptor)
-
-        #expect(message.contains("Claude support is experimental"))
-        #expect(message.contains("undocumented mechanism that may change or stop working"))
-        #expect(message.hasSuffix("Reads the Claude Code sign-in from your Keychain."))
+        #expect(descriptor.isExperimental)
+        #expect(
+            ProvidersSettingsView.consentMessage(for: descriptor)
+                == "Uses an undocumented endpoint.\n\nReads the Claude Code sign-in from your Keychain."
+        )
     }
 }

@@ -208,4 +208,19 @@ struct UsageStoreTests {
 
         #expect(store.states["stub"] == nil)
     }
+
+    @Test func asksAgainForDeniedAccessOnlyWhenUserRefreshes() async {
+        let provider = StubProvider(clock: clock, results: [.failure(.accessDenied), .success([.session(0.1)])])
+        let store = makeStore(provider)
+
+        await store.refresh("stub", .manual)
+        clock.advance(by: policy.interval * 10)
+        await store.refresh("stub", .scheduled)
+        await store.refresh("stub", .popoverOpened)
+        #expect(provider.callCount == 1)
+
+        await store.refresh("stub", .manual)
+        #expect(provider.callCount == 2)
+        #expect(store.state(for: "stub").error == nil)
+    }
 }

@@ -135,7 +135,7 @@ public final class UsageStore {
             let error = ProviderError(error)
             state.error = error
             switch error {
-            case .notConnected:
+            case .notConnected, .accessDenied:
                 // A disconnected provider must not keep showing old numbers as if they were live.
                 state.snapshot = nil
             case .rateLimited(let retryAfter):

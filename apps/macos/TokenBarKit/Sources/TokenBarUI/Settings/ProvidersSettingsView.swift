@@ -106,14 +106,8 @@ struct ProvidersSettingsView: View {
         return String(localized: "Checking…", bundle: .module)
     }
 
+    /// The provider's own notice (source and risk differ per provider), then what it reads.
     static func consentMessage(for descriptor: ProviderDescriptor) -> String {
-        let warning = String(
-            localized: """
-                \(descriptor.displayName) support is experimental. It relies on an undocumented mechanism \
-                that may change or stop working at any time.
-                """,
-            bundle: .module
-        )
-        return [warning, descriptor.accessDescription].compactMap(\.self).joined(separator: "\n\n")
+        [descriptor.experimentalNotice, descriptor.accessDescription].compactMap(\.self).joined(separator: "\n\n")
     }
 }
