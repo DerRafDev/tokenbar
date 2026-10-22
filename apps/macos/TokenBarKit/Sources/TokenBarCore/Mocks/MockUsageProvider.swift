@@ -121,7 +121,7 @@ extension MockUsageProvider {
         )
     }
 
-    /// Codex-like sample data: a rolling 5-hour window and a weekly limit. Experimental, like the real provider.
+    /// Codex-like sample data: a 5-hour session and a weekly limit. Experimental, like the real provider.
     public static func codex(_ behavior: Behavior? = nil) -> MockUsageProvider {
         MockUsageProvider(
             id: "codex",
@@ -132,7 +132,7 @@ extension MockUsageProvider {
                 ?? .success(
                     plan: "Plus",
                     limits: [
-                        Limit(.rolling(length: .seconds(5 * hour)), used: 0.12, resetsIn: 2 * hour + 22 * minute),
+                        Limit(.session, used: 0.12, resetsIn: 2 * hour + 22 * minute),
                         Limit(.weekly, used: 0.42, resetsIn: 4 * day + 8 * hour),
                     ]
                 )
