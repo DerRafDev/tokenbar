@@ -25,7 +25,9 @@ public struct UsagePopover: View {
                 content(now: Date())
             }
         }
-        .padding(16)
+        .padding(.horizontal, Spacing.large)
+        .padding(.top, Spacing.large)
+        .padding(.bottom, Spacing.medium)
         .frame(width: 360)
         .background(
             WindowVisibilityObserver { visible in
@@ -44,7 +46,7 @@ public struct UsagePopover: View {
             }
             ForEach(Array(store.enabledDescriptors.enumerated()), id: \.element.id) { index, descriptor in
                 if index > 0 {
-                    Divider().padding(.vertical, 16)
+                    Divider().padding(.vertical, Spacing.large)
                 }
                 ProviderSection(
                     descriptor: descriptor,
@@ -54,44 +56,45 @@ public struct UsagePopover: View {
                     formatter: formatter
                 )
             }
-            Divider().padding(.vertical, 12)
+            Divider().padding(.top, Spacing.large).padding(.bottom, Spacing.small)
             footer(now: now)
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.small) {
             Image(systemName: "gauge.with.dots.needle.33percent")
-                .font(.largeTitle)
+                .font(.system(size: 28))
                 .foregroundStyle(.secondary)
+                .padding(.bottom, Spacing.tight)
+                .accessibilityHidden(true)
             Text("No providers enabled", bundle: .module)
                 .font(.headline)
-            Text("Enable a provider in Settings.", bundle: .module)
+            Text("Turn on a provider to see its usage limits here.", bundle: .module)
+                .font(.callout)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(String(localized: "Configure Providers…", bundle: .module)) {
+                showSettings(.providers)
+            }
+            .buttonStyle(.link)
+            .padding(.top, Spacing.tight)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .padding(.vertical, Spacing.medium)
     }
 
     private func footer(now: Date) -> some View {
         HStack {
-            Button {
-                Task { await store.refreshAll(.manual) }
-            } label: {
-                Label(formatter.updatedDescription(store.lastUpdated, now: now), systemImage: "arrow.clockwise")
+            if !store.enabledDescriptors.isEmpty {
+                refreshButton(now: now)
             }
-            .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
-            .disabled(store.isRefreshing)
-            .keyboardShortcut("r")
-            .help(String(localized: "Refresh now", bundle: .module))
-
             Spacer()
 
             Menu {
                 Button(String(localized: "Settings…", bundle: .module)) {
-                    NSApp.activate()
-                    openSettings()
+                    showSettings()
                 }
                 .keyboardShortcut(",")
                 Divider()
@@ -105,6 +108,53 @@ public struct UsagePopover: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
+            .help(String(localized: "Settings", bundle: .module))
+            .accessibilityLabel(Text("Settings", bundle: .module))
+        }
+        .font(.callout)
+    }
+
+    private func refreshButton(now: Date) -> some View {
+        Button {
+            Task { await store.refreshAll(.manual) }
+        } label: {
+            Label {
+                Text(
+                    store.isRefreshing
+                        ? String(localized: "Updating…", bundle: .module)
+                        : formatter.updatedDescription(store.lastUpdated, now: now)
+                )
+            } icon: {
+                RefreshIcon(isRefreshing: store.isRefreshing)
+            }
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(.secondary)
+        .disabled(store.isRefreshing)
+        .keyboardShortcut("r")
+        .help(String(localized: "Refresh now", bundle: .module))
+        .accessibilityLabel(Text("Refresh now", bundle: .module))
+        .accessibilityValue(formatter.updatedDescription(store.lastUpdated, now: now))
+    }
+
+    private func showSettings(_ tab: SettingsTab? = nil) {
+        if let tab { SettingsTab.select(tab) }
+        NSApp.activate()
+        openSettings()
+    }
+}
+
+/// The footer's refresh symbol. Spins while a refresh runs (macOS 15+, never with Reduce Motion).
+private struct RefreshIcon: View {
+    let isRefreshing: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let image = Image(systemName: "arrow.clockwise")
+        if #available(macOS 15, *) {
+            image.symbolEffect(.rotate, options: .repeat(.continuous), isActive: isRefreshing && !reduceMotion)
+        } else {
+            image
         }
     }
 }
