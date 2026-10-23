@@ -14,6 +14,10 @@ INFOPLIST_KEY_CFBundleDisplayName = TokenBar
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.utilities
 INFOPLIST_KEY_NSHumanReadableCopyright = © 2026 TokenBar contributors. MIT License.
 
+// App icon: TokenBar/AppIcon.icon (Icon Composer). Xcode also derives the .icns used before
+// macOS 26 from it. The original artwork is docs/assets/app-icon.png.
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
 // Distributed outside the Mac App Store: hardened runtime (required for notarization),
 // no App Sandbox (providers read credentials owned by other apps; see docs/providers.md).
 ENABLE_HARDENED_RUNTIME = YES
