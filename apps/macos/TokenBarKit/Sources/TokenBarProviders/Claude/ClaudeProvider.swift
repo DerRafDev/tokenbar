@@ -17,6 +17,7 @@ public struct ClaudeProvider: UsageProvider {
         id: "claude",
         displayName: "Claude",
         symbolName: "asterisk",
+        logo: .claude,
         experimentalNotice: String(
             localized: """
                 TokenBar reads Claude usage from the endpoint behind Claude Code's /usage command. \

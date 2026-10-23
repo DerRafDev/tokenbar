@@ -17,8 +17,10 @@ public struct ProviderDescriptor: Identifiable, Hashable, Sendable {
     public let id: ProviderID
     /// Name shown in the UI, such as "Claude".
     public let displayName: String
-    /// SF Symbol shown next to the name. Use a neutral symbol, not a company logo (trademarks).
+    /// SF Symbol shown next to the name when the provider has no ``logo``.
     public let symbolName: String
+    /// The provider's own mark, shown instead of ``symbolName``.
+    public let logo: ProviderLogo?
     /// True for providers that return made-up data. The UI labels their data as a demo.
     public let isDemo: Bool
     /// Set when the data source is undocumented and may change or stop working. Explains the
@@ -35,6 +37,7 @@ public struct ProviderDescriptor: Identifiable, Hashable, Sendable {
         id: ProviderID,
         displayName: String,
         symbolName: String = "sparkle",
+        logo: ProviderLogo? = nil,
         isDemo: Bool = false,
         experimentalNotice: String? = nil,
         accessDescription: String? = nil
@@ -42,8 +45,29 @@ public struct ProviderDescriptor: Identifiable, Hashable, Sendable {
         self.id = id
         self.displayName = displayName
         self.symbolName = symbolName
+        self.logo = logo
         self.isDemo = isDemo
         self.experimentalNotice = experimentalNotice
         self.accessDescription = accessDescription
     }
+}
+
+/// A provider's logo, shipped as a vector PDF in the UI module's resources.
+///
+/// Used with the brand owner's mark as the provider's identity only; TokenBar is not affiliated
+/// with the providers (see README).
+public struct ProviderLogo: Hashable, Sendable {
+    /// Resource name without extension, for example "claude" for `Logos/claude.pdf`.
+    public let resourceName: String
+    /// True to draw the logo in its brand colors. False to draw it in the text color, like a symbol.
+    /// The menu bar always draws logos in the text color.
+    public let keepsColors: Bool
+
+    public init(resourceName: String, keepsColors: Bool = false) {
+        self.resourceName = resourceName
+        self.keepsColors = keepsColors
+    }
+
+    public static let claude = ProviderLogo(resourceName: "claude", keepsColors: true)
+    public static let openAI = ProviderLogo(resourceName: "openai")
 }

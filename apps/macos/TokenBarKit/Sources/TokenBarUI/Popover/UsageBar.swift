@@ -1,14 +1,23 @@
 import SwiftUI
 
-/// Horizontal usage bar. Static (no animation) to keep the popover cheap to render.
+/// Thin horizontal usage bar: a rounded fill on a faint track.
+///
+/// The fill uses the system accent color and turns orange, then red, as the limit gets close
+/// (see ``UsageLevel``).
+/// Value changes animate briefly (never with Reduce Motion); nothing animates while idle.
 struct UsageBar: View {
     let fraction: Double?
     var dimmed = false
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    static let height: CGFloat = 4
+
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
-                Capsule().fill(.quaternary)
+                Capsule().fill(.primary.opacity(contrast == .increased ? 0.25 : 0.1))
                 if let fraction, fraction > 0 {
                     Capsule()
                         .fill(Self.tint(for: fraction))
@@ -16,17 +25,14 @@ struct UsageBar: View {
                 }
             }
         }
-        .frame(height: 6)
+        .frame(height: Self.height)
         .opacity(dimmed ? 0.4 : 1)
+        .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: fraction)
         .accessibilityHidden(true)
     }
 
     static func tint(for fraction: Double) -> Color {
-        switch fraction {
-        case ..<0.7: .accentColor
-        case ..<0.9: .orange
-        default: .red
-        }
+        UsageLevel(fraction).color ?? .accentColor
     }
 }
 

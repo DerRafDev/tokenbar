@@ -15,7 +15,7 @@ let package = Package(
         // Domain model, provider protocol, refresh policy. No UI, no networking.
         .target(name: "TokenBarCore"),
         // SwiftUI views. Must never depend on TokenBarProviders.
-        .target(name: "TokenBarUI", dependencies: ["TokenBarCore"]),
+        .target(name: "TokenBarUI", dependencies: ["TokenBarCore"], resources: [.copy("Resources/Logos")]),
         // Concrete providers, networking, and credentials. No UI.
         .target(name: "TokenBarProviders", dependencies: ["TokenBarCore"]),
 

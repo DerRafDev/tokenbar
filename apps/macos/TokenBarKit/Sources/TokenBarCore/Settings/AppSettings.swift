@@ -23,6 +23,11 @@ public final class AppSettings {
         didSet { defaults.set(showsUsageInMenuBar, forKey: Key.showsUsageInMenuBar) }
     }
 
+    /// What the menu bar shows when ``showsUsageInMenuBar`` is on.
+    public var menuBarDisplay: MenuBarDisplayMode {
+        didSet { defaults.set(menuBarDisplay.rawValue, forKey: Key.menuBarDisplay) }
+    }
+
     /// Providers the user turned on. Every provider starts disabled: TokenBar reads no
     /// other app's credentials until the user enables the provider that needs them.
     public private(set) var enabledProviders: Set<ProviderID> {
@@ -46,6 +51,8 @@ public final class AppSettings {
         refreshInterval =
             RefreshPolicy.intervalChoices.contains(interval) ? interval : RefreshPolicy.default.interval
         showsUsageInMenuBar = defaults.object(forKey: Key.showsUsageInMenuBar) as? Bool ?? true
+        menuBarDisplay =
+            defaults.string(forKey: Key.menuBarDisplay).flatMap(MenuBarDisplayMode.init(rawValue:)) ?? .providers
         enabledProviders =
             defaults.object(forKey: Key.enabledProviders) == nil
             ? initiallyEnabled : Self.providerIDs(defaults, Key.enabledProviders)
@@ -75,6 +82,7 @@ public final class AppSettings {
     private enum Key {
         static let refreshInterval = "refreshInterval"
         static let showsUsageInMenuBar = "showsUsageInMenuBar"
+        static let menuBarDisplay = "menuBarDisplay"
         static let enabledProviders = "enabledProviders"
         static let providersHiddenFromMenuBar = "providersHiddenFromMenuBar"
     }

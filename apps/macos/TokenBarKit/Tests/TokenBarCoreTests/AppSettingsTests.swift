@@ -20,6 +20,7 @@ struct AppSettingsTests {
         let settings = AppSettings(defaults: defaults)
         #expect(settings.refreshInterval == RefreshPolicy.default.interval)
         #expect(settings.showsUsageInMenuBar)
+        #expect(settings.menuBarDisplay == .providers)
         #expect(settings.enabledProviders.isEmpty)
         #expect(!settings.isEnabled("claude"))
         #expect(settings.showsInMenuBar("claude"))
@@ -29,6 +30,7 @@ struct AppSettingsTests {
         let settings = AppSettings(defaults: defaults)
         settings.refreshInterval = 10 * 60
         settings.showsUsageInMenuBar = false
+        settings.menuBarDisplay = .detailed
         settings.setEnabled(true, for: "claude")
         settings.setEnabled(true, for: "codex")
         settings.setEnabled(false, for: "codex")
@@ -37,6 +39,7 @@ struct AppSettingsTests {
         let reloaded = AppSettings(defaults: defaults)
         #expect(reloaded.refreshInterval == 10 * 60)
         #expect(!reloaded.showsUsageInMenuBar)
+        #expect(reloaded.menuBarDisplay == .detailed)
         #expect(reloaded.enabledProviders == ["claude"])
         #expect(!reloaded.showsInMenuBar("claude"))
         #expect(reloaded.showsInMenuBar("codex"))
@@ -52,10 +55,12 @@ struct AppSettingsTests {
         defaults.set(-3, forKey: "refreshInterval")
         defaults.set("yes", forKey: "showsUsageInMenuBar")
         defaults.set(42, forKey: "enabledProviders")
+        defaults.set("huge", forKey: "menuBarDisplay")
 
         let settings = AppSettings(defaults: defaults)
         #expect(settings.refreshInterval == RefreshPolicy.default.interval)
         #expect(settings.showsUsageInMenuBar)
+        #expect(settings.menuBarDisplay == .providers)
         #expect(settings.enabledProviders.isEmpty)
     }
 

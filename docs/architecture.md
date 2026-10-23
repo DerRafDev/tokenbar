@@ -63,8 +63,11 @@ does not depend on the providers module. (`TokenBarProviders` holds the Keychain
 `CredentialStore` today; real providers join it from Milestone 5. The debug-only
 `MockUsageProvider` lives in `TokenBarCore`, so SwiftUI previews can use it.)
 
-Provider-specific presentation (name, SF Symbol, demo flag) comes from
-`ProviderDescriptor`, so the UI never switches on provider IDs.
+Provider-specific presentation (name, logo or SF Symbol, demo flag) comes from
+`ProviderDescriptor`, so the UI never switches on provider IDs. Logos are vector PDFs in
+`TokenBarUI/Resources/Logos`, used only to identify the provider: the popover and Settings
+draw Claude's mark in its brand color and OpenAI's in the text color; the menu bar draws
+both as template images, so macOS tints them for light and dark menu bars.
 
 ## Domain model
 
@@ -98,9 +101,15 @@ with a small `LimitWindow` enum covers all known cases and stays readable.
 **A metric is never relabeled to make providers look consistent.** Each limit is the
 window the provider actually reports: a Claude session (starts with the first message)
 is `.session`; a window counting the trailing 5 hours is `.rolling(length: 5h)`, even
-though both last five hours. The menu bar shows every unscoped limit in provider order
-with a compact label (`S 17% | W 79%`, `5h 12% | W 42%`); the popover spells it out
+though both last five hours. The popover's collapsed row uses short names
+("Session 15% · Week 12%", "5h 12% · Week 42%") and its details spell them out
 ("Current session", "Rolling window (5 hours)").
+
+The UI never reads specific fields like "session" or "week": it works on the list. A
+provider's **headline** is its unscoped limit closest to being used up; the menu bar
+(Providers and Minimal modes) and the popover row show that one number. Levels are
+normal below 70%, attention from 70%, critical from 90% (`UsageLevel`), so the UI stays
+quiet until a limit gets close.
 
 `usedFraction` is optional because "no percentage available" is different from "0%".
 The UI never renders a missing value as an empty bar.
@@ -126,7 +135,13 @@ ProviderState = connection + last good snapshot + last error + isRefreshing
 - The scheduler sleeps on the continuous clock, so after the Mac wakes from sleep the
   overdue refresh runs right away without a separate wake observer.
 - The menu bar label is rendered into a template image (MenuBarExtra drops symbols
-  embedded in text), only when its values change.
+  embedded in text), only when its values change. A template image cannot use color,
+  so close limits are marked by weight and critical ones by a dot.
+- Menu bar display modes: **Providers** (default, one number per provider), **Minimal**
+  (only the provider closest to its limit), **Detailed** (`15/12`, the first two limits).
+  macOS gives no reliable way to read the free menu bar space, so the label is capped at
+  a fixed width and falls back to the next more compact mode (Detailed → Providers →
+  Minimal) when the rendered image is wider.
 
 ## Settings
 
@@ -135,7 +150,7 @@ Settings window ──edits──▶ AppSettings (UserDefaults) ──follow─�
 ```
 
 - `AppSettings` is the single source of truth for preferences: refresh interval,
-  menu bar visibility, and which providers are enabled or hidden from the menu bar.
+  menu bar visibility and display mode, and which providers are enabled or hidden from the menu bar.
   Stored values are validated on load. Nothing sensitive is stored there.
 - The Settings window only edits `AppSettings`; `UsageStore.follow(_:)` applies the
   enabled providers and the interval (restarting the schedule when it changes).
@@ -147,9 +162,11 @@ Settings window ──edits──▶ AppSettings (UserDefaults) ──follow─�
 
 ## Mock data
 
-Debug builds can run with demo providers: the shared scheme passes
-`-TokenBarUseMocks YES`. Demo mode keeps its settings in a separate defaults suite, so it
-never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
+Every build, Debug included, runs the real providers. Debug builds can opt into demo
+providers by launching with the environment variable `TOKENBAR_DEMO=1` (the shared scheme
+lists it, unchecked; tick it in Edit Scheme › Run › Arguments). A test fails if the shared
+scheme enables it, so ⌘R never silently runs on mock data. Demo mode keeps its settings in a
+separate defaults suite, so it never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
 builds, and the popover labels demo data with a "Demo" badge.
 
 ## Security boundaries
