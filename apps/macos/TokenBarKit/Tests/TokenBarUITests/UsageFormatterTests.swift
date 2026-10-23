@@ -64,6 +64,16 @@ struct UsageFormatterTests {
     @Test func describesResetDaysAway() {
         let reset = now.addingTimeInterval(2 * 86400 + 14 * 3600 + 40 * 60)  // Sun 07:00
         #expect(normalized(english.resetDescription(reset, now: now)) == "Resets in 2d 14h (Sun, Oct 25 at 7:00 AM)")
+        #expect(portuguese.resetDescription(reset, now: now)?.hasPrefix("Redefine em ") == true)
+    }
+
+    @Test func countsRealTimeAcrossDaylightSavingChange() {
+        // New York falls back at 02:00 EDT on 2026-11-01: 00:30 EDT to 03:00 EST is 3h 30m, not 2h 30m.
+        let newYork = UsageFormatter(
+            locale: Locale(identifier: "en_US"), timeZone: TimeZone(identifier: "America/New_York")!)
+        let now = Date(timeIntervalSince1970: 1_793_507_400)  // 2026-11-01 04:30 UTC
+        let reset = Date(timeIntervalSince1970: 1_793_520_000)  // 2026-11-01 08:00 UTC
+        #expect(normalized(newYork.resetDescription(reset, now: now)) == "Resets at 3:00 AM (in 3h 30m)")
     }
 
     @Test func describesExpiredReset() {

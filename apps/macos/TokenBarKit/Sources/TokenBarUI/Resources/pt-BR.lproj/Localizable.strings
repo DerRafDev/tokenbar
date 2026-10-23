@@ -40,7 +40,7 @@
 "Refresh now" = "Atualizar agora";
 "Reset due, updating soon" = "Redefinição pendente, atualizando em breve";
 "Resets at %@ (in %@)" = "Redefine às %1$@ (em %2$@)";
-"Resets in %@ (%@)" = "Reseta em %1$@ (%2$@)";
+"Resets in %@ (%@)" = "Redefine em %1$@ (%2$@)";
 "Rolling window (%@)" = "Janela móvel (%@)";
 "Session" = "Sessão";
 "Settings" = "Ajustes";
@@ -48,7 +48,7 @@
 "Show in menu bar" = "Mostrar na barra de menus";
 "Show usage in menu bar" = "Mostrar uso na barra de menus";
 "Shows details" = "Mostra os detalhes";
-"Sign-in expired. Sign in again to resume updates." = "Sessão expirada. Entre novamente para retomar as atualizações.";
+"Sign-in expired. Sign in again to resume updates." = "Login expirado. Entre novamente para retomar as atualizações.";
 "Something went wrong." = "Algo deu errado.";
 "The service returned an error (%lld)." = "O serviço retornou um erro (%lld).";
 "The service took too long to respond." = "O serviço demorou demais para responder.";
