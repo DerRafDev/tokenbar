@@ -63,8 +63,11 @@ does not depend on the providers module. (`TokenBarProviders` holds the Keychain
 `CredentialStore` today; real providers join it from Milestone 5. The debug-only
 `MockUsageProvider` lives in `TokenBarCore`, so SwiftUI previews can use it.)
 
-Provider-specific presentation (name, SF Symbol, demo flag) comes from
-`ProviderDescriptor`, so the UI never switches on provider IDs.
+Provider-specific presentation (name, logo or SF Symbol, demo flag) comes from
+`ProviderDescriptor`, so the UI never switches on provider IDs. Logos are vector PDFs in
+`TokenBarUI/Resources/Logos`, used only to identify the provider: the popover and Settings
+draw Claude's mark in its brand color and OpenAI's in the text color; the menu bar draws
+both as template images, so macOS tints them for light and dark menu bars.
 
 ## Domain model
 

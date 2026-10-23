@@ -52,6 +52,7 @@ public struct MockUsageProvider: UsageProvider {
         id: ProviderID,
         name: String,
         symbolName: String = "sparkle",
+        logo: ProviderLogo? = nil,
         experimental: Bool = false,
         behavior: Behavior,
         latency: Duration = .milliseconds(300)
@@ -60,6 +61,7 @@ public struct MockUsageProvider: UsageProvider {
             id: id,
             displayName: name,
             symbolName: symbolName,
+            logo: logo,
             isDemo: true,
             experimentalNotice: experimental
                 ? "Demo of an experimental provider. The real one relies on an undocumented source." : nil,
@@ -109,6 +111,7 @@ extension MockUsageProvider {
             id: "claude",
             name: "Claude",
             symbolName: "asterisk",
+            logo: .claude,
             experimental: true,
             behavior: behavior
                 ?? .success(
@@ -127,6 +130,7 @@ extension MockUsageProvider {
             id: "codex",
             name: "Codex",
             symbolName: "chevron.left.forwardslash.chevron.right",
+            logo: .openAI,
             experimental: true,
             behavior: behavior
                 ?? .success(

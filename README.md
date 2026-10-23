@@ -84,4 +84,6 @@ Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 ## License
 
 [MIT](LICENSE). TokenBar is not affiliated with Anthropic or OpenAI. Claude, ChatGPT,
-and Codex are trademarks of their respective owners.
+and Codex, and the Claude and OpenAI logos, are trademarks of their respective owners.
+TokenBar shows the logos only to identify each provider; they are not covered by the MIT
+license.

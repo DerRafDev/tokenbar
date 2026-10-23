@@ -44,7 +44,7 @@ struct ProvidersSettingsView: View {
         let isEnabled = settings.isEnabled(descriptor.id)
         return VStack(alignment: .leading, spacing: Spacing.small) {
             HStack(spacing: Spacing.small) {
-                ProviderIcon(symbolName: descriptor.symbolName)
+                ProviderIcon(descriptor: descriptor)
                     .font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {

@@ -18,7 +18,7 @@ struct ProviderSection: View {
 
     private var header: some View {
         HStack(spacing: Spacing.small) {
-            ProviderIcon(symbolName: descriptor.symbolName)
+            ProviderIcon(descriptor: descriptor)
                 .font(.title2)
             Text(descriptor.displayName)
                 .font(.title3.weight(.semibold))
@@ -121,15 +121,35 @@ struct ProviderSection: View {
     }
 }
 
-/// The provider's symbol in a fixed-width slot, so names line up across providers.
+/// The provider's logo, or its symbol when it has none, in a fixed-width slot so names line up.
 struct ProviderIcon: View {
-    let symbolName: String
+    let descriptor: ProviderDescriptor
+    /// Edge length of a logo. Symbols follow the font instead.
+    var size: CGFloat = 20
 
     var body: some View {
-        Image(systemName: symbolName)
-            .fontWeight(.medium)
-            .frame(width: 24)
-            .accessibilityHidden(true)
+        Group {
+            if let logo = descriptor.logo, let image = LogoImage.load(logo) {
+                Image(nsImage: image)
+                    .renderingMode(logo.keepsColors ? .original : .template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+            } else {
+                Image(systemName: descriptor.symbolName)
+                    .fontWeight(.medium)
+            }
+        }
+        .frame(width: 24)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Loads logos from this module's resources.
+enum LogoImage {
+    static func load(_ logo: ProviderLogo) -> NSImage? {
+        Bundle.module.url(forResource: logo.resourceName, withExtension: "pdf", subdirectory: "Logos")
+            .flatMap(NSImage.init(contentsOf:))
     }
 }
 

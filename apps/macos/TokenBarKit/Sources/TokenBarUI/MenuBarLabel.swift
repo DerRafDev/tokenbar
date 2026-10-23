@@ -30,6 +30,7 @@ public struct MenuBarLabel: View {
 
     struct Item: Hashable {
         let symbolName: String
+        let logo: ProviderLogo?
         let parts: [MenuBarSummary.Part]
         let spokenText: String
     }
@@ -43,6 +44,7 @@ public struct MenuBarLabel: View {
             guard !parts.isEmpty else { return nil }
             return Item(
                 symbolName: descriptor.symbolName,
+                logo: descriptor.logo,
                 parts: parts,
                 spokenText: MenuBarSummary.spokenText(for: snapshot, name: descriptor.displayName, formatter: formatter)
             )
@@ -58,8 +60,7 @@ public struct MenuBarLabel: View {
         let content = HStack(spacing: 12) {
             ForEach(items, id: \.self) { item in
                 HStack(spacing: 4) {
-                    Image(systemName: item.symbolName)
-                        .fontWeight(.semibold)
+                    icon(item)
                     summary(item.parts)
                 }
             }
@@ -73,6 +74,21 @@ public struct MenuBarLabel: View {
         let image = renderer.nsImage ?? NSImage()
         image.isTemplate = true
         return image
+    }
+
+    /// Logos are always drawn in the text color here, so the status item stays a template image.
+    @ViewBuilder
+    private static func icon(_ item: Item) -> some View {
+        if let logo = item.logo, let image = LogoImage.load(logo) {
+            Image(nsImage: image)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
+        } else {
+            Image(systemName: item.symbolName)
+                .fontWeight(.semibold)
+        }
     }
 
     private static func summary(_ parts: [MenuBarSummary.Part]) -> Text {

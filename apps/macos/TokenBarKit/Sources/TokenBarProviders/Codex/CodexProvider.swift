@@ -18,6 +18,7 @@ public struct CodexProvider: UsageProvider {
         id: "codex",
         displayName: "Codex",
         symbolName: "chevron.left.forwardslash.chevron.right",
+        logo: .openAI,
         experimentalNotice: String(
             localized: """
                 TokenBar reads Codex usage from the endpoint the Codex apps use to show your plan's limits. \
