@@ -8,16 +8,22 @@ the few boundaries that exist and why each one does.
 ```text
 tokenbar/
 ├── apps/
-│   └── macos/                     # The macOS app (the only app today)
-│       ├── TokenBar.xcodeproj     # Thin app target: entry point, Info.plist, signing
-│       ├── TokenBar/              # App sources (composition root only)
-│       └── TokenBarKit/           # Swift package with all logic and all tests
+│   ├── macos/                     # The native macOS app
+│   │   ├── TokenBar.xcodeproj     # Thin app target: entry point, Info.plist, signing
+│   │   ├── TokenBar/              # App sources (composition root only)
+│   │   └── TokenBarKit/           # Swift package with all logic and all tests
+│   └── web/                       # The official website (static Astro site, own npm project)
 ├── docs/                          # Architecture, providers, releasing, roadmap
-├── scripts/                       # Shell scripts used by developers and CI
+├── scripts/                       # Shell scripts used by developers and CI (macOS app)
+├── tools/                         # Standalone helpers, e.g. the README demo renderer
 └── .github/                       # CI, release workflow, templates
 ```
 
-Future apps (`apps/cli`, `apps/website`, …) are added as siblings. Code is only moved
+Each app builds on its own. The macOS app needs only Xcode; the website needs only
+Node.js and builds from inside `apps/web` (see its README). There is no root
+`package.json` and no monorepo tooling. Releases package only the macOS `.app`.
+
+Future apps (`apps/cli`, …) are added as siblings. Code is only moved
 to `packages/` when a **second consumer actually exists**. Until then a top-level
 `packages/` folder would be empty ceremony.
 

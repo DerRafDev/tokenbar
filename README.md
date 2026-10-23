@@ -147,6 +147,9 @@ Every build runs the real providers. To work on the UI without accounts, launch 
 build with `TOKENBAR_DEMO=1` (listed, unchecked, in the scheme's environment variables).
 Demo data is labeled "Demo" and does not exist in Release builds.
 
+The repository also holds the TokenBar website in `apps/web`, a separate static site
+with its own [README](apps/web/README.md). The app never needs it to build.
+
 ## Architecture
 
 All logic lives in the `TokenBarKit` Swift package: `TokenBarCore` (domain model and
