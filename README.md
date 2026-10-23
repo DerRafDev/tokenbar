@@ -22,7 +22,7 @@ reset, without opening a terminal or a website. It is a small native Mac app tha
 directly to the providers. There is no TokenBar server and no account.
 
 <p align="center">
-  <img src="docs/assets/screenshot.png" alt="TokenBar in the menu bar with its popover open, showing Claude and Codex session and weekly usage" width="720">
+  <img src="docs/assets/demo.gif" alt="Animation of TokenBar: the menu bar shows Claude and Codex session usage; clicking it opens a popover with session and weekly limits, reset times, and a refresh button" width="720">
 </p>
 
 ## Features

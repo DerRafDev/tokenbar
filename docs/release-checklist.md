@@ -69,6 +69,6 @@ defaults delete io.github.derrafdev.TokenBar   # TokenBar's preferences only
 
 ## Before publishing
 
-- [ ] README screenshot is current and shows no email, account name, or private window.
+- [ ] README demo (`docs/assets/demo.gif`) matches the app as released.
 - [ ] Draft release: notes are right, artifacts are `TokenBar-<version>.dmg`, `.zip` and
       `SHA256SUMS.txt`, and the version matches the tag.
