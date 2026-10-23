@@ -42,11 +42,10 @@ struct ProvidersSettingsView: View {
 
     private func row(_ descriptor: ProviderDescriptor) -> some View {
         let isEnabled = settings.isEnabled(descriptor.id)
-        return VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Image(systemName: descriptor.symbolName)
-                    .font(.title3)
-                    .frame(width: 24)
+        return VStack(alignment: .leading, spacing: Spacing.small) {
+            HStack(spacing: Spacing.small) {
+                ProviderIcon(symbolName: descriptor.symbolName)
+                    .font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(descriptor.displayName).font(.headline)
@@ -57,9 +56,16 @@ struct ProvidersSettingsView: View {
                             Badge(text: String(localized: "Demo", bundle: .module), tint: .orange)
                         }
                     }
-                    Text(status(of: descriptor.id, isEnabled: isEnabled))
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
+                    let status = status(of: descriptor.id, isEnabled: isEnabled)
+                    Label {
+                        Text(status.text)
+                    } icon: {
+                        Circle()
+                            .fill(status.color)
+                            .frame(width: 7, height: 7)
+                    }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                 }
                 Spacer()
                 Toggle(
@@ -83,6 +89,7 @@ struct ProvidersSettingsView: View {
                 Text(access)
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Toggle(
                 String(localized: "Show in menu bar", bundle: .module),
@@ -96,14 +103,18 @@ struct ProvidersSettingsView: View {
         .padding(.vertical, 2)
     }
 
-    private func status(of id: ProviderID, isEnabled: Bool) -> String {
-        guard isEnabled else { return String(localized: "Off", bundle: .module) }
+    /// One line about the provider's connection, with a colored dot: green when usage is current,
+    /// orange when the last refresh failed, gray when off or still checking.
+    private func status(of id: ProviderID, isEnabled: Bool) -> (text: String, color: Color) {
+        guard isEnabled else { return (String(localized: "Off", bundle: .module), .gray.opacity(0.5)) }
         let state = store.state(for: id)
-        if let error = state.error { return ProviderSection.message(for: error) }
+        // The requirements are listed right below the status, so "see Settings" would be circular here.
+        if state.error == .notConnected { return (String(localized: "Not connected", bundle: .module), .orange) }
+        if let error = state.error { return (ProviderSection.message(for: error), .orange) }
         if let snapshot = state.snapshot {
-            return formatter.updatedDescription(snapshot.fetchedAt, now: Date())
+            return (formatter.updatedDescription(snapshot.fetchedAt, now: Date()), .green)
         }
-        return String(localized: "Checking…", bundle: .module)
+        return (String(localized: "Checking…", bundle: .module), .gray.opacity(0.5))
     }
 
     /// The provider's own notice (source and risk differ per provider), then what it reads.
