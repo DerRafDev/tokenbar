@@ -88,10 +88,10 @@ extension MenuBarDisplayMode {
         case .providers:
             String(
                 localized:
-                    "Each provider's highest usage. Switches to Minimal when there are too many providers to fit.",
+                    "Each provider's current session. Switches to Minimal when there are too many providers to fit.",
                 bundle: .module)
         case .minimal:
-            String(localized: "Only the provider closest to its limit.", bundle: .module)
+            String(localized: "Only the provider whose current session is most used.", bundle: .module)
         case .detailed:
             String(
                 localized: "The two main limits of each provider, such as 15/12 for session and week.",

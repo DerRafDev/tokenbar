@@ -27,9 +27,9 @@ directly to the providers. There is no TokenBar server and no account.
 
 ## Features
 
-- **Glanceable menu bar.** Each provider's logo with its highest usage, so you see at once
-  which one is closest to a limit. Prefer less? Show only the closest one (Minimal), or
-  both main limits as `15/12` (Detailed).
+- **Glanceable menu bar.** Each provider's logo with its current session usage, the number
+  that matters while you code. Prefer less? Show only the busiest one (Minimal), or
+  session and week as `15/12` (Detailed).
 - **Session and weekly limits.** The popover lists every provider in one line; click one
   to see each limit with a bar and its reset time.
 - **Reset times you can read.** "Resets at 19:10 (in 2h 50m)", computed locally in your

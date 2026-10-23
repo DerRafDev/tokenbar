@@ -3,9 +3,9 @@ import TokenBarCore
 
 /// Builds what the menu bar shows for each provider.
 ///
-/// The menu bar answers one question at a glance: which provider is closest to its limit?
-/// - ``MenuBarDisplayMode/providers``: each provider's highest usage ("15%").
-/// - ``MenuBarDisplayMode/minimal``: only the provider with the highest usage.
+/// The menu bar answers one question at a glance: how much of the current session is used?
+/// - ``MenuBarDisplayMode/providers``: each provider's current session ("15%").
+/// - ``MenuBarDisplayMode/minimal``: only the provider whose session is most used.
 /// - ``MenuBarDisplayMode/detailed``: each provider's first two limits ("15/12"), in provider order.
 ///
 /// Only limits that apply to all models count; model-specific limits stay in the popover.

@@ -105,7 +105,8 @@ though both last five hours. The popover's collapsed row uses short names
 ("Current session", "Rolling window (5 hours)").
 
 The UI never reads specific fields like "session" or "week": it works on the list. A
-provider's **headline** is its unscoped limit closest to being used up; the menu bar
+provider's **headline** is its first unscoped limit with a percentage, which is the
+current session for Claude and Codex (providers list the shortest window first); the menu bar
 (Providers and Minimal modes) and the popover row show that one number. Levels are
 normal below 70%, attention from 70%, critical from 90% (`UsageLevel`), so the UI stays
 quiet until a limit gets close.
@@ -140,7 +141,7 @@ ProviderState = connection + last good snapshot + last error + isRefreshing
   embedded in text), only when its values change. A template image cannot use color,
   so close limits are marked by weight and critical ones by a dot.
 - Menu bar display modes: **Providers** (default, one number per provider), **Minimal**
-  (only the provider closest to its limit), **Detailed** (`15/12`, the first two limits).
+  (only the provider whose session is most used), **Detailed** (`15/12`, the first two limits).
   macOS gives no reliable way to read the free menu bar space, so the label is capped at
   a fixed width and falls back to the next more compact mode (Detailed → Providers →
   Minimal) when the rendered image is wider.

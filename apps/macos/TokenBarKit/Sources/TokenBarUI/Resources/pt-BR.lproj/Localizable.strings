@@ -11,7 +11,7 @@
 "Demo" = "Demo";
 "Detailed" = "Detalhado";
 "Display" = "Exibição";
-"Each provider's highest usage. Switches to Minimal when there are too many providers to fit." = "O maior uso de cada provedor. Muda para Mínimo quando há provedores demais para caber.";
+"Each provider's current session. Switches to Minimal when there are too many providers to fit." = "A sessão atual de cada provedor. Muda para Mínimo quando há provedores demais para caber.";
 "Enable %@" = "Ativar %@";
 "Enable %@?" = "Ativar %@?";
 "Enable" = "Ativar";
@@ -31,7 +31,7 @@
 "Not connected. See Settings › Providers for what's needed." = "Não conectado. Veja em Ajustes › Provedores o que é necessário.";
 "Not updated yet" = "Ainda não atualizado";
 "Off" = "Desativado";
-"Only the provider closest to its limit." = "Apenas o provedor mais perto do limite.";
+"Only the provider whose current session is most used." = "Apenas o provedor com a sessão atual mais usada.";
 "Open at login" = "Abrir ao iniciar sessão";
 "Open Login Items…" = "Abrir Itens de Início…";
 "Providers" = "Provedores";
