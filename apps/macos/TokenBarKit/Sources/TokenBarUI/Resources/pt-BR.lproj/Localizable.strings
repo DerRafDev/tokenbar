@@ -11,7 +11,7 @@
 "Demo" = "Demo";
 "Detailed" = "Detalhado";
 "Display" = "Exibição";
-"Each provider's highest usage. Switches to Minimal when there are too many providers to fit." = "O maior uso de cada provedor. Muda para Mínimo quando há provedores demais para caber.";
+"Each provider's current session. Switches to Minimal when there are too many providers to fit." = "A sessão atual de cada provedor. Muda para Mínimo quando há provedores demais para caber.";
 "Enable %@" = "Ativar %@";
 "Enable %@?" = "Ativar %@?";
 "Enable" = "Ativar";
@@ -31,7 +31,7 @@
 "Not connected. See Settings › Providers for what's needed." = "Não conectado. Veja em Ajustes › Provedores o que é necessário.";
 "Not updated yet" = "Ainda não atualizado";
 "Off" = "Desativado";
-"Only the provider closest to its limit." = "Apenas o provedor mais perto do limite.";
+"Only the provider whose current session is most used." = "Apenas o provedor com a sessão atual mais usada.";
 "Open at login" = "Abrir ao iniciar sessão";
 "Open Login Items…" = "Abrir Itens de Início…";
 "Providers" = "Provedores";
@@ -40,7 +40,7 @@
 "Refresh now" = "Atualizar agora";
 "Reset due, updating soon" = "Redefinição pendente, atualizando em breve";
 "Resets at %@ (in %@)" = "Redefine às %1$@ (em %2$@)";
-"Resets in %@ (%@)" = "Reseta em %1$@ (%2$@)";
+"Resets in %@ (%@)" = "Redefine em %1$@ (%2$@)";
 "Rolling window (%@)" = "Janela móvel (%@)";
 "Session" = "Sessão";
 "Settings" = "Ajustes";
@@ -48,7 +48,7 @@
 "Show in menu bar" = "Mostrar na barra de menus";
 "Show usage in menu bar" = "Mostrar uso na barra de menus";
 "Shows details" = "Mostra os detalhes";
-"Sign-in expired. Sign in again to resume updates." = "Sessão expirada. Entre novamente para retomar as atualizações.";
+"Sign-in expired. Sign in again to resume updates." = "Login expirado. Entre novamente para retomar as atualizações.";
 "Something went wrong." = "Algo deu errado.";
 "The service returned an error (%lld)." = "O serviço retornou um erro (%lld).";
 "The service took too long to respond." = "O serviço demorou demais para responder.";

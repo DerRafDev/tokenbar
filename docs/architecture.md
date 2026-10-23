@@ -59,9 +59,8 @@ to `packages/` when a **second consumer actually exists**. Until then a top-leve
 | App target | Wiring | Business logic |
 
 The `TokenBarUI ↛ TokenBarProviders` rule is enforced by the compiler: the UI module
-does not depend on the providers module. (`TokenBarProviders` holds the Keychain
-`CredentialStore` today; real providers join it from Milestone 5. The debug-only
-`MockUsageProvider` lives in `TokenBarCore`, so SwiftUI previews can use it.)
+does not depend on the providers module. (The debug-only `MockUsageProvider` lives in
+`TokenBarCore`, so SwiftUI previews can use it.)
 
 Provider-specific presentation (name, logo or SF Symbol, demo flag) comes from
 `ProviderDescriptor`, so the UI never switches on provider IDs. Logos are vector PDFs in
@@ -106,7 +105,8 @@ though both last five hours. The popover's collapsed row uses short names
 ("Current session", "Rolling window (5 hours)").
 
 The UI never reads specific fields like "session" or "week": it works on the list. A
-provider's **headline** is its unscoped limit closest to being used up; the menu bar
+provider's **headline** is its first unscoped limit with a percentage, which is the
+current session for Claude and Codex (providers list the shortest window first); the menu bar
 (Providers and Minimal modes) and the popover row show that one number. Levels are
 normal below 70%, attention from 70%, critical from 90% (`UsageLevel`), so the UI stays
 quiet until a limit gets close.
@@ -128,17 +128,20 @@ ProviderState = connection + last good snapshot + last error + isRefreshing
 - A failed refresh **keeps the last good snapshot** and marks it stale. The UI shows
   the data plus an "Updated 12 min ago" warning instead of an error screen.
 - Rate limits (HTTP 429) back off using `Retry-After` when present.
-- Opening the popover triggers a refresh only if data is older than the stale threshold.
+- Opening the popover triggers a refresh only if data is at least one interval old.
 - Countdowns ("in 2h 50min") are computed locally from `resetsAt` and re-rendered
   with `TimelineView(.everyMinute)` only while the popover is open. No network
   request is made to update a countdown.
 - The scheduler sleeps on the continuous clock, so after the Mac wakes from sleep the
-  overdue refresh runs right away without a separate wake observer.
+  overdue refresh runs right away. That one usually fails because the network is not back
+  yet, so the app delegate restarts the schedule 10 seconds after `didWakeNotification`;
+  providers that did refresh are skipped. There is no network-change observer: after an
+  outage, data stays marked outdated until the next scheduled refresh.
 - The menu bar label is rendered into a template image (MenuBarExtra drops symbols
   embedded in text), only when its values change. A template image cannot use color,
   so close limits are marked by weight and critical ones by a dot.
 - Menu bar display modes: **Providers** (default, one number per provider), **Minimal**
-  (only the provider closest to its limit), **Detailed** (`15/12`, the first two limits).
+  (only the provider whose session is most used), **Detailed** (`15/12`, the first two limits).
   macOS gives no reliable way to read the free menu bar space, so the label is capped at
   a fixed width and falls back to the next more compact mode (Detailed → Providers →
   Minimal) when the rendered image is wider.

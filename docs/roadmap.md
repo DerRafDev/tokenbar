@@ -1,22 +1,31 @@
 # Roadmap
 
-Each milestone ends with green CI and updated docs. Real providers come **after**
-settings, because connecting and disconnecting a provider is part of shipping it.
+## 0.1.0 (first public release)
 
-| # | Milestone | Exit criteria |
-|---|---|---|
-| 0 | **Repository foundation** | Community files, `swift format` config, CI workflow, Dependabot, PR/issue templates, provider research ([providers.md](providers.md)). |
-| 1 | **Native macOS shell** | Xcode project + `TokenBarKit` package. Menu-bar-only app (`LSUIElement`), `MenuBarExtra` window, empty Settings scene. Builds in CI. |
-| 2 | **Usage domain + mocks + refresh** | `UsageProvider`, `UsageSnapshot`, `UsageLimit`, `UsageStore`, refresh scheduling, staleness, reset formatting. Debug-only mock providers. Unit tests for the edge cases (0%, 100%, nil, expired reset, time zones, stale, partial data, errors). |
-| 3 | **UI matching the mockup** | Menu bar label (`S 17% \| W 79%` for Claude), popover sections, progress bars, reset text, stale/error/disconnected states, footer. English + Portuguese (Brazil). |
-| 4 | **Settings + Keychain + launch at login** | General (launch at login, refresh interval, show in menu bar) and Providers (status, enable with consent, show in menu bar). Keychain `CredentialStore`. |
-| 5 | **Claude provider (experimental)** | Opt-in with warning ([decision](providers.md#decision-2026-10-22)). Sanitized fixtures. Parser + error-mapping tests. Isolated behind the provider registry. |
-| 6 | **Codex provider** | Named Codex, never presented as ChatGPT message limits. Window semantics verified from a live capture. Fixtures + tests. |
-| 7 | **Release pipeline** | Tag-triggered workflow: test → archive → sign → notarize → DMG/zip → checksum → GitHub Release. Signing steps skip cleanly when secrets are absent. |
-| 8 | **Docs + 0.1.0** | README screenshot, `adding-a-provider.md` verified by following it, first public release. |
+Done: native menu bar app, experimental Claude and Codex providers, session and weekly
+limits with reset countdowns, menu bar display modes, automatic refresh, launch at login,
+English and Portuguese (Brazil), release pipeline (DMG, ZIP, checksums; signing and
+notarization ready but unused). 0.1.0 ships unsigned and not notarized.
 
-## Not planned (yet)
+Milestones 0–8 took it from an empty repository to this release; the history is in the
+merged pull requests.
 
-Windows/Linux apps, CLI, website, widgets, notifications, usage history. The
-boundaries in [architecture.md](architecture.md) keep these possible without
-building them now.
+## After 0.1.0
+
+Candidates, not commitments. Each needs evidence that it works reliably before it is built.
+
+| Item | Status |
+|---|---|
+| **Developer ID signing and notarization** | Needs an Apple Developer Program membership. The release pipeline already supports it ([releasing.md](releasing.md)). Removes the Gatekeeper override and keeps Claude's Keychain permission across updates. |
+| **Codex Keychain sign-in** (`cli_auth_credentials_store = "keyring"`) | Needs a verified capture of the item's format. Until then those installations show "Not connected". |
+| **Codex 403 vs. workspace without Codex** | Needs a captured 403 response that tells the two apart. Both show "Sign-in expired" today. |
+| **Refresh when the network comes back** | Today data stays marked outdated until the next scheduled refresh after an outage. |
+| **Automatic updates** | Would add the first network request not made for a provider. Needs a privacy-preserving design. |
+| **More providers** (Gemini, Cursor, Copilot, …) | Only with a reliable, documented-enough source. Start with a section in [providers.md](providers.md). |
+| **Menu bar customization** | Driven by dogfooding feedback. |
+
+## Not planned
+
+Windows/Linux apps, CLI, website, widgets, notifications, usage history, cloud sync,
+accounts. The boundaries in [architecture.md](architecture.md) keep some of these possible
+without building them now.

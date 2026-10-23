@@ -24,9 +24,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         store.startScheduledRefreshes()
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(systemDidWake), name: NSWorkspace.didWakeNotification, object: nil)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         store.stopScheduledRefreshes()
+    }
+
+    /// The scheduled refresh due during sleep runs at wake, usually before the network is back, so
+    /// usage (and any reset that happened meanwhile) would stay outdated for a whole interval.
+    /// Restarting the schedule a moment later refreshes once the connection has had time to return.
+    @objc private func systemDidWake(_ notification: Notification) {
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            store.startScheduledRefreshes()
+        }
     }
 }

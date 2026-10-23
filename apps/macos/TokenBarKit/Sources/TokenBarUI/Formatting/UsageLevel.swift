@@ -43,14 +43,13 @@ extension UsageSnapshot {
         return unscoped.isEmpty ? limits : unscoped
     }
 
-    /// The primary limit closest to being used up, or `nil` if none reports a percentage.
-    /// Ties keep provider order. This is the single number that answers "how close is this
-    /// provider to its limit?" in the menu bar and the popover.
+    /// The first primary limit that reports a percentage, or `nil` if none does.
+    ///
+    /// Providers list limits from the shortest window to the longest, so this is the current
+    /// session for Claude and Codex: what matters while coding. Longer limits stay visible in
+    /// the popover. This is the single number shown for the provider in the menu bar and the
+    /// popover row.
     var headlineLimit: UsageLimit? {
-        primaryLimits.reduce(nil) { best, limit in
-            guard let fraction = limit.usedFraction else { return best }
-            guard let best, let bestFraction = best.usedFraction else { return limit }
-            return fraction > bestFraction ? limit : best
-        }
+        primaryLimits.first { $0.usedFraction != nil }
     }
 }

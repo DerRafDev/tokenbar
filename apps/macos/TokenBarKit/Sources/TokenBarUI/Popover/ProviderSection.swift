@@ -3,7 +3,7 @@ import TokenBarCore
 
 /// One provider in the popover.
 ///
-/// Collapsed, it is a compact overview: name, plan, the highest usage, and one line with every
+/// Collapsed, it is a compact overview: name, plan, the current session, and one line with every
 /// limit ("Session 15% · Week 12%"). Expanded, it adds a bar and reset time per limit. Limits come
 /// from the snapshot as a list, so providers with other windows (daily, monthly, rolling) need
 /// nothing special here.
@@ -81,7 +81,7 @@ struct ProviderSection: View {
         }
     }
 
-    /// The provider's highest usage: what decides how close it is to a limit.
+    /// The provider's headline: its current session (see ``UsageSnapshot/headlineLimit``).
     @ViewBuilder
     private var headline: some View {
         if let limit = state.snapshot?.headlineLimit {

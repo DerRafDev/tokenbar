@@ -16,8 +16,8 @@ struct MenuBarSummaryTests {
         UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.61, resetsAt: nil),
     ]
 
-    @Test func providersModeShowsHighestUsage() {
-        #expect(MenuBarSummary.text(for: snapshot(sessionAndWeek), mode: .providers, formatter: formatter) == "61%")
+    @Test func providersModeShowsCurrentSessionEvenWhenWeekIsHigher() {
+        #expect(MenuBarSummary.text(for: snapshot(sessionAndWeek), mode: .providers, formatter: formatter) == "42%")
     }
 
     @Test func detailedModeShowsFirstTwoLimitsInProviderOrder() {
@@ -71,7 +71,7 @@ struct MenuBarSummaryTests {
             UsageLimit(id: "session", window: .session, usedFraction: 0.75, resetsAt: nil),
             UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.95, resetsAt: nil),
         ]
-        #expect(MenuBarSummary.level(of: snapshot(limits), mode: .providers) == .critical)
+        #expect(MenuBarSummary.level(of: snapshot(limits), mode: .providers) == .attention)
         #expect(MenuBarSummary.level(of: snapshot(limits), mode: .detailed) == .critical)
         #expect(MenuBarSummary.level(of: snapshot(sessionAndWeek), mode: .detailed) == .normal)
     }
@@ -83,7 +83,7 @@ struct MenuBarSummaryTests {
     }
 
     @MainActor
-    @Test func minimalModeShowsOnlyProviderClosestToLimit() {
+    @Test func minimalModeShowsOnlyProviderWithBusiestSession() {
         let claude = ProviderDescriptor(id: "claude", displayName: "Claude")
         let gemini = ProviderDescriptor(id: "gemini", displayName: "Gemini")
         let codex = ProviderDescriptor(id: "codex", displayName: "Codex")
@@ -96,7 +96,8 @@ struct MenuBarSummaryTests {
             mode: .minimal,
             formatter: formatter
         )
-        #expect(items.map(\.id) == ["gemini"])
+        // Gemini's week (61%) is higher, but only sessions are compared.
+        #expect(items.map(\.id) == ["codex"])
         #expect(items.first?.values == ["61%"])
     }
 
@@ -129,18 +130,24 @@ struct UsageLevelTests {
         #expect(UsageLevel(fraction) == expected)
     }
 
-    @Test func headlineIsFirstHighestPrimaryLimit() {
-        let snapshot = UsageSnapshot(
-            provider: "claude",
-            plan: nil,
-            limits: [
-                UsageLimit(id: "session", window: .session, usedFraction: 0.3, resetsAt: nil),
-                UsageLimit(id: "daily", window: .daily, usedFraction: nil, resetsAt: nil),
-                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.3, resetsAt: nil),
-                UsageLimit(id: "weekly.opus", window: .weekly, scope: "Opus", usedFraction: 0.9, resetsAt: nil),
-            ],
-            fetchedAt: .now
-        )
-        #expect(snapshot.headlineLimit?.id == "session")
+    private func snapshot(_ limits: [UsageLimit]) -> UsageSnapshot {
+        UsageSnapshot(provider: "claude", plan: nil, limits: limits, fetchedAt: .now)
+    }
+
+    @Test func headlineIsTheCurrentSession() {
+        let limits = [
+            UsageLimit(id: "session", window: .session, usedFraction: 0.3, resetsAt: nil),
+            UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.8, resetsAt: nil),
+            UsageLimit(id: "weekly.opus", window: .weekly, scope: "Opus", usedFraction: 0.9, resetsAt: nil),
+        ]
+        #expect(snapshot(limits).headlineLimit?.id == "session")
+    }
+
+    @Test func headlineSkipsLimitsWithoutPercentage() {
+        let limits = [
+            UsageLimit(id: "session", window: .session, usedFraction: nil, resetsAt: nil),
+            UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.3, resetsAt: nil),
+        ]
+        #expect(snapshot(limits).headlineLimit?.id == "weekly")
     }
 }
