@@ -50,17 +50,24 @@ if [[ -n "${NOTARY_KEY_ID:-}" && -n "$suffix" ]]; then
     exit 1
 fi
 
-if [[ -n "${NOTARY_KEY_ID:-}" ]]; then
-    echo "==> Notarizing"
-    ditto -c -k --keepParent "$app" "$work/notarize.zip"
-    xcrun notarytool submit "$work/notarize.zip" \
+# Submits a file for notarization and fails unless Apple accepts it. `notarytool --wait` can
+# exit 0 for a rejected submission, so the status is checked explicitly.
+notarize() {
+    xcrun notarytool submit "$1" \
         --key "${NOTARY_KEY_PATH:?}" --key-id "$NOTARY_KEY_ID" --issuer "${NOTARY_ISSUER_ID:?}" \
         --wait --output-format json > "$work/notary.json"
+    local status
     status=$(plutil -extract status raw "$work/notary.json")
     if [[ "$status" != "Accepted" ]]; then
-        echo "error: notarization status: $status" >&2
+        echo "error: notarization of $(basename "$1"): $status" >&2
         exit 1
     fi
+}
+
+if [[ -n "${NOTARY_KEY_ID:-}" ]]; then
+    echo "==> Notarizing app"
+    ditto -c -k --keepParent "$app" "$work/notarize.zip"
+    notarize "$work/notarize.zip"
     xcrun stapler staple "$app"
 fi
 
@@ -78,8 +85,8 @@ if [[ -n "${DEVELOPER_ID_IDENTITY:-}" ]]; then
     codesign --sign "$DEVELOPER_ID_IDENTITY" --timestamp "dist/$name.dmg"
 fi
 if [[ -n "${NOTARY_KEY_ID:-}" ]]; then
-    xcrun notarytool submit "dist/$name.dmg" \
-        --key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" --wait
+    echo "==> Notarizing disk image"
+    notarize "dist/$name.dmg"
     xcrun stapler staple "dist/$name.dmg"
 fi
 

@@ -69,7 +69,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          flags=(--draft --generate-notes --title "TokenBar ${GITHUB_REF_NAME#v}")
+          flags=(--draft --title "TokenBar ${GITHUB_REF_NAME#v}")
+          notes="docs/release-notes/$GITHUB_REF_NAME.md"
+          if [[ -f "$notes" ]]; then flags+=(--notes-file "$notes"); else flags+=(--generate-notes); fi
           if [[ "$HAS_SIGNING" != "true" ]]; then flags+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" dist/* "${flags[@]}"
 
