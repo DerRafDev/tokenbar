@@ -88,4 +88,26 @@ struct UsageFormatterTests {
         #expect(english.updatedDescription(now.addingTimeInterval(-90), now: now) == "Updated 1m ago")
         #expect(portuguese.updatedDescription(now.addingTimeInterval(-90), now: now) == "Atualizado há 1min")
     }
+
+    @Test func namesLimitsByWindowAndScope() {
+        let session = UsageLimit(id: "session", window: .session, usedFraction: 0.1, resetsAt: nil)
+        let opus = UsageLimit(id: "weekly.opus", window: .weekly, scope: "Opus", usedFraction: 0.1, resetsAt: nil)
+        let rolling = UsageLimit(
+            id: "rolling", window: .rolling(length: .seconds(5 * 3600)), usedFraction: 0.1, resetsAt: nil)
+        #expect(english.title(for: session) == "Current session")
+        #expect(english.title(for: opus) == "Weekly · Opus")
+        #expect(english.title(for: rolling) == "Rolling window (5 hours)")
+        #expect(portuguese.title(for: session) == "Sessão atual")
+        #expect(portuguese.title(for: opus) == "Uso semanal · Opus")
+    }
+
+    @Test func describesUsageForVoiceOver() {
+        #expect(english.usedDescription(0.17) == "17% used")
+        #expect(portuguese.usedDescription(0.17) == "17% usado")
+    }
+
+    @Test func formatsClockTimeInTheConfiguredTimeZone() {
+        #expect(portuguese.time(now) == "16:20")
+        #expect(normalized(english.time(now)) == "4:20 PM")
+    }
 }

@@ -86,6 +86,31 @@ public struct UsageFormatter: Sendable {
         return localized("Resets in \(countdown) (\(date))")
     }
 
+    /// Clock time only, for example "19:10" or "7:10 PM".
+    public func time(_ date: Date) -> String {
+        date.formatted(
+            Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone).hour().minute())
+    }
+
+    /// Name of a limit, for example "Current session" or "Weekly · Opus".
+    public func title(for limit: UsageLimit) -> String {
+        let base =
+            switch limit.window {
+            case .session: localized("Current session")
+            case .rolling(let length): localized("Rolling window (\(duration(length.timeInterval)))")
+            case .daily: localized("Today")
+            case .weekly: localized("Weekly")
+            case .monthly: localized("Monthly")
+            }
+        guard let scope = limit.scope else { return base }
+        return "\(base) · \(scope)"
+    }
+
+    /// Spoken form of a usage value, for example "17% used".
+    public func usedDescription(_ fraction: Double?) -> String {
+        localized("\(percent(fraction)) used")
+    }
+
     private func localized(_ key: String.LocalizationValue) -> String {
         String(localized: key, bundle: strings, locale: locale)
     }
