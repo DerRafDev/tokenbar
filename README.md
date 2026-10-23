@@ -64,17 +64,36 @@ Codex limits are **not** ChatGPT chat message limits; TokenBar does not show tho
 
 Requires macOS 14 Sonoma or later, on Apple silicon or Intel.
 
-1. Download `TokenBar-<version>.dmg` from the
+> [!WARNING]
+> **TokenBar 0.1.0 is unsigned and not notarized by Apple.** Its files are named
+> `TokenBar-0.1.0-unsigned.dmg` and `.zip`. macOS Gatekeeper will block the first launch.
+> This does not mean macOS found malware: the build has not gone through Apple's
+> Developer ID signing and notarization. Only open it if you downloaded it from the
+> [official TokenBar releases](https://github.com/DerRafDev/tokenbar/releases) and you
+> trust the project. You can also build it yourself from source (see [Development](#development)).
+
+1. Download `TokenBar-<version>-unsigned.dmg` from the
    [latest release](https://github.com/DerRafDev/tokenbar/releases/latest).
-2. Open it and drag **TokenBar** to **Applications**.
-3. Open TokenBar. It lives in the menu bar; there is no Dock icon or window.
-4. Click the menu bar icon → **Configure Providers…**, and enable the providers you use.
+2. Open the DMG.
+3. Drag **TokenBar** to **Applications**.
+4. Open TokenBar from Applications. macOS says it cannot verify the app; click **Done**
+   (or **OK**).
+5. Open **System Settings › Privacy & Security**.
+6. Scroll to **Security**, find the message about TokenBar, and click **Open Anyway**.
+7. Confirm with **Open Anyway** and your password or Touch ID.
+8. TokenBar opens and lives in the menu bar; there is no Dock icon or window. Later
+   launches open normally.
+
+Then click the menu bar icon → **Configure Providers…**, and enable the providers you use.
+
+This approves TokenBar only. Do not turn off Gatekeeper for your whole Mac.
 
 Each release lists SHA-256 checksums in `SHA256SUMS.txt`
 (`shasum -a 256 -c SHA256SUMS.txt`).
 
-If a release is marked **unsigned**, macOS blocks it on first launch. Open
-**System Settings › Privacy & Security** and click **Open Anyway** next to TokenBar.
+Because the build is unsigned, macOS may ask again for access to Claude Code's Keychain
+item after you install an update. Signing and notarization are planned after 0.1.0
+([roadmap](docs/roadmap.md)).
 
 ### Enabling a provider
 

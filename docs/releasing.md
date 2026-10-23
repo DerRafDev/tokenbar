@@ -41,6 +41,10 @@ Configure in *Settings → Secrets and variables → Actions*. All are optional:
 them the release is ad-hoc signed, its artifacts are suffixed `-unsigned`, and the draft
 is marked prerelease. macOS Gatekeeper blocks unsigned apps on first launch.
 
+To ship an unsigned build as the main release (as 0.1.0 does), untick *Set as a
+pre-release* and tick *Set as the latest release* before publishing the draft. GitHub's
+`/releases/latest` link, used by the README, skips pre-releases.
+
 | Secret | Purpose |
 |---|---|
 | `DEVELOPER_ID_CERT_P12_BASE64` | Developer ID Application certificate + private key, exported as `.p12`, base64-encoded |
