@@ -1,13 +1,19 @@
 import SwiftUI
 import TokenBarCore
 
-/// Content of the menu bar popover.
+/// Content of the menu bar popover: a compact overview of every enabled provider, where one
+/// provider at a time can be expanded to show its details.
 public struct UsagePopover: View {
     let store: UsageStore
     let formatter: UsageFormatter
 
     @State private var isVisible = false
+    /// The provider the user expanded, or `nil` when they collapsed it. Only read once
+    /// ``hasChosenExpansion`` is true; until then a lone provider starts expanded.
+    @State private var expandedID: ProviderID?
+    @State private var hasChosenExpansion = false
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(store: UsageStore, formatter: UsageFormatter = UsageFormatter()) {
         self.store = store
@@ -25,8 +31,9 @@ public struct UsagePopover: View {
                 content(now: Date())
             }
         }
-        .padding(.horizontal, Spacing.large)
-        .padding(.top, Spacing.large)
+        // Rows add their own inner padding, so their content still lines up at `Spacing.large`.
+        .padding(.horizontal, Spacing.small)
+        .padding(.top, Spacing.small)
         .padding(.bottom, Spacing.medium)
         .frame(width: 360)
         .background(
@@ -44,20 +51,40 @@ public struct UsagePopover: View {
             if store.enabledDescriptors.isEmpty {
                 emptyState
             }
-            ForEach(Array(store.enabledDescriptors.enumerated()), id: \.element.id) { index, descriptor in
-                if index > 0 {
-                    Divider().padding(.vertical, Spacing.large)
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(store.enabledDescriptors) { descriptor in
+                    ProviderSection(
+                        descriptor: descriptor,
+                        state: store.state(for: descriptor.id),
+                        policy: store.policy,
+                        now: now,
+                        formatter: formatter,
+                        isExpanded: expanded == descriptor.id,
+                        onToggle: { toggle(descriptor.id) }
+                    )
                 }
-                ProviderSection(
-                    descriptor: descriptor,
-                    state: store.state(for: descriptor.id),
-                    policy: store.policy,
-                    now: now,
-                    formatter: formatter
-                )
             }
-            Divider().padding(.top, Spacing.large).padding(.bottom, Spacing.small)
+            Divider()
+                .padding(.horizontal, Spacing.small)
+                .padding(.top, Spacing.small)
+                .padding(.bottom, Spacing.small)
             footer(now: now)
+                .padding(.horizontal, Spacing.small)
+        }
+    }
+
+    private var expanded: ProviderID? {
+        if hasChosenExpansion { return expandedID }
+        let descriptors = store.enabledDescriptors
+        return descriptors.count == 1 ? descriptors.first?.id : nil
+    }
+
+    /// Expands `id` and collapses any other provider, or collapses `id` if it is already open.
+    private func toggle(_ id: ProviderID) {
+        let next = expanded == id ? nil : id
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.22)) {
+            expandedID = next
+            hasChosenExpansion = true
         }
     }
 
@@ -83,6 +110,7 @@ public struct UsagePopover: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.medium)
+        .padding(.top, Spacing.small)
     }
 
     private func footer(now: Date) -> some View {

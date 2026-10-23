@@ -33,6 +33,14 @@ public struct UsageFormatter: Sendable {
         return truncated.formatted(.percent.precision(.fractionLength(0)).locale(locale))
     }
 
+    /// Like ``percent(_:)`` without the percent sign, for example "17" or "<1". Used where several
+    /// values share one unit, such as "15/12" in the menu bar.
+    public func percentNumber(_ fraction: Double?) -> String {
+        guard let fraction else { return "–" }
+        if fraction > 0 && fraction < 0.01 { return "<1" }
+        return Int((fraction * 100).rounded(.down)).formatted(.number.locale(locale))
+    }
+
     /// Up to two units, for example "2h 50m" or "2d 14h". "<1m" below one minute.
     public func countdown(_ interval: TimeInterval) -> String {
         let totalMinutes = Int(max(interval, 0) / 60)
@@ -101,6 +109,20 @@ public struct UsageFormatter: Sendable {
             case .daily: localized("Today")
             case .weekly: localized("Weekly")
             case .monthly: localized("Monthly")
+            }
+        guard let scope = limit.scope else { return base }
+        return "\(base) · \(scope)"
+    }
+
+    /// One-word name of a limit for compact lists, for example "Session", "Week" or "5h".
+    public func shortTitle(for limit: UsageLimit) -> String {
+        let base =
+            switch limit.window {
+            case .session: localized("Session")
+            case .rolling(let length): countdown(length.timeInterval)
+            case .daily: localized("Today")
+            case .weekly: localized("Week")
+            case .monthly: localized("Month")
             }
         guard let scope = limit.scope else { return base }
         return "\(base) · \(scope)"

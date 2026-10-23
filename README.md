@@ -15,8 +15,11 @@
 
 ## Features
 
-- **Glanceable menu bar summary.** `S 17% | W 79%` per provider, where **S** is the
-  current session and **W** is the weekly limit.
+- **Glanceable menu bar summary.** Each provider's icon with its highest usage, so you
+  see at once which one is closest to a limit. Switch to Minimal (only the closest one)
+  or Detailed (`15/12` for session and week) in Settings.
+- **Compact overview.** The popover lists every provider in one line each; click one
+  to see its limits, bars, and reset times.
 - **Reset times you can read.** "Resets at 19:10 (in 2h 50min)", computed locally in
   your time zone.
 - **Native and light.** SwiftUI + AppKit, no Electron, no web views, no third-party

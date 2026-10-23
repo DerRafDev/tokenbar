@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenBarCore
 
-/// One limit: title and percentage, bar, and reset time.
+/// One limit in a provider's details: name and percentage, a thin bar, and the reset time.
 struct LimitRow: View {
     let limit: UsageLimit
     let now: Date
@@ -11,26 +11,25 @@ struct LimitRow: View {
         let hasReset = limit.hasReset(at: now)
         let title = formatter.title(for: limit)
         let reset = formatter.resetDescription(limit.resetsAt, now: now)
+        let level = hasReset ? .normal : UsageLevel(limit.usedFraction)
 
-        VStack(alignment: .leading, spacing: Spacing.tight) {
+        VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
                 Text(title)
+                    .font(.subheadline.weight(.medium))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 Spacer(minLength: 0)
-                // The number is what people scan for; "used" only explains it.
-                Text(
-                    "\(Text(formatter.percent(limit.usedFraction)).fontWeight(.semibold).foregroundStyle(.primary)) used",
-                    bundle: .module
-                )
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .layoutPriority(1)
+                Text(formatter.percent(limit.usedFraction))
+                    .font(.subheadline.weight(level == .normal ? .medium : .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(level.color ?? .primary)
+                    .layoutPriority(1)
             }
             UsageBar(fraction: limit.usedFraction, dimmed: hasReset)
             if let reset {
                 Text(reset)
-                    .font(.callout)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }

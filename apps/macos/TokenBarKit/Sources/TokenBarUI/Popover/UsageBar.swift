@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Horizontal usage bar: a rounded fill on a faint track.
+/// Thin horizontal usage bar: a rounded fill on a faint track.
 ///
-/// The fill uses the system accent color and turns orange, then red, as the limit gets close.
+/// The fill uses the system accent color and turns orange, then red, as the limit gets close
+/// (see ``UsageLevel``).
 /// Value changes animate briefly (never with Reduce Motion); nothing animates while idle.
 struct UsageBar: View {
     let fraction: Double?
@@ -11,7 +12,7 @@ struct UsageBar: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSchemeContrast) private var contrast
 
-    static let height: CGFloat = 6
+    static let height: CGFloat = 4
 
     var body: some View {
         GeometryReader { proxy in
@@ -31,11 +32,7 @@ struct UsageBar: View {
     }
 
     static func tint(for fraction: Double) -> Color {
-        switch fraction {
-        case ..<0.7: .accentColor
-        case ..<0.9: .orange
-        default: .red
-        }
+        UsageLevel(fraction).color ?? .accentColor
     }
 }
 
