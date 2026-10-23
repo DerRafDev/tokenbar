@@ -25,7 +25,7 @@ public struct GeminiProvider: UsageProvider {
     public let descriptor = ProviderDescriptor(
         id: "gemini",                 // persisted in settings, never change it
         displayName: "Gemini",
-        symbolName: "sparkle"         // neutral SF Symbol, not a company logo
+        symbolName: "sparkle"         // SF Symbol; or pass `logo:` with a PDF in TokenBarUI/Resources/Logos
     )
 
     public func fetchUsage() async throws -> UsageSnapshot {

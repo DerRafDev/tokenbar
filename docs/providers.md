@@ -87,7 +87,7 @@ and against the open-source Codex client ([openai/codex](https://github.com/open
 | **Model-specific limits** | `additional_rate_limits[]` → limits scoped to `limit_name` (id `<window>.<metered_feature>`). None on the verified Plus account; the shape comes from Codex's client models. A community report shows a model limit exhausted while the main windows read 0 %, so they are parsed separately. |
 | **Plan** | `plan_type` from the response (`plus` verified; `free`, `go`, `pro`, `team`, `business`, `enterprise`, `edu` named; unknown values hidden). The JWT also carries the plan, but TokenBar does not decode the token. |
 | **Not available** | **ChatGPT chat message limits.** This endpoint reports **Codex** limits on a ChatGPT plan. Message counts are not available either (`credits.approx_*_messages` belongs to purchased credits in Codex's client, not to plan limits; TokenBar ignores it). |
-| **Errors** (*verified*) | Invalid or missing token → HTTP 401 with a JSON `detail` body. 403, 429 and `Retry-After` were not observed; they follow the shared rules (403 → "Sign-in expired", 429 → back off, honoring `Retry-After` in seconds or as an HTTP date). TokenBar never reads error bodies. The response sets cookies; the provider session stores none. |
+| **Errors** (*verified*) | Invalid or missing token → HTTP 401 with a JSON `detail` body. 403, 429 and `Retry-After` were not observed; they follow the shared rules (403 → "Sign-in expired", 429 → back off, honoring `Retry-After` in seconds or as an HTTP date). A 403 could also mean Codex is not available for the workspace, but no captured response distinguishes the two, so TokenBar does not guess: it shows "Sign-in expired" for both (reviewed for 0.1.0). TokenBar never reads error bodies. The response sets cookies; the provider session stores none. |
 | **Known limitations** | Undocumented; can change without notice. Requires Codex (CLI or app) signed in with ChatGPT on the same Mac. Tokens from the newer "Sign in with ChatGPT" token-sharing flow are rejected (401); only a Codex login works ([openai/codex#54219](https://github.com/openai/codex/issues/54219)). |
 | **Policy risk** | OpenAI does not offer this endpoint to third-party apps. Shown to the user before enabling. |
 
@@ -102,7 +102,7 @@ and against the open-source Codex client ([openai/codex](https://github.com/open
 | Is anything persisted? | No. No copy in TokenBar's Keychain, `UserDefaults`, or files. Requests use the ephemeral provider session (no cache, cookies, or credential storage). |
 | Who grants access? | The user, by enabling the provider. Unlike Keychain items, a file in the user's home folder has no per-app macOS prompt (TokenBar is not sandboxed). An unreadable file is reported as "Access was not allowed". |
 | Codex logged out? | `codex logout` deletes `auth.json` → "Not connected". Signed in with an API key instead of ChatGPT (no `tokens`) → "Not connected": API-key usage has no plan limits. |
-| Keychain storage mode? | Not supported yet: no file → "Not connected". See the open decision below. |
+| Keychain storage mode? | **Not supported.** With `keyring` (or `auto` when Codex chose the Keychain) there is no file → "Not connected". The item's format has not been verified against a live capture, so TokenBar does not read it. |
 | Credentials expired? | The access token is a JWT valid ~10 days; Codex refreshes it when it is within minutes of expiring or `last_refresh` is older than 8 days. TokenBar does not decode the expiry; an expired token gets HTTP 401 → "Sign-in expired". TokenBar never refreshes the token (that would rotate Codex's refresh token and could sign Codex out). Running Codex renews it, and TokenBar picks up the new file on its next refresh. |
 
 ### Least invasive option
@@ -120,13 +120,13 @@ Codex ships as an **experimental, opt-in** provider, isolated in `TokenBarProvid
 and referenced in one line of `ProviderRegistry`. Disabled by default; enabling it shows a
 Codex-specific warning (undocumented endpoint, may change, may not be covered by OpenAI's
 terms, Codex limits only) and what is read. The 5-hour limit is shown as a session
-(`S 12% | W 42%`, "Current session") because that is how the source behaves.
+("Session 12% · Week 42%", "Current session") because that is how the source behaves.
 
 ---
 
 ## Consequences for the product
 
-1. **Mockup change:** remove the "N / M mensagens" lines. Keep percentage + reset.
+1. **No message counts:** neither source reports them. TokenBar shows percentage + reset.
 2. **Naming honesty (decided 2026-10-22):** the provider is called **Codex** (id
    `codex`), because it reports Codex limits on a ChatGPT plan, not ChatGPT message
    limits. Nothing in the UI may imply otherwise. The id `chatgpt` stays free for a

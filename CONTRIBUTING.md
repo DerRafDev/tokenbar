@@ -70,7 +70,7 @@ Protect `main` (Settings → Rules → Rulesets):
 
 - Require a pull request before merging (1 approval once there is more than one
   maintainer).
-- Require these status checks to pass: **`Lint`**, **`Build & Test`**.
+- Require these status checks to pass: **`Lint`**, **`Build & Test`**, **`PR Title`**.
 - Require branches to be up to date before merging.
 - Block force pushes and deletions.
 - Allow squash merging only.
