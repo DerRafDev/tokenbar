@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenBarCore
 
-/// The status item: each provider's icon followed by "S 17% | W 79%".
+/// The status item: each provider's icon followed by "S 17% | W 79%", keys dimmed so the numbers stand out.
 ///
 /// `MenuBarExtra` labels only render a single plain image or text and drop symbols embedded in
 /// text, so the summary is rendered into a template image. macOS tints template images for light
@@ -24,32 +24,43 @@ public struct MenuBarLabel: View {
                 .accessibilityLabel(Text(verbatim: "TokenBar"))
         } else {
             Image(nsImage: Self.render(items))
-                .accessibilityLabel(items.map { "\($0.name) \($0.summary)" }.joined(separator: ", "))
+                .accessibilityLabel(items.map(\.spokenText).joined(separator: ". "))
         }
     }
 
     struct Item: Hashable {
-        let name: String
         let symbolName: String
-        let summary: String
+        let parts: [MenuBarSummary.Part]
+        let spokenText: String
     }
 
     private var items: [Item] {
         store.enabledDescriptors.compactMap { descriptor in
             guard settings.showsInMenuBar(descriptor.id),
-                let snapshot = store.state(for: descriptor.id).snapshot,
-                let summary = MenuBarSummary.text(for: snapshot, formatter: formatter)
+                let snapshot = store.state(for: descriptor.id).snapshot
             else { return nil }
-            return Item(name: descriptor.displayName, symbolName: descriptor.symbolName, summary: summary)
+            let parts = MenuBarSummary.parts(for: snapshot, formatter: formatter)
+            guard !parts.isEmpty else { return nil }
+            return Item(
+                symbolName: descriptor.symbolName,
+                parts: parts,
+                spokenText: MenuBarSummary.spokenText(for: snapshot, name: descriptor.displayName, formatter: formatter)
+            )
         }
     }
 
-    private static func render(_ items: [Item]) -> NSImage {
-        let content = HStack(spacing: 10) {
+    /// Opacity of the limit keys ("S", "W") and separators. A template image keeps alpha, so they
+    /// stay quieter than the numbers in light and dark menu bars alike.
+    private static let keyOpacity = 0.55
+    private static let separatorOpacity = 0.3
+
+    static func render(_ items: [Item]) -> NSImage {
+        let content = HStack(spacing: 12) {
             ForEach(items, id: \.self) { item in
                 HStack(spacing: 4) {
                     Image(systemName: item.symbolName)
-                    Text(verbatim: item.summary)
+                        .fontWeight(.semibold)
+                    summary(item.parts)
                 }
             }
         }
@@ -62,5 +73,17 @@ public struct MenuBarLabel: View {
         let image = renderer.nsImage ?? NSImage()
         image.isTemplate = true
         return image
+    }
+
+    private static func summary(_ parts: [MenuBarSummary.Part]) -> Text {
+        parts.enumerated().reduce(Text(verbatim: "")) { text, element in
+            let (index, part) = element
+            let separator =
+                index == 0
+                ? Text(verbatim: "") : Text(verbatim: " | ").foregroundStyle(.black.opacity(separatorOpacity))
+            return text + separator
+                + Text(verbatim: "\(part.label) ").fontWeight(.regular).foregroundStyle(.black.opacity(keyOpacity))
+                + Text(verbatim: part.value)
+        }
     }
 }

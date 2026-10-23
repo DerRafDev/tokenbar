@@ -56,4 +56,28 @@ struct MenuBarSummaryTests {
     @Test func returnsNilWithoutLimits() {
         #expect(MenuBarSummary.text(for: snapshot([]), formatter: formatter) == nil)
     }
+
+    @Test func splitsEachNumberFromItsLabel() {
+        let parts = MenuBarSummary.parts(
+            for: snapshot([
+                UsageLimit(id: "session", window: .session, usedFraction: 0.17, resetsAt: nil),
+                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.79, resetsAt: nil),
+            ]),
+            formatter: formatter
+        )
+        #expect(parts == [.init(label: "S", value: "17%"), .init(label: "W", value: "79%")])
+    }
+
+    @Test func spellsOutLimitsForVoiceOver() {
+        let text = MenuBarSummary.spokenText(
+            for: snapshot([
+                UsageLimit(id: "session", window: .session, usedFraction: 0.17, resetsAt: nil),
+                UsageLimit(id: "weekly", window: .weekly, usedFraction: 0.79, resetsAt: nil),
+                UsageLimit(id: "weekly.opus", window: .weekly, scope: "Opus", usedFraction: 0.9, resetsAt: nil),
+            ]),
+            name: "Claude",
+            formatter: formatter
+        )
+        #expect(text == "Claude: Current session, 17% used; Weekly, 79% used")
+    }
 }
