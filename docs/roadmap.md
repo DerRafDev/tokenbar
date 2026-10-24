@@ -10,6 +10,12 @@ notarization ready but unused). 0.1.0 ships unsigned and not notarized.
 Milestones 0–8 took it from an empty repository to this release; the history is in the
 merged pull requests.
 
+## Planned
+
+| Item | Status |
+|---|---|
+| **Windows app** | Being planned. No release date and no download yet. |
+
 ## After 0.1.0
 
 Candidates, not commitments. Each needs evidence that it works reliably before it is built.
@@ -26,6 +32,6 @@ Candidates, not commitments. Each needs evidence that it works reliably before i
 
 ## Not planned
 
-Windows/Linux apps, CLI, website, widgets, notifications, usage history, cloud sync,
-accounts. The boundaries in [architecture.md](architecture.md) keep some of these possible
-without building them now.
+Linux app, CLI, widgets, notifications, usage history, cloud sync, accounts. The
+boundaries in [architecture.md](architecture.md) keep some of these possible without
+building them now.
