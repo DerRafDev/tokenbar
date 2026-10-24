@@ -1,0 +1,415 @@
+---
+// 04. Reset times. A gauge like the app icon, and a clock that scroll moves forward:
+// usage climbs, turns orange at 70%, the session resets, and the countdowns follow. Strings
+// use the app's formats ("Resets at 5:10 PM (in 2h 18m)"). Sample data.
+---
+
+<section id="resets" class="resets" data-resets aria-labelledby="resets-title">
+  <div class="resets__stage">
+    <div class="wrap resets__grid">
+      <div class="resets__copy">
+        <p class="index"><b>04</b> Resets</p>
+        <h2 id="resets-title" class="headline" data-lines>
+          <span class="line"><span>Not just how much.</span></span>{" "}
+          <span class="line"><span class="serif">When.</span></span>
+        </h2>
+        <p class="body" data-reveal>
+          A percentage alone doesn’t tell you whether to slow down. TokenBar shows when each limit resets: the clock time
+          when it’s today, the day when it’s later. Countdowns are computed on your computer, in your time zone. Updating them
+          never makes a network request.
+        </p>
+      </div>
+
+      <div class="clock" data-clock-scene>
+        <figure class="gauge" aria-hidden="true">
+          <svg viewBox="0 0 240 240">
+            <defs>
+              <linearGradient id="gauge-g" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0" stop-color="#0a5cff" />
+                <stop offset="1" stop-color="#5ad8ff" />
+              </linearGradient>
+            </defs>
+            <path class="gauge__track" d="M54.95 185.05a92 92 0 1 1 130.1 0" pathLength="100"></path>
+            <path class="gauge__fill" d="M54.95 185.05a92 92 0 1 1 130.1 0" pathLength="100" data-gauge-fill></path>
+            <g class="gauge__needle" data-gauge-needle>
+              <path d="M120 120 120 52" stroke-width="9" stroke-linecap="round"></path>
+              <circle cx="120" cy="120" r="15"></circle>
+            </g>
+          </svg>
+          <span class="gauge__label">
+            <span class="gauge__pct" data-g-pct>42%</span>
+            <span class="gauge__name">Current session</span>
+          </span>
+        </figure>
+
+        <div class="readout">
+          <div class="readout__row" data-row="session">
+            <div class="readout__top">
+              <span>Current session</span>
+              <span data-r-pct="session">42%</span>
+            </div>
+            <span class="rbar"><i data-r-bar="session" style="--f:0.42"></i></span>
+            <span class="readout__reset" data-r-reset="session">Resets at 5:10 PM (in 2h 18m)</span>
+          </div>
+          <div class="readout__row" data-row="weekly">
+            <div class="readout__top">
+              <span>Weekly</span>
+              <span data-r-pct="weekly">18%</span>
+            </div>
+            <span class="rbar"><i data-r-bar="weekly" style="--f:0.18"></i></span>
+            <span class="readout__reset" data-r-reset="weekly">Resets in 3d 4h (Sun, Oct 26 at 7:00 PM)</span>
+          </div>
+          <div class="timeline" aria-hidden="true">
+            <span class="timeline__track"><i data-t-fill></i></span>
+            <span class="timeline__now" data-t-now>
+              <span data-t-time>2:52 PM</span>
+            </span>
+            <span class="timeline__end">5:10 PM</span>
+            <span class="timeline__start">Now</span>
+          </div>
+          <p class="readout__caption">Illustration · sample data · Thu, Oct 23</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { scene, seg, lerp } from "../scripts/motion";
+  import { level } from "../scripts/popover";
+
+  const root = document.querySelector<HTMLElement>("[data-resets]");
+  const $ = <T extends Element = HTMLElement>(s: string): T | null => root?.querySelector<T>(s) ?? null;
+
+  const START = 14 * 60 + 52; // Thu 2:52 PM
+  const SESSION_RESET = 17 * 60 + 10; // 5:10 PM
+  const WEEK_RESET = 3 * 24 * 60 + 19 * 60; // Sun 7:00 PM, in minutes from Thu 0:00
+  const clock = (min: number): string => {
+    const h = Math.floor(min / 60) % 24;
+    const m = Math.floor(min % 60);
+    return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  };
+  // Up to two units, like UsageFormatter.countdown: "2h 18m", "3d 4h", "<1m".
+  const countdown = (min: number): string => {
+    const total = Math.floor(min);
+    if (total <= 0) return "<1m";
+    const d = Math.floor(total / 1440);
+    const h = Math.floor(total / 60) % 24;
+    const m = total % 60;
+    const parts = d > 0 ? [d && `${d}d`, h && `${h}h`] : [h && `${h}h`, m && `${m}m`];
+    return parts.filter(Boolean).join(" ");
+  };
+
+  if (root && matchMedia("(min-width: 1024px)").matches) {
+    const fill = $<SVGPathElement>("[data-gauge-fill]");
+    const needle = $<SVGGElement>("[data-gauge-needle]");
+    const gPct = $("[data-g-pct]");
+    const sPct = $('[data-r-pct="session"]');
+    const wPct = $('[data-r-pct="weekly"]');
+    const sBar = $('[data-r-bar="session"]');
+    const sReset = $('[data-r-reset="session"]');
+    const wReset = $('[data-r-reset="weekly"]');
+    const sRow = $('[data-row="session"]');
+    const tFill = $("[data-t-fill]");
+    const tNow = $("[data-t-now]");
+    const tTime = $("[data-t-time]");
+    const span = SESSION_RESET - START;
+
+    const setText = (el: Element | null, text: string): void => {
+      if (el && el.textContent !== text) el.textContent = text;
+    };
+
+    scene(root, (p) => {
+      const elapsed = lerp(0, span + 14, seg(p, 0.08, 0.88));
+      const now = START + elapsed;
+      const left = SESSION_RESET - now;
+      const due = left <= 0;
+      const refreshed = elapsed >= span + 8;
+      const used = refreshed ? 0 : 42 + 31 * Math.min(elapsed / span, 1);
+      const lvl = due ? "normal" : level(used);
+      const pct = `${Math.floor(used)}%`;
+
+      setText(gPct, pct);
+      setText(sPct, pct);
+      if (sPct) sPct.dataset.level = lvl;
+      if (gPct) gPct.dataset.level = lvl;
+      root.dataset.level = lvl;
+      if (sBar) sBar.style.setProperty("--f", String(used / 100));
+      sRow?.classList.toggle("is-due", due && !refreshed);
+      if (fill) {
+        fill.style.strokeDasharray = `${used.toFixed(2)} 200`;
+        fill.style.opacity = used > 0.5 ? "1" : "0";
+      }
+      if (needle) needle.style.transform = `rotate(${(-135 + 2.7 * used).toFixed(2)}deg)`;
+
+      setText(
+        sReset,
+        refreshed ? "Updated just now" : due ? "Reset due, updating soon" : `Resets at 5:10 PM (in ${countdown(left)})`,
+      );
+      const weekLeft = WEEK_RESET - now;
+      setText(wReset, `Resets in ${countdown(weekLeft)} (Sun, Oct 26 at 7:00 PM)`);
+      setText(wPct, `${Math.floor(18 + 2 * Math.min(elapsed / span, 1))}%`);
+
+      const tp = Math.min(elapsed / span, 1);
+      if (tFill) tFill.style.transform = `scaleX(${tp.toFixed(4)})`;
+      if (tNow) tNow.style.left = `${(tp * 100).toFixed(2)}%`;
+      setText(tTime, clock(now));
+    });
+  }
+</script>
+
+<style>
+  .resets {
+    position: relative;
+    padding-block: clamp(80px, 12vw, 160px);
+  }
+
+  .resets__grid {
+    display: grid;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .resets__copy {
+    display: grid;
+    gap: 28px;
+  }
+
+  .clock {
+    display: grid;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .gauge {
+    position: relative;
+    width: min(100%, 420px);
+    justify-self: center;
+  }
+
+  .gauge svg {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .gauge__track,
+  .gauge__fill {
+    fill: none;
+    stroke-width: 22;
+    stroke-linecap: round;
+  }
+
+  .gauge__track {
+    stroke: rgb(255 255 255 / 0.08);
+  }
+
+  .gauge__fill {
+    stroke: url(#gauge-g);
+    stroke-dasharray: 42 200;
+    filter: drop-shadow(0 0 14px rgb(90 216 255 / 0.45));
+    transition: stroke 0.4s;
+  }
+
+  [data-level="attention"] .gauge__fill {
+    stroke: #ff9f0a;
+    filter: drop-shadow(0 0 14px rgb(255 159 10 / 0.45));
+  }
+
+  .gauge__needle {
+    transform-origin: 120px 120px;
+    transform: rotate(-21.6deg);
+  }
+
+  .gauge__needle path {
+    stroke: #e6ecf5;
+  }
+
+  .gauge__needle circle {
+    fill: #e6ecf5;
+  }
+
+  .gauge__label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4%;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+  }
+
+  .gauge__pct {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 600;
+    font-stretch: 82%;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-level="attention"].gauge__pct,
+  [data-level="attention"][data-r-pct] {
+    color: #ff9f0a;
+  }
+
+  .gauge__name {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  .readout {
+    display: grid;
+    gap: 26px;
+    padding: 28px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.01));
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-family: var(--font-ui);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .readout__row {
+    display: grid;
+    gap: 9px;
+  }
+
+  .readout__top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  .rbar {
+    position: relative;
+    display: block;
+    height: 6px;
+    border-radius: 6px;
+    background: rgb(255 255 255 / 0.1);
+    overflow: hidden;
+  }
+
+  .rbar i {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--blue);
+    transform: translate3d(calc((max(var(--f), 0.012) - 1) * 100%), 0, 0);
+  }
+
+  [data-level="attention"] [data-r-bar="session"] {
+    background: #ff9f0a;
+  }
+
+  .is-due .rbar {
+    opacity: 0.4;
+  }
+
+  .readout__reset {
+    font-size: 0.9375rem;
+    color: var(--text-2);
+  }
+
+  .timeline {
+    position: relative;
+    height: 56px;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+  }
+
+  .timeline__track {
+    position: absolute;
+    top: 26px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.16) 0 2px, transparent 2px 10px);
+  }
+
+  .timeline__track i {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  .timeline__now {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    justify-items: center;
+    transform: translateX(-50%);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .timeline__now::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 14px var(--cyan);
+  }
+
+  .timeline__end,
+  .timeline__start {
+    position: absolute;
+    bottom: 0;
+  }
+
+  .timeline__end {
+    right: 0;
+  }
+
+  .timeline__start {
+    left: 0;
+  }
+
+  .readout__caption {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  :global(html:not(.motion)) .timeline__now {
+    left: 0;
+  }
+
+  @media (min-width: 1024px) {
+    :global(.motion) .resets {
+      height: 320vh;
+      padding: 0;
+    }
+
+    :global(.motion) .resets__stage {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      height: 100svh;
+      padding-top: var(--bar-h);
+    }
+
+    .resets__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: clamp(40px, 5vw, 96px);
+    }
+
+    .clock {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: 32px;
+    }
+  }
+</style>

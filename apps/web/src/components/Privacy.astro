@@ -1,0 +1,301 @@
+---
+// 06. Privacy. The diagram shows the whole architecture: the computer talks to each provider
+// directly, and the TokenBar server in the middle does not exist. Facts from the README's
+// Privacy section, SECURITY.md and docs/providers.md.
+import { links } from "../config";
+
+const facts = [
+  ["No TokenBar account", "There is nothing to sign up for and nothing to sign in to."],
+  [
+    "No TokenBar server",
+    "Requests go from your computer only to api.anthropic.com for Claude and chatgpt.com for Codex, and only for the providers you turned on.",
+  ],
+  ["No analytics", "No telemetry, crash reporting, tracking, or update checks. No cloud sync."],
+  [
+    "No history",
+    "Usage is kept in memory and never written to disk. Responses are not cached and cookies are not stored.",
+  ],
+  [
+    "Sign-ins stay where they are",
+    "TokenBar reads the sign-in Claude Code or Codex already keeps on your computer, at refresh time. It never stores, copies or renews it, and never logs tokens.",
+  ],
+  ["Off until you say so", "Every provider starts disabled and shows exactly what it will read before you confirm."],
+];
+---
+
+<section id="privacy" class="section privacy" aria-labelledby="privacy-title">
+  <div class="wrap">
+    <div class="privacy__head">
+      <p class="index"><b>06</b> Privacy</p>
+      <h2 id="privacy-title" class="display" data-lines>
+        <span class="line"><span>Your usage</span></span>{" "}
+        <span class="line"><span class="serif">stays yours.</span></span>
+      </h2>
+      <p class="lede" data-reveal>
+        TokenBar talks to the providers directly from your computer. There is no TokenBar backend in between, so there is
+        nothing to collect your data.
+      </p>
+    </div>
+
+    <figure class="arch" data-reveal>
+      <svg class="arch__svg arch__svg--wide" viewBox="0 0 1000 440" role="img" aria-labelledby="arch-title">
+        <title id="arch-title">
+          Your computer connects directly to api.anthropic.com for Claude and to chatgpt.com for Codex. There is no TokenBar
+          server in between.
+        </title>
+        <path class="arch__wire" d="M330 190C450 190 520 95 690 95"></path>
+        <path class="arch__wire" d="M330 250C450 250 520 345 690 345"></path>
+        <path class="arch__flow" d="M330 190C450 190 520 95 690 95"></path>
+        <path class="arch__flow arch__flow--2" d="M330 250C450 250 520 345 690 345"></path>
+
+        <g class="arch__ghost">
+          <rect x="405" y="180" width="190" height="80" rx="14"></rect>
+          <text x="500" y="216" text-anchor="middle" class="arch__t2">TokenBar server</text>
+          <text x="500" y="240" text-anchor="middle" class="arch__mono">does not exist</text>
+          <path d="M418 252 582 188"></path>
+        </g>
+
+        <g class="arch__node arch__node--mac">
+          <rect x="40" y="130" width="290" height="180" rx="20"></rect>
+          <text x="68" y="168" class="arch__mono">Your computer</text>
+          <text x="68" y="212" class="arch__t1">TokenBar</text>
+          <text x="68" y="248" class="arch__t3">Reads sign-ins at refresh time</text>
+          <text x="68" y="274" class="arch__t3">Keeps usage in memory only</text>
+        </g>
+        <g class="arch__node">
+          <rect x="690" y="40" width="270" height="110" rx="20"></rect>
+          <text x="718" y="80" class="arch__mono">api.anthropic.com</text>
+          <text x="718" y="122" class="arch__t1">Claude</text>
+        </g>
+        <g class="arch__node">
+          <rect x="690" y="290" width="270" height="110" rx="20"></rect>
+          <text x="718" y="330" class="arch__mono">chatgpt.com</text>
+          <text x="718" y="372" class="arch__t1">Codex</text>
+        </g>
+      </svg>
+
+      <svg class="arch__svg arch__svg--tall" viewBox="0 0 360 600" aria-hidden="true">
+        <path class="arch__wire" d="M120 200C120 300 30 330 95 450"></path>
+        <path class="arch__wire" d="M240 200C240 300 330 330 265 450"></path>
+        <path class="arch__flow" d="M120 200C120 300 30 330 95 450"></path>
+        <path class="arch__flow arch__flow--2" d="M240 200C240 300 330 330 265 450"></path>
+        <g class="arch__ghost">
+          <rect x="88" y="282" width="184" height="74" rx="14"></rect>
+          <text x="180" y="314" text-anchor="middle" class="arch__t2">TokenBar server</text>
+          <text x="180" y="338" text-anchor="middle" class="arch__mono">does not exist</text>
+          <path d="M100 348 260 290"></path>
+        </g>
+        <g class="arch__node arch__node--mac">
+          <rect x="20" y="30" width="320" height="170" rx="20"></rect>
+          <text x="46" y="68" class="arch__mono">Your computer</text>
+          <text x="46" y="112" class="arch__t1">TokenBar</text>
+          <text x="46" y="146" class="arch__t3">Reads sign-ins at refresh time</text>
+          <text x="46" y="172" class="arch__t3">Keeps usage in memory only</text>
+        </g>
+        <g class="arch__node">
+          <rect x="14" y="450" width="160" height="110" rx="18"></rect>
+          <text x="32" y="486" class="arch__mono">api.anthropic.com</text>
+          <text x="32" y="530" class="arch__t1">Claude</text>
+        </g>
+        <g class="arch__node">
+          <rect x="186" y="450" width="160" height="110" rx="18"></rect>
+          <text x="204" y="486" class="arch__mono">chatgpt.com</text>
+          <text x="204" y="530" class="arch__t1">Codex</text>
+        </g>
+      </svg>
+    </figure>
+
+    <ol class="facts" role="list">
+      {
+        facts.map(([title, text], i) => (
+          <li data-reveal style={`--d:${i % 2}`}>
+            <span class="facts__n">{String(i + 1).padStart(2, "0")}</span>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="privacy__foot" data-reveal>
+      What TokenBar promises, and how to report a problem privately, is in <a class="link" href={`${links.repo}/blob/main/SECURITY.md`} rel="noopener">SECURITY.md</a>. This website has no analytics and sets no cookies either.
+    </p>
+  </div>
+</section>
+
+<style>
+  .privacy {
+    background:
+      radial-gradient(60% 40% at 50% 38%, rgb(10 70 160 / 0.16), transparent 70%),
+      var(--bg);
+  }
+
+  .privacy__head {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+  }
+
+  .arch {
+    margin-block: clamp(56px, 8vw, 104px);
+  }
+
+  .arch__svg {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .arch__svg--wide {
+    display: none;
+  }
+
+  .arch__svg--tall {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+
+  .arch__wire {
+    fill: none;
+    stroke: rgb(255 255 255 / 0.1);
+    stroke-width: 2;
+  }
+
+  .arch__flow {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 3 18;
+    filter: drop-shadow(0 0 6px rgb(90 216 255 / 0.7));
+  }
+
+  :global(.motion) .arch__flow {
+    animation: arch-flow 1.6s linear infinite;
+  }
+
+  :global(.motion) .arch__flow--2 {
+    animation-delay: -0.8s;
+  }
+
+  @keyframes arch-flow {
+    to {
+      stroke-dashoffset: -42;
+    }
+  }
+
+  .arch__node rect {
+    fill: rgb(16 19 27);
+    stroke: rgb(255 255 255 / 0.14);
+    stroke-width: 1.5;
+  }
+
+  .arch__node--mac rect {
+    fill: rgb(14 28 52);
+    stroke: rgb(90 216 255 / 0.45);
+  }
+
+  .arch__ghost rect {
+    fill: none;
+    stroke: rgb(255 255 255 / 0.22);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 6;
+  }
+
+  .arch__ghost path {
+    stroke: rgb(255 120 110 / 0.7);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .arch__ghost text {
+    fill: rgb(255 255 255 / 0.42);
+  }
+
+  .arch text {
+    font-family: var(--font-sans);
+    fill: var(--text);
+  }
+
+  .arch__t1 {
+    font-size: 34px;
+    font-weight: 600;
+    font-stretch: 85%;
+    letter-spacing: -0.03em;
+  }
+
+  .arch__t2 {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .arch__t3 {
+    font-size: 17px;
+    fill: var(--text-2) !important;
+  }
+
+  .arch__mono {
+    font-family: var(--font-mono) !important;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    fill: var(--text-3) !important;
+  }
+
+  .arch__node--mac .arch__mono {
+    fill: var(--cyan) !important;
+  }
+
+  .facts {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+
+  .facts li {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    column-gap: 12px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .facts__n {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 2.1;
+    color: var(--cyan);
+  }
+
+  .facts h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+  }
+
+  .facts p {
+    max-width: 52ch;
+    margin-top: 6px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .privacy__foot {
+    margin-top: 40px;
+    color: var(--text-2);
+  }
+
+  @media (min-width: 760px) {
+    .arch__svg--wide {
+      display: block;
+    }
+
+    .arch__svg--tall {
+      display: none;
+    }
+
+    .facts {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 56px;
+    }
+  }
+</style>

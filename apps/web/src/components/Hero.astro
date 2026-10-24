@@ -1,0 +1,335 @@
+---
+// Hero. The site's menu bar already holds TokenBar's status item; here its popover hangs
+// from it, like in a real menu bar. Scrolling pulls the popover out of the menu bar into depth.
+import Popover from "./Popover.astro";
+import Icon from "./Icon.astro";
+import { links } from "../config";
+---
+
+<section id="top" class="hero" data-hero aria-labelledby="hero-title">
+  <div class="hero__stage">
+    <div class="hero__sky" aria-hidden="true">
+      <span class="hero__orb"></span>
+      <svg class="hero__rings" viewBox="0 0 600 600" data-hero-rings>
+        <defs>
+          <linearGradient id="ring-g" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#0a5cff" />
+            <stop offset="1" stop-color="#5ad8ff" />
+          </linearGradient>
+        </defs>
+        <path d="M120 470a220 220 0 1 1 360 0" fill="none" stroke="url(#ring-g)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
+        <path d="M60 520a290 290 0 1 1 480 0" fill="none" stroke="url(#ring-g)" stroke-width="1" stroke-linecap="round" opacity="0.28"></path>
+        <path d="M180 420a150 150 0 1 1 240 0" fill="none" stroke="url(#ring-g)" stroke-width="3" stroke-linecap="round" opacity="0.35" stroke-dasharray="2 10"></path>
+      </svg>
+    </div>
+
+    <div class="wrap hero__grid">
+      <div class="hero__copy" data-hero-copy>
+        <p class="eyebrow" data-reveal>Free · Open source · Native</p>
+        <h1 id="hero-title" class="display hero__title" data-lines style="--d:1">
+          <span class="line"><span>Your AI usage.</span></span>{" "}
+          <span class="line"><span class="serif">One glance away.</span></span>
+        </h1>
+        <p class="lede hero__lede" data-reveal style="--d:4">
+          Track your AI usage limits directly from your menu bar. Currently supports <strong>Claude</strong> and <strong>Codex</strong>.
+        </p>
+        <div class="actions" data-reveal style="--d:5">
+          <a class="btn" href={links.download} data-magnetic>
+            <Icon name="download" />
+            Download for macOS — Free
+          </a>
+          <a class="btn btn--ghost" href={links.repo} rel="noopener" data-magnetic>
+            <Icon name="github" />
+            View on GitHub
+          </a>
+        </div>
+        <p class="platforms hero__platforms" data-reveal style="--d:6">
+          <span><i class="dot"></i>macOS available now</span>
+          <span><i class="dot dot--dev"></i>Windows planned</span>
+          <a class="link" href="#download">Install notes</a>
+        </p>
+      </div>
+
+      <figure class="hero__product" data-hero-product>
+        <div class="hero__tilt" data-hero-tilt>
+          <Popover id="hero" class="hero__pop" />
+        </div>
+        <figcaption>Illustration · sample data</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { scene, pointerTilt, motionEnabled, easeInOut, lerp, seg } from "../scripts/motion";
+
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  const product = hero?.querySelector<HTMLElement>("[data-hero-product]");
+  const tilt = hero?.querySelector<HTMLElement>("[data-hero-tilt]");
+  const copy = hero?.querySelector<HTMLElement>("[data-hero-copy]");
+  const rings = hero?.querySelector<SVGElement>("[data-hero-rings]");
+  const status = document.querySelector<HTMLElement>("[data-menubar] [data-status]");
+  const wide = matchMedia("(min-width: 1024px)");
+
+  if (hero && product && tilt && copy && motionEnabled()) {
+    let ax = 0;
+    let p = 0;
+    let px = 0;
+    let py = 0;
+
+    // Horizontal offset that puts the popover right under the menu bar's status item.
+    const measure = (): void => {
+      if (!wide.matches || !status) {
+        ax = 0;
+        return;
+      }
+      // Measure the popover where the layout puts it, not where the last frame moved it.
+      product.style.translate = "none";
+      tilt.style.transform = "none";
+      const s = status.getBoundingClientRect();
+      const t = tilt.getBoundingClientRect();
+      ax = s.left + s.width / 2 - (t.left + t.width / 2);
+      // Near the screen edge it shifts left instead of overflowing, like a macOS popover.
+      ax = Math.min(ax, window.innerWidth - 16 - t.right);
+      render();
+    };
+
+    const render = (): void => {
+      const e = easeInOut(seg(p, 0, 0.9));
+      const big = wide.matches;
+      const x = lerp(ax, big ? -40 : 0, e);
+      const y = e * (big ? window.innerHeight * 0.16 : 0);
+      const rx = e * 18 - py * 4;
+      const ry = -e * 24 + px * 6;
+      const scale = 1 + e * (big ? 0.1 : 0);
+      // The whole figure moves sideways, so the caption stays under the popover.
+      product.style.translate = `${x.toFixed(1)}px 0`;
+      tilt.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(e * 2).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      copy.style.opacity = String(1 - seg(p, 0.55, 1) * 0.75);
+      if (rings) rings.style.transform = `rotate(${(p * 40).toFixed(2)}deg)`;
+      status?.classList.toggle("is-on", hero.classList.contains("is-open") && p < 0.12);
+    };
+
+    measure();
+    wide.addEventListener("change", measure);
+    window.addEventListener("resize", measure);
+    document.fonts?.ready.then(measure);
+
+    // Like clicking the status item: the popover opens just after the page appears.
+    setTimeout(() => {
+      hero.classList.add("is-open");
+      render();
+    }, 650);
+
+    scene(hero, (progress) => {
+      p = progress;
+      render();
+    });
+    pointerTilt((x, y) => {
+      px = x;
+      py = y;
+      render();
+    });
+  } else {
+    hero?.classList.add("is-open");
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+  }
+
+  .hero__stage {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    min-height: 100svh;
+    padding-top: var(--bar-h);
+    overflow: clip;
+  }
+
+  .hero__sky {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero__orb {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 80vmax;
+    height: 80vmax;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(16 33 61 / 0.95), rgb(10 70 160 / 0.25) 55%, transparent 72%);
+    filter: blur(10px);
+  }
+
+  .hero__rings {
+    position: absolute;
+    right: -14vmax;
+    bottom: -26vmax;
+    width: 74vmax;
+    height: 74vmax;
+    transform-origin: 50% 50%;
+  }
+
+  .hero__grid {
+    position: relative;
+    display: grid;
+    gap: 56px;
+    align-content: center;
+    padding-block: 48px 64px;
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+  }
+
+  .hero__title {
+    font-size: clamp(3.25rem, 13vw, 10.5rem);
+  }
+
+  .hero__title .serif {
+    font-size: 1.04em;
+    color: #cfe9ff;
+    background: linear-gradient(100deg, #f2f8ff 10%, #8fdcff 55%, #3b8cff 95%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* The gradient only paints inside the box; extend it under the italic descenders. */
+    padding: 0 0.08em 0.3em 0.04em;
+    margin: 0 0 -0.3em -0.04em;
+  }
+
+  .hero__lede {
+    max-width: 30ch;
+  }
+
+  .hero__lede strong {
+    font-weight: 500;
+  }
+
+  .hero__platforms .link {
+    color: var(--text-2);
+  }
+
+  .hero__product {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    perspective: 1400px;
+  }
+
+  .hero__tilt {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .hero :global(.hero__pop) {
+    --s: 0.94;
+    transform-origin: 50% 0;
+  }
+
+  .hero__product figcaption {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* The popover opens from the status item: a short spring from the top edge. */
+  :global(.motion) .hero :global(.hero__pop) {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) scale(0.94);
+    transition:
+      opacity 0.35s var(--ease-out),
+      transform 0.7s cubic-bezier(0.34, 1.4, 0.5, 1);
+  }
+
+  :global(.motion) .hero.is-open :global(.hero__pop) {
+    opacity: 1;
+    transform: none;
+  }
+
+  :global(.motion) .hero__product figcaption {
+    opacity: 0;
+    transition: opacity 0.6s 0.9s var(--ease-out);
+  }
+
+  :global(.motion) .hero.is-open .hero__product figcaption {
+    opacity: 1;
+  }
+
+  @media (min-width: 1024px) {
+    :global(.motion) .hero {
+      height: 190vh;
+    }
+
+    :global(.motion) .hero__stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+    }
+
+    .hero__grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-content: stretch;
+      align-items: end;
+      gap: 40px;
+      padding-block: 0 clamp(48px, 9vh, 112px);
+    }
+
+    .hero__copy {
+      align-self: end;
+      gap: 32px;
+    }
+
+    .hero__title {
+      font-size: clamp(5rem, 9.6vw, 10.5rem);
+      white-space: nowrap;
+    }
+
+    .hero__product {
+      align-self: start;
+      justify-items: center;
+      padding-top: 8px;
+      margin-right: -12px;
+    }
+
+    .hero :global(.hero__pop) {
+      --s: 1.12;
+    }
+
+    .hero__product figcaption {
+      justify-self: center;
+    }
+
+    /* The title runs under the popover on narrower desktops; keep it readable. */
+    .hero__copy {
+      position: relative;
+      z-index: 1;
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    .hero__product {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+
+  @media (min-width: 1024px) and (max-height: 760px) {
+    .hero__title {
+      font-size: clamp(4rem, 8vw, 8rem);
+    }
+
+    .hero :global(.hero__pop) {
+      --s: 0.96;
+    }
+  }
+</style>

@@ -1,0 +1,499 @@
+---
+// 02. The product tour: a working replica of the popover. Scrolling walks through glance,
+// open, switch and refresh; the rows are real buttons, so visitors can also click through.
+// Below it, the three menu bar display modes and the warning levels.
+import Popover from "./Popover.astro";
+import StatusItem from "./StatusItem.astro";
+
+const steps = [
+  {
+    title: "Glance",
+    text: "Each provider’s logo sits in the menu bar with its current session: the number that matters while you work.",
+  },
+  {
+    title: "Open",
+    text: "Click it for every enabled provider in one line. Expand one to see each limit with a bar and its reset time.",
+  },
+  {
+    title: "Switch",
+    text: "One provider opens at a time, so the popover stays small. Session, weekly, and model-specific limits when your plan has them.",
+  },
+  {
+    title: "Refresh",
+    text: "Every 5 minutes by default (2–15, your choice), after your computer wakes, and when you open the popover. If a refresh fails, the last values stay, marked as outdated.",
+  },
+];
+
+const modes = [
+  { id: "providers", name: "Providers", text: "One number per provider. The default." },
+  { id: "minimal", name: "Minimal", text: "Only the provider whose session is most used." },
+  { id: "detailed", name: "Detailed", text: "Session and week together, like 42/18." },
+];
+---
+
+<section id="product" class="product" data-product aria-labelledby="product-title">
+  <div class="product__pin" data-product-pin>
+  <div class="product__stage">
+    <div class="wrap product__grid">
+      <div class="product__copy">
+        <p class="index"><b>02</b> The popover</p>
+        <h2 id="product-title" class="headline" data-lines>
+          <span class="line"><span>One click.</span></span>{" "}
+          <span class="line"><span class="serif">Every limit.</span></span>
+        </h2>
+        <ol class="steps" role="list">
+          {
+            steps.map((s, i) => (
+              <li class:list={["step", { "is-on": i === 0 }]} data-step={i}>
+                <span class="step__n">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{s.title}</h3>
+                <p>{s.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <div class="product__view">
+        <div class="product__tilt" data-product-tilt>
+          <Popover id="tour" interactive expanded={null} class="product__pop" />
+        </div>
+        <p class="product__hint">Interactive replica · sample data · click a provider</p>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="wrap modes">
+    <div class="modes__head">
+      <h3 class="modes__title" data-reveal>Three ways to sit in the menu bar.</h3>
+      <div class="modes__switch" role="group" aria-label="Menu bar display mode" data-reveal style="--d:1">
+        {
+          modes.map((m, i) => (
+            <button type="button" class="modes__btn" aria-pressed={i === 0 ? "true" : "false"} data-mode={m.id}>
+              {m.name}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <div class="modes__bar" data-reveal style="--d:2">
+      <span class="modes__apps" aria-hidden="true"><b>Code</b><span>File</span><span>Edit</span><span>Selection</span><span>View</span></span>
+      <span class="modes__status" data-modes-status>
+        <StatusItem />
+      </span>
+      <span class="modes__clock" aria-hidden="true">9:41 AM</span>
+    </div>
+    <dl class="modes__list">
+      {
+        modes.map((m, i) => (
+          <div class:list={["modes__item", { "is-on": i === 0 }]} data-mode-item={m.id} data-reveal style={`--d:${i + 2}`}>
+            <dt>{m.name}</dt>
+            <dd>{m.text}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="body modes__note" data-reveal>
+      The menu bar stays quiet until a limit gets close: values turn <span class="lvl lvl--a">orange from 70%</span> and{" "}
+      <span class="lvl lvl--c">red from 90%</span>. On the menu bar, which macOS tints for light and dark, close limits get
+      heavier and critical ones a dot. Too little room? The label falls back to a more compact mode.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { scene, seg, lerp, easeInOut, pointerTilt } from "../scripts/motion";
+  import { popover } from "../scripts/popover";
+  import { sampleProviders, type ProviderId } from "../data/sample";
+
+  const root = document.querySelector<HTMLElement>("[data-product]");
+  const pop = popover(root?.querySelector<HTMLElement>('[data-pop="tour"]') ?? null);
+  const steps = [...(root?.querySelectorAll<HTMLElement>(".step") ?? [])];
+  const tilt = root?.querySelector<HTMLElement>("[data-product-tilt]");
+  const pin = root?.querySelector<HTMLElement>("[data-product-pin]") ?? null;
+
+  const base = Object.fromEntries(sampleProviders.map((p) => [p.id, p.limits.map((l) => l.used)])) as Record<
+    ProviderId,
+    number[]
+  >;
+  // After the refresh step, a little more usage, like the README demo.
+  const after: Record<ProviderId, number[]> = { claude: [47, 19], codex: [14, 28] };
+
+  const setAll = (fill: (id: ProviderId, i: number) => number): void => {
+    for (const p of sampleProviders) {
+      pop?.set(p.id, "session", fill(p.id, 0));
+      pop?.set(p.id, "weekly", fill(p.id, 1));
+    }
+  };
+
+  let step = -1;
+  const show = (n: number): void => {
+    steps.forEach((s, i) => s.classList.toggle("is-on", i === n));
+  };
+
+  if (root && pop && matchMedia("(min-width: 1024px)").matches) {
+    let rx = 0;
+    let ry = 0;
+    let px = 0;
+    let py = 0;
+    const applyTilt = (): void => {
+      if (tilt) tilt.style.transform = `rotateY(${(ry + px * 5).toFixed(2)}deg) rotateX(${(rx - py * 4).toFixed(2)}deg)`;
+    };
+
+    scene(pin, (p) => {
+      const n = p < 0.2 ? 0 : p < 0.45 ? 1 : p < 0.7 ? 2 : 3;
+      if (n !== step) {
+        step = n;
+        show(n);
+        pop.expand(n === 0 ? null : n === 2 ? "codex" : n === 3 ? "codex" : "claude");
+      }
+      // Bars grow in as the popover opens; the refresh step bumps the values.
+      const grow = easeInOut(seg(p, 0.18, 0.3));
+      const refreshing = p > 0.76 && p < 0.84;
+      const bumped = easeInOut(seg(p, 0.84, 0.9));
+      setAll((id, i) => lerp(base[id][i]! * (n === 0 ? 1 : grow), after[id][i]!, bumped));
+      pop.updated(refreshing ? "Updating…" : p >= 0.84 ? "Updated just now" : "Updated 4m ago", refreshing);
+
+      rx = lerp(8, 2, seg(p, 0, 0.3));
+      ry = lerp(-14, -4, seg(p, 0, 0.3)) + lerp(0, 8, seg(p, 0.45, 1));
+      applyTilt();
+    });
+
+    pointerTilt((x, y) => {
+      px = x;
+      py = y;
+      applyTilt();
+    });
+  } else if (pop) {
+    // Small screens: start on Claude; visitors expand rows themselves.
+    pop.expand("claude");
+    show(1);
+  }
+
+  // Display modes.
+  const statusEl = root?.querySelector<HTMLElement>("[data-modes-status] [data-status]");
+  const buttons = [...(root?.querySelectorAll<HTMLButtonElement>(".modes__btn") ?? [])];
+  const items = [...(root?.querySelectorAll<HTMLElement>("[data-mode-item]") ?? [])];
+  for (const b of buttons) {
+    b.addEventListener("click", () => {
+      const mode = b.dataset.mode!;
+      if (statusEl) statusEl.dataset.mode = mode;
+      buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      items.forEach((x) => x.classList.toggle("is-on", x.dataset.modeItem === mode));
+    });
+  }
+</script>
+
+<style>
+  .product {
+    position: relative;
+    padding-block: clamp(80px, 12vw, 160px) 0;
+  }
+
+  .product__grid {
+    display: grid;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .product__copy {
+    display: grid;
+    gap: 36px;
+  }
+
+  .steps {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    column-gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step__n {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.9;
+    color: var(--text-2);
+    transition: color 0.4s;
+  }
+
+  .step h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+  }
+
+  .step p {
+    max-width: 46ch;
+    margin-top: 4px;
+    color: var(--text-2);
+    font-size: 0.975rem;
+    line-height: 1.55;
+  }
+
+  .step.is-on .step__n {
+    color: var(--cyan);
+  }
+
+  .product__view {
+    --ps: 1.02;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 18px;
+    perspective: 1600px;
+  }
+
+  .product__tilt {
+    transform-style: preserve-3d;
+    will-change: transform;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .product :global(.product__pop) {
+    --s: var(--ps);
+  }
+
+  .product__hint {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  /* ---- display modes ---- */
+  .modes {
+    display: grid;
+    gap: 32px;
+    padding-block: clamp(96px, 12vw, 180px) clamp(40px, 6vw, 80px);
+  }
+
+  .modes__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .modes__title {
+    max-width: 16ch;
+    font-size: clamp(2rem, 4.4vw, 3.75rem);
+    font-weight: 600;
+    font-stretch: 85%;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .modes__switch {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.05);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  .modes__btn {
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition:
+      background-color 0.3s var(--ease-out),
+      color 0.3s;
+  }
+
+  .modes__btn:hover {
+    color: var(--text);
+  }
+
+  .modes__btn[aria-pressed="true"] {
+    background: var(--text);
+    color: #07090d;
+  }
+
+  .modes__bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: clamp(56px, 7vw, 84px);
+    padding: 0 clamp(16px, 2.4vw, 32px);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02)),
+      radial-gradient(80% 200% at 80% 0%, rgb(10 92 255 / 0.25), transparent 60%);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-family: var(--font-ui);
+    font-size: clamp(1rem, 2vw, 1.625rem);
+    overflow: hidden;
+  }
+
+  .modes__apps {
+    display: flex;
+    gap: 1.1em;
+    color: rgb(255 255 255 / 0.5);
+    white-space: nowrap;
+  }
+
+  .modes__apps b {
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .modes__status {
+    margin-left: auto;
+  }
+
+  .modes__clock {
+    color: rgb(255 255 255 / 0.7);
+    white-space: nowrap;
+  }
+
+  .modes__list {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .modes__item {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.3fr) 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-3);
+    transition: color 0.4s;
+  }
+
+  .modes__item dt {
+    font-weight: 600;
+  }
+
+  .modes__item.is-on {
+    color: var(--text);
+  }
+
+  .modes__item.is-on dt {
+    color: var(--cyan);
+  }
+
+  .modes__note {
+    max-width: 70ch;
+  }
+
+  .lvl {
+    font-weight: 600;
+  }
+
+  .lvl--a {
+    color: #ff9f0a;
+  }
+
+  .lvl--c {
+    color: #ff6961;
+  }
+
+  @media (max-width: 719px) {
+    .modes__apps span,
+    .modes__clock {
+      display: none;
+    }
+
+    .modes__item {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :global(.motion) .product {
+      padding: 0;
+    }
+
+    :global(.motion) .product__pin {
+      height: 400vh;
+    }
+
+    :global(.motion) .product__stage {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      height: 100svh;
+      padding-top: var(--bar-h);
+    }
+
+    .product__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: clamp(40px, 6vw, 120px);
+    }
+
+    .product__copy {
+      gap: 28px;
+    }
+
+    /* Room for the tallest state, so expanding a row never shifts the layout. */
+    .product__view {
+      --ps: 1.32;
+      min-height: calc(13px * var(--ps) * 24);
+    }
+
+    /* Inactive steps stay readable (WCAG AA); the active one gains the accent rule. */
+    :global(.motion) .step {
+      position: relative;
+      opacity: 0.74;
+      transition: opacity 0.5s var(--ease-out);
+    }
+
+    :global(.motion) .step::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--cyan), transparent 60%);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      transition: transform 0.7s var(--ease-out);
+    }
+
+    :global(.motion) .step.is-on {
+      opacity: 1;
+    }
+
+    :global(.motion) .step.is-on::before {
+      transform: none;
+    }
+  }
+
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .product__view {
+      --ps: 1.1;
+    }
+
+    .step {
+      padding: 11px 0;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+    }
+  }
+</style>

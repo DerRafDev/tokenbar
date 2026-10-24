@@ -1,0 +1,354 @@
+---
+// 07. Open source. A terminal with the real clone steps and repository layout, the real
+// provider protocol, and a ticker of what "free" means here. No GitHub statistics are shown.
+import Icon from "./Icon.astro";
+import { links } from "../config";
+
+const clone = "git clone https://github.com/DerRafDev/tokenbar.git";
+const tree = [
+  ["tokenbar/", ""],
+  ["├── apps/", ""],
+  ["│   ├── macos/", "the native macOS app"],
+  ["│   └── web/", "this website"],
+  ["├── docs/", "architecture, providers, roadmap"],
+  ["├── scripts/", "test, lint, format, release"],
+  ["└── tools/", "the README demo renderer"],
+];
+// Plain, fixed strings: safe to inline as HTML, and <pre> keeps their spacing exactly.
+const treeHtml = tree.map(([path, note]) => (note ? `${path}<span class="term__note">  ${note}</span>` : path)).join("\n");
+const ticker = ["MIT licensed", "Free", "No subscription", "No account", "No tracking", "Pull requests welcome"];
+---
+
+<section id="open-source" class="section oss" data-oss aria-labelledby="oss-title">
+  <div class="wrap oss__grid">
+    <div class="oss__copy">
+      <p class="index"><b>07</b> Open source</p>
+      <h2 id="oss-title" class="display oss__title" data-lines>
+        <span class="line"><span>Read it.</span></span>{" "}
+        <span class="line"><span>Fork it.</span></span>{" "}
+        <span class="line"><span class="serif">Make it better.</span></span>
+      </h2>
+      <p class="lede" data-reveal>
+        Every line of TokenBar is public under the MIT License, including how each provider integration works and why.
+        It is free, and there is no subscription.
+      </p>
+      <div class="actions" data-reveal style="--d:1">
+        <a class="btn" href={links.repo} rel="noopener" data-magnetic><Icon name="github" />View source on GitHub</a>
+        <a class="btn btn--ghost" href={links.contributing} rel="noopener" data-magnetic>Contribute</a>
+      </div>
+    </div>
+
+    <div class="oss__code">
+      <div class="term" data-reveal>
+        <div class="term__bar" aria-hidden="true"><i></i><i></i><i></i><span>zsh</span></div>
+        <div class="term__body">
+          <div class="term__cmd">
+            <code><span class="term__p" aria-hidden="true">$ </span>{clone}</code>
+            <button type="button" class="term__copy" data-copy={clone} aria-label="Copy the clone command">
+              <Icon name="copy" class="i-copy" />
+              <Icon name="check" class="i-check" />
+            </button>
+          </div>
+          <code class="term__line"><span class="term__p" aria-hidden="true">$ </span>cd tokenbar && open apps/macos/TokenBar.xcodeproj</code>
+          <pre class="term__tree" aria-label="Repository layout" set:html={treeHtml}></pre>
+        </div>
+      </div>
+
+      <figure class="snippet" data-reveal style="--d:2">
+        <pre><code><span class="k">public protocol</span> <span class="t">UsageProvider</span>: <span class="t">Sendable</span> {"{"}
+    <span class="k">var</span> descriptor: <span class="t">ProviderDescriptor</span> {"{"} <span class="k">get</span> {"}"}
+
+    <span class="k">func</span> <span class="f">fetchUsage</span>() <span class="k">async throws</span> -&gt; <span class="t">UsageSnapshot</span>
+{"}"}</code></pre>
+        <figcaption>One protocol per provider · TokenBarCore/Provider/UsageProvider.swift</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="ticker" aria-hidden="true" data-ticker>
+    <div class="ticker__row" data-ticker-row>
+      {
+        [0, 1, 2].map(() =>
+          ticker.map((t) => (
+            <span class="ticker__item">
+              {t}
+              <i />
+            </span>
+          )),
+        )
+      }
+    </div>
+  </div>
+  <p class="visually-hidden">TokenBar is MIT licensed and free, with no subscription, no account, and no tracking. Pull requests are welcome.</p>
+</section>
+
+<script>
+  import { scene, lerp } from "../scripts/motion";
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.classList.add("is-done");
+        button.setAttribute("aria-label", "Copied");
+        setTimeout(() => {
+          button.classList.remove("is-done");
+          button.setAttribute("aria-label", "Copy the clone command");
+        }, 1800);
+      } catch {
+        // Clipboard access can be denied; the command stays selectable.
+      }
+    });
+  }
+
+  const ticker = document.querySelector<HTMLElement>("[data-ticker]");
+  const row = ticker?.querySelector<HTMLElement>("[data-ticker-row]");
+  if (ticker && row) {
+    scene(
+      ticker,
+      (p) => {
+        row.style.transform = `translate3d(${lerp(0, -33.333, p).toFixed(3)}%, 0, 0)`;
+      },
+      { pass: true },
+    );
+  }
+</script>
+
+<style>
+  .oss {
+    overflow: clip;
+  }
+
+  .oss__grid {
+    display: grid;
+    gap: 64px;
+  }
+
+  .oss__copy {
+    display: grid;
+    gap: 28px;
+    align-content: start;
+    justify-items: start;
+  }
+
+  .oss__code {
+    display: grid;
+    gap: 20px;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .term {
+    overflow: hidden;
+    border-radius: 16px;
+    background: #07090d;
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      0 40px 100px -40px rgb(10 92 255 / 0.4);
+  }
+
+  .term__bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    color: var(--text-3);
+  }
+
+  .term__bar i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  .term__bar span {
+    margin-inline: auto;
+    padding-right: 42px;
+  }
+
+  .term__body {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-x: auto;
+  }
+
+  .term__body code {
+    font-size: inherit;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .term__cmd {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .term__p {
+    color: var(--ok);
+    user-select: none;
+  }
+
+  .term__copy {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin: -4px -6px 0 0;
+    border: 0;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.06);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .term__copy:hover {
+    background: rgb(255 255 255 / 0.12);
+    color: var(--text);
+  }
+
+  .term__copy :global(svg) {
+    grid-area: 1 / 1;
+    width: 16px;
+    height: 16px;
+    transition:
+      opacity 0.2s,
+      transform 0.4s var(--ease-out);
+  }
+
+  .term__copy :global(.i-check) {
+    opacity: 0;
+    transform: scale(0.6);
+    color: var(--ok);
+  }
+
+  .term__copy.is-done :global(.i-copy) {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  .term__copy.is-done :global(.i-check) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .term__tree {
+    margin: 8px 0 0;
+    font: inherit;
+    color: var(--text-2);
+    white-space: pre;
+  }
+
+  .term__tree :global(.term__note) {
+    color: var(--text-3);
+  }
+
+  .snippet {
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.025);
+    box-shadow: inset 0 0 0 1px var(--line);
+    overflow: hidden;
+  }
+
+  .snippet pre {
+    margin: 0;
+    padding: 22px 20px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .snippet code {
+    font-size: inherit;
+  }
+
+  .snippet .k {
+    color: #ff7ab2;
+  }
+
+  .snippet .t {
+    color: var(--cyan);
+  }
+
+  .snippet .f {
+    color: #ffd479;
+  }
+
+  .snippet figcaption {
+    padding: 12px 20px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+  }
+
+  .ticker {
+    margin-top: clamp(80px, 10vw, 140px);
+    padding-block: 20px;
+    border-block: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .ticker__row {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .ticker__item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(24px, 3vw, 48px);
+    padding-right: clamp(24px, 3vw, 48px);
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+    font-weight: 600;
+    font-stretch: 80%;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .ticker__item:nth-child(even) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-stretch: normal;
+    color: var(--text-2);
+  }
+
+  .ticker__item i {
+    width: 0.16em;
+    height: 0.16em;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 16px var(--cyan);
+  }
+
+  @media (min-width: 1024px) {
+    .oss__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: clamp(48px, 6vw, 112px);
+      align-items: center;
+    }
+
+    .oss__title {
+      font-size: clamp(4rem, 7.4vw, 8rem);
+    }
+  }
+</style>
