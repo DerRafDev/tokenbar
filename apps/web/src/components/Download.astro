@@ -15,7 +15,6 @@ import { links, requirements } from "../config";
     <div class="download__bar" aria-hidden="true" data-reveal>
       <span class="download__apps"><b>TokenBar</b></span>
       <StatusItem highlighted />
-      <span class="download__clock" data-clock-copy>9:41 AM</span>
     </div>
 
     <div class="download__hero">
@@ -81,15 +80,6 @@ import { links, requirements } from "../config";
   import { pointerTilt } from "../scripts/motion";
 
   const icon = document.querySelector<HTMLElement>("[data-download-icon]");
-  const clock = document.querySelector<HTMLElement>("[data-clock-copy]");
-  const source = document.querySelector<HTMLElement>("[data-clock]");
-  if (clock && source) {
-    const copy = (): void => {
-      clock.textContent = source.textContent;
-    };
-    copy();
-    setInterval(copy, 15_000);
-  }
   pointerTilt((x, y) => {
     if (icon) icon.style.transform = `perspective(800px) rotateY(${(x * 14).toFixed(2)}deg) rotateX(${(-y * 12).toFixed(2)}deg)`;
   });
@@ -135,10 +125,6 @@ import { links, requirements } from "../config";
     margin-right: auto;
   }
 
-  .download__clock {
-    color: rgb(255 255 255 / 0.8);
-    white-space: nowrap;
-  }
 
   .download__hero {
     position: relative;
@@ -258,12 +244,6 @@ import { links, requirements } from "../config";
 
   .install__foot {
     font-size: 0.9375rem;
-  }
-
-  @media (max-width: 559px) {
-    .download__clock {
-      display: none;
-    }
   }
 
   @media (min-width: 1024px) {

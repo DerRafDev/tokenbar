@@ -40,7 +40,6 @@ const items = [
         <StatusItem />
         <span class="menubar__tip" aria-hidden="true">Sample data</span>
       </a>
-      <span class="menubar__clock" aria-hidden="true" data-clock>9:41 AM</span>
       <a class="btn btn--sm menubar__cta" href={links.download} data-magnetic>Download</a>
 
       <details class="menubar__more">
@@ -68,18 +67,7 @@ const items = [
 
 <script>
   const bar = document.querySelector<HTMLElement>("[data-menubar]");
-  const clock = document.querySelector<HTMLElement>("[data-clock]");
   const more = document.querySelector<HTMLDetailsElement>(".menubar__more");
-
-  // The clock shows the visitor's own time, like a real menu bar.
-  if (clock) {
-    const fmt = new Intl.DateTimeFormat("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" });
-    const render = (): void => {
-      clock.textContent = fmt.format(new Date()).replace(",", "");
-    };
-    render();
-    setInterval(render, 15_000);
-  }
 
   // A denser, more opaque bar once the page scrolls.
   if (bar) {
@@ -230,13 +218,6 @@ const items = [
     transform: translate(-50%, 0);
   }
 
-  .menubar__clock {
-    display: none;
-    padding: 0 8px;
-    color: rgb(255 255 255 / 0.9);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
 
   .menubar__cta {
     display: none;
@@ -358,10 +339,6 @@ const items = [
 
     .menubar__more {
       display: none;
-    }
-
-    .menubar__clock {
-      display: inline;
     }
 
     .menubar__inner {
