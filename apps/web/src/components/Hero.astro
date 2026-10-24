@@ -194,7 +194,9 @@ import { links } from "../config";
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    padding-right: 0.08em;
+    /* The gradient only paints inside the box; extend it under the italic descenders. */
+    padding: 0 0.08em 0.3em 0.04em;
+    margin: 0 0 -0.3em -0.04em;
   }
 
   .hero__lede {

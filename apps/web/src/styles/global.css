@@ -419,8 +419,8 @@ kbd {
   display: block;
   overflow: clip;
   /* Room for descenders (g, y) and italic overhang, which the mask would otherwise cut. */
-  padding: 0 0.12em 0.24em 0;
-  margin: 0 -0.12em -0.24em 0;
+  padding: 0 0.12em 0.36em;
+  margin: 0 -0.12em -0.36em;
 }
 
 .motion [data-lines] .line > span {
