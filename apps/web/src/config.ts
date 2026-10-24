@@ -21,9 +21,9 @@ export const links = {
 } as const;
 
 export const seo = {
-  title: "TokenBar — AI Usage Limits in Your macOS Menu Bar",
+  title: "AI Usage Limits in Your Menu Bar | TokenBar",
   description:
-    "Track your AI usage limits from the macOS menu bar. TokenBar is a free, native and open-source app that shows session and weekly limits and when they reset, with support for Claude and Codex.",
+    "Track your AI usage limits from your menu bar. TokenBar is a free, native and open-source app that shows session and weekly limits and when they reset. Supports Claude and Codex. Available for macOS, with Windows planned.",
 } as const;
 
 export const requirements = "macOS 14 Sonoma or later · Apple silicon or Intel";
