@@ -17,7 +17,7 @@ Website: https://tokenbar.sh/
 - No TokenBar account and no TokenBar backend or server.
 - No analytics, telemetry, crash reporting, tracking, update checks or cloud sync.
 - Currently supports Claude and Codex. Both integrations are experimental.
-- macOS is available now. Windows is in development.
+- macOS is available now. A Windows version is planned.
 
 ## Supported platforms
 
@@ -27,7 +27,7 @@ Available now. Requires macOS 14 Sonoma or later, on Apple silicon or Intel.
 
 ### Windows
 
-In development. There is no Windows release, no Windows download, and no release date yet.
+Planned. There is no Windows release, no Windows download, and no release date yet.
 
 ## Supported AI providers
 
@@ -80,18 +80,17 @@ Each provider implements one protocol (`UsageProvider`) and returns a normalized
 
 **macOS — Available now.** Download the latest release from https://github.com/DerRafDev/tokenbar/releases/latest (a `.dmg` and a `.zip`, with SHA-256 checksums in `SHA256SUMS.txt`).
 
-**Windows — In development.** No download yet.
+**Windows — Planned.** No download yet.
 
-The current macOS build is unsigned and not notarized by Apple, so macOS Gatekeeper blocks the first launch. To open it: open TokenBar once, then go to System Settings › Privacy & Security, find the message about TokenBar, click Open Anyway and confirm. This approves TokenBar only; Gatekeeper should not be turned off for the whole Mac. Developer ID signing and notarization are planned.
+The current macOS build is unsigned and not notarized by Apple, so macOS Gatekeeper blocks the first launch. To open it: open TokenBar once, then go to System Settings › Privacy & Security, find the message about TokenBar, click Open Anyway and confirm. This approves TokenBar only; Gatekeeper should not be turned off for the whole Mac. Developer ID signing and notarization are on the roadmap.
 
 ## Roadmap
 
 There are no dates. Source: https://github.com/DerRafDev/tokenbar/blob/main/docs/roadmap.md
 
 - **Shipped — v0.1.0:** native macOS menu bar app; experimental Claude and Codex providers; session and weekly limits with reset countdowns; menu bar display modes; automatic refresh; launch at login; English and Portuguese (Brazil).
-- **In development:** Windows.
-- **Planned:** Developer ID signing and notarization.
-- **Exploring (candidates, not commitments):** more providers (only with a reliable data source); Codex Keychain sign-in; refresh when the network comes back; automatic updates (needs a privacy-preserving design); menu bar customization; telling a Codex 403 apart from a workspace without Codex.
+- **Planned:** a Windows version. No release date.
+- **After 0.1.0 (candidates, not commitments; each needs evidence that it works reliably before it is built):** Developer ID signing and notarization; Codex Keychain sign-in; telling a Codex 403 apart from a workspace without Codex; refresh when the network comes back; automatic updates (needs a privacy-preserving design); more providers (only with a reliable, documented-enough source); menu bar customization.
 
 ## Canonical links
 

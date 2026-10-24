@@ -1,6 +1,6 @@
 ---
 // 08. Roadmap. A luminous path runs through the milestones. Scroll draws it and carries the
-// TokenBar icon along; milestones light up as it passes, and Windows emerges from the dark.
+// TokenBar icon along; milestones light up as it passes, and the spotlit milestone (Windows) emerges from the dark.
 // Without JavaScript the path is a plain line and every milestone is lit.
 import { Image } from "astro:assets";
 import icon from "../assets/icon.png";
@@ -42,7 +42,7 @@ import { links } from "../config";
       <ol class="road__list" role="list">
         {
           roadmap.map((m, i) => (
-            <li class={`ms ms--${m.state} ms--${i % 2 ? "r" : "l"}`} data-ms>
+            <li class={`ms ms--${m.state} ms--${i % 2 ? "r" : "l"}${m.spotlight ? " ms--spotlight" : ""}`} data-ms>
               <span class="ms__dot" data-dot />
               <div class="ms__card">
                 <p class="ms__meta">
@@ -285,12 +285,8 @@ import { links } from "../config";
     color: var(--ok);
   }
 
-  .ms__state--development {
-    color: var(--cyan);
-  }
-
   .ms__state--planned {
-    color: #a9c7ff;
+    color: var(--cyan);
   }
 
   .ms__state--exploring {
@@ -351,7 +347,7 @@ import { links } from "../config";
   }
 
   /* Windows: the large word that emerges as the icon approaches. */
-  .ms--development .ms__title {
+  .ms--spotlight .ms__title {
     font-size: clamp(4rem, 13vw, 12rem);
     font-stretch: 78%;
     letter-spacing: -0.055em;
@@ -360,9 +356,11 @@ import { links } from "../config";
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    /* The gradient only paints inside the box; leave room for the last glyph's overhang. */
+    padding: 0.04em 0.1em 0.08em;
   }
 
-  .ms--development .ms__card {
+  .ms--spotlight .ms__card {
     max-width: none;
   }
 
@@ -375,7 +373,7 @@ import { links } from "../config";
       transform 0.3s linear;
   }
 
-  :global(.motion) .road.is-live .ms--development .ms__title {
+  :global(.motion) .road.is-live .ms--spotlight .ms__title {
     opacity: calc(0.04 + var(--near, 0) * 0.96);
     filter: blur(calc((1 - var(--near, 0)) * 10px));
     transform: scale(calc(0.94 + var(--near, 0) * 0.06));
@@ -474,7 +472,7 @@ import { links } from "../config";
     }
 
     /* Windows spans the whole road; the path runs behind the word. */
-    .ms--development .ms__card {
+    .ms--spotlight .ms__card {
       grid-column: 1 / -1;
       justify-self: stretch;
       justify-items: center;
@@ -482,21 +480,21 @@ import { links } from "../config";
       text-align: center;
     }
 
-    .ms--development .ms__meta {
+    .ms--spotlight .ms__meta {
       justify-content: center;
     }
 
-    .ms--development .ms__dot {
+    .ms--spotlight .ms__dot {
       top: -72px;
       left: calc(50% - 8px);
     }
 
-    .ms--development .ms__title {
+    .ms--spotlight .ms__title {
       font-size: clamp(6rem, 17vw, 16rem);
       transform-origin: 50% 100%;
     }
 
-    .ms--development .ms__text {
+    .ms--spotlight .ms__text {
       margin-inline: auto;
     }
 

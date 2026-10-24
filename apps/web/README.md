@@ -74,7 +74,7 @@ The website, `public/llms.txt`, `public/llms.md`, the structured data in
 changes any of:
 
 - supported providers or what each one shows,
-- supported platforms (today: macOS available, Windows in development),
+- supported platforms (today: macOS available, Windows planned),
 - major features,
 - the privacy architecture,
 - download or install behavior (today: unsigned and not notarized),
