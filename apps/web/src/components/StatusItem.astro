@@ -1,0 +1,78 @@
+---
+// Replica of TokenBar's menu bar label. Modes match the app: "providers" (each logo with its
+// current session), "minimal" (only the busiest provider) and "detailed" (session/week,
+// "42/18"). Values are sample data; scripts update [data-v] and [data-mode].
+import ProviderLogo from "./ProviderLogo.astro";
+import { sampleProviders } from "../data/sample";
+
+interface Props {
+  class?: string;
+  highlighted?: boolean;
+}
+
+const { class: className, highlighted = false } = Astro.props;
+---
+
+<span class:list={["status", className, { "is-on": highlighted }]} data-status data-mode="providers">
+  {
+    sampleProviders.map((p) => (
+      <span class="status__item" data-provider={p.id}>
+        <ProviderLogo name={p.logo} template class="status__logo" />
+        <span class="status__pct" data-v="session">
+          {p.limits[0]!.used}%
+        </span>
+        <span class="status__det">
+          <span data-v="session-n">{p.limits[0]!.used}</span>/<span data-v="weekly-n">{p.limits[1]!.used}</span>
+        </span>
+      </span>
+    ))
+  }
+</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.18em 0.6em;
+    border-radius: 0.42em;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    white-space: nowrap;
+    transition: background-color 0.3s var(--ease-out);
+  }
+
+  .status.is-on {
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  .status__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+
+  .status :global(.status__logo) {
+    width: 1.05em;
+    height: 1.05em;
+  }
+
+  .status__det {
+    display: none;
+  }
+
+  .status[data-mode="detailed"] .status__det {
+    display: inline;
+  }
+
+  .status[data-mode="detailed"] .status__pct {
+    display: none;
+  }
+
+  /* Minimal: Claude has the most-used session in the sample data. */
+  .status[data-mode="minimal"] .status__item:not(:first-child) {
+    display: none;
+  }
+</style>

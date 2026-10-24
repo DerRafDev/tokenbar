@@ -1,0 +1,364 @@
+---
+// Replica of TokenBar's popover (TokenBarUI/UsagePopover.swift): one row per provider with
+// its plan and current session; one provider at a time expands to show each limit with a
+// bar and its reset time. Sample data only, labeled with a "Sample" badge.
+//
+// `interactive` renders real buttons that expand and collapse rows (scripts/popover.ts).
+// Otherwise the replica is a picture with the same content in its label.
+import ProviderLogo from "./ProviderLogo.astro";
+import { sampleProviders, type ProviderId } from "../data/sample";
+
+interface Props {
+  id: string;
+  expanded?: ProviderId | null;
+  interactive?: boolean;
+  class?: string;
+}
+
+const { id, expanded = "claude", interactive = false, class: className } = Astro.props;
+const Head = interactive ? "button" : "div";
+const label = sampleProviders
+  .map((p) => `${p.name} ${p.plan}: ${p.limits.map((l) => `${l.title.toLowerCase()} ${l.used}%, ${l.reset.toLowerCase()}`).join("; ")}`)
+  .join(". ");
+---
+
+<div
+  class:list={["pop", className]}
+  data-pop={id}
+  {...interactive ? {} : { role: "img", "aria-label": `TokenBar popover with sample data. ${label}.` }}
+>
+  <div class="pop__rows">
+    {
+      sampleProviders.map((p) => {
+        const open = expanded === p.id;
+        const detailsId = `${id}-${p.id}`;
+        return (
+          <div class:list={["prow", { "is-open": open }]} data-provider={p.id}>
+            <Head
+              class="prow__head"
+              {...(interactive
+                ? { type: "button", "aria-expanded": open ? "true" : "false", "aria-controls": detailsId }
+                : {})}
+            >
+              <ProviderLogo name={p.logo} template={p.logo === "openai"} class="prow__logo" />
+              <span class="prow__name">{p.name}</span>
+              <span class="badge">{p.plan}</span>
+              <span class="prow__pct" data-v="session">
+                {p.limits[0]!.used}%
+              </span>
+              <svg class="prow__chev" viewBox="0 0 10 16" aria-hidden="true">
+                <path d="M2.5 2.5 8 8l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span class="prow__sum">
+                {p.limits.map((l, i) => (
+                  <>
+                    {i > 0 && <span class="prow__sep"> · </span>}
+                    {l.short} <span data-v={l.id}>{l.used}%</span>
+                  </>
+                ))}
+              </span>
+            </Head>
+            <div class="prow__details" id={detailsId}>
+              <div class="prow__inner">
+                {p.limits.map((l) => (
+                  <div class="limit" data-limit={l.id}>
+                    <div class="limit__top">
+                      <span>{l.title}</span>
+                      <span data-v={l.id}>{l.used}%</span>
+                    </div>
+                    <span class="bar" style={`--f:${l.used / 100}`} data-bar={l.id}>
+                      <i />
+                    </span>
+                    <span class="limit__reset" data-reset={l.id}>
+                      {l.reset}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+  <div class="pop__foot">
+    <span class="pop__refresh">
+      <svg viewBox="0 0 16 16" aria-hidden="true" data-spin>
+        <path d="M13 8a5 5 0 1 1-1.5-3.56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        <path d="M13.2 2.3v2.9h-2.9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span data-updated>Updated 4m ago</span>
+    </span>
+    <span class="badge badge--sample">Sample</span>
+    <svg class="pop__gear" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path
+        d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"></path>
+      <circle cx="10" cy="10" r="5.6" fill="none" stroke="currentColor" stroke-width="1.5" />
+    </svg>
+  </div>
+</div>
+
+<style>
+  /* Sizes are in em of a 13 px macOS body font, so the replica scales with --s. */
+  .pop {
+    --s: 1;
+    position: relative;
+    width: 27.7em;
+    max-width: 100%;
+    padding: 0.62em 0.62em 0.9em;
+    border-radius: 1.08em;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 40%),
+      linear-gradient(180deg, rgb(44 50 62 / 0.92), rgb(30 34 44 / 0.94));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.13),
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 30px 80px -20px rgb(0 0 0 / 0.8),
+      0 10px 30px -10px rgb(0 0 0 / 0.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.4);
+    font-family: var(--font-ui);
+    font-size: calc(13px * var(--s));
+    line-height: 1.25;
+    color: #fff;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pop__rows {
+    display: grid;
+    gap: 0.15em;
+  }
+
+  .prow {
+    border-radius: 0.46em;
+    transition: background-color 0.35s var(--ease-out);
+  }
+
+  .prow.is-open {
+    background: rgb(255 255 255 / 0.05);
+  }
+
+  .prow__head {
+    display: grid;
+    grid-template-columns: 1.85em auto auto 1fr auto;
+    grid-template-areas:
+      "logo name badge pct chev"
+      ". sum sum sum sum";
+    align-items: center;
+    column-gap: 0.5em;
+    row-gap: 0.2em;
+    width: 100%;
+    padding: 0.75em 0.62em;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+  }
+
+  button.prow__head {
+    cursor: pointer;
+  }
+
+  button.prow__head:hover {
+    background: rgb(255 255 255 / 0.035);
+  }
+
+  button.prow__head:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .prow :global(.prow__logo) {
+    grid-area: logo;
+    width: 1.38em;
+    height: 1.38em;
+  }
+
+  .prow__name {
+    grid-area: name;
+    font-size: 1.154em;
+    font-weight: 600;
+  }
+
+  .badge {
+    grid-area: badge;
+    justify-self: start;
+    padding: 0.1em 0.42em;
+    border-radius: 0.36em;
+    background: rgb(255 255 255 / 0.12);
+    font-size: 0.846em;
+    font-weight: 500;
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  .badge--sample {
+    color: #ffb35c;
+    background: rgb(255 159 10 / 0.14);
+  }
+
+  .prow__pct {
+    grid-area: pct;
+    justify-self: end;
+    font-size: 1.154em;
+  }
+
+  .prow__chev {
+    grid-area: chev;
+    width: 0.62em;
+    height: 1em;
+    margin-left: 0.2em;
+    color: rgb(255 255 255 / 0.35);
+    transition: transform 0.35s var(--ease-out);
+  }
+
+  .is-open .prow__chev {
+    transform: rotate(90deg);
+  }
+
+  .prow__sum {
+    grid-area: sum;
+    font-size: 0.96em;
+    color: rgb(255 255 255 / 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.25s var(--ease-out);
+  }
+
+  .is-open .prow__sum {
+    display: none;
+  }
+
+  .prow__details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s var(--ease-out);
+  }
+
+  .is-open .prow__details {
+    grid-template-rows: 1fr;
+  }
+
+  .prow__inner {
+    display: grid;
+    gap: 1.1em;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 0.62em 0 calc(0.62em + 1.85em + 0.5em);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-out);
+  }
+
+  .is-open .prow__inner {
+    padding-bottom: 0.95em;
+    padding-top: 0.25em;
+    opacity: 1;
+    transition-delay: 0.08s;
+  }
+
+  .limit {
+    display: grid;
+    gap: 0.45em;
+  }
+
+  .limit__top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .limit__top span:last-child {
+    font-weight: 500;
+  }
+
+  .bar {
+    position: relative;
+    display: block;
+    height: 0.46em;
+    border-radius: 1em;
+    background: rgb(255 255 255 / 0.12);
+    overflow: hidden;
+  }
+
+  .bar i {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--blue);
+    transform: translate3d(calc((max(var(--f), 0.012) - 1) * 100%), 0, 0);
+    transition: transform 0.9s var(--ease-out);
+  }
+
+  /* Levels from the app: orange from 70%, red from 90%. */
+  [data-level="attention"] {
+    --level: #ff9f0a;
+  }
+
+  [data-level="critical"] {
+    --level: #ff453a;
+  }
+
+  [data-v][data-level="attention"],
+  [data-v][data-level="critical"] {
+    color: var(--level);
+    font-weight: 600;
+  }
+
+  .bar[data-level="attention"] i,
+  .bar[data-level="critical"] i {
+    background: var(--level);
+  }
+
+  .limit__reset {
+    font-size: 0.885em;
+    color: rgb(255 255 255 / 0.5);
+  }
+
+  .pop__foot {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.5em 0.62em 0;
+    padding-top: 0.85em;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  .pop__refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    margin-right: auto;
+  }
+
+  .pop__refresh svg {
+    width: 1.08em;
+    height: 1.08em;
+  }
+
+  .pop__refresh svg.is-spinning {
+    animation: pop-spin 0.7s linear infinite;
+  }
+
+  .pop__foot .badge {
+    margin-right: 0.4em;
+  }
+
+  .pop__gear {
+    width: 1.25em;
+    height: 1.25em;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  @keyframes pop-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

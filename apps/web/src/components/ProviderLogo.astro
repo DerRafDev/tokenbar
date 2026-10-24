@@ -1,0 +1,32 @@
+---
+// The provider logos the app ships (TokenBarUI/Resources/Logos), converted from PDF to SVG.
+// They identify each provider only. `template` draws them in the current text color, like
+// the macOS menu bar does; otherwise Claude keeps its brand color.
+import claude from "../assets/logos/claude.svg?raw";
+import openai from "../assets/logos/openai.svg?raw";
+
+interface Props {
+  name: "claude" | "openai";
+  template?: boolean;
+  class?: string;
+}
+
+const { name, template = false, class: className } = Astro.props;
+let svg = name === "claude" ? claude : openai;
+if (template) svg = svg.replace(/fill="#[0-9A-Fa-f]+"/, 'fill="currentColor"');
+svg = svg.replace("<svg ", '<svg aria-hidden="true" focusable="false" ');
+---
+
+<span class:list={["plogo", className]} set:html={svg} />
+
+<style>
+  .plogo {
+    display: inline-flex;
+    flex: none;
+  }
+
+  .plogo :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+</style>
