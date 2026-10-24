@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+npm-debug.log*
+
+# Local environment files. The site needs no secrets today; never commit real values.
+.env
+.env.*
+!.env.example
