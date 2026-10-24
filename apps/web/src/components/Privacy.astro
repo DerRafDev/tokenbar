@@ -1,5 +1,5 @@
 ---
-// 06. Privacy. The diagram shows the whole architecture: the Mac talks to each provider
+// 06. Privacy. The diagram shows the whole architecture: the computer talks to each provider
 // directly, and the TokenBar server in the middle does not exist. Facts from the README's
 // Privacy section, SECURITY.md and docs/providers.md.
 import { links } from "../config";
@@ -8,7 +8,7 @@ const facts = [
   ["No TokenBar account", "There is nothing to sign up for and nothing to sign in to."],
   [
     "No TokenBar server",
-    "Requests go from your Mac only to api.anthropic.com for Claude and chatgpt.com for Codex, and only for the providers you turned on.",
+    "Requests go from your computer only to api.anthropic.com for Claude and chatgpt.com for Codex, and only for the providers you turned on.",
   ],
   ["No analytics", "No telemetry, crash reporting, tracking, or update checks. No cloud sync."],
   [
@@ -17,7 +17,7 @@ const facts = [
   ],
   [
     "Sign-ins stay where they are",
-    "TokenBar reads the sign-in Claude Code or Codex already keeps on your Mac, at refresh time. It never stores, copies or renews it, and never logs tokens.",
+    "TokenBar reads the sign-in Claude Code or Codex already keeps on your computer, at refresh time. It never stores, copies or renews it, and never logs tokens.",
   ],
   ["Off until you say so", "Every provider starts disabled and shows exactly what it will read before you confirm."],
 ];
@@ -32,7 +32,7 @@ const facts = [
         <span class="line"><span class="serif">stays yours.</span></span>
       </h2>
       <p class="lede" data-reveal>
-        TokenBar talks to the providers directly from your Mac. There is no TokenBar backend in between, so there is
+        TokenBar talks to the providers directly from your computer. There is no TokenBar backend in between, so there is
         nothing to collect your data.
       </p>
     </div>
@@ -40,7 +40,7 @@ const facts = [
     <figure class="arch" data-reveal>
       <svg class="arch__svg arch__svg--wide" viewBox="0 0 1000 440" role="img" aria-labelledby="arch-title">
         <title id="arch-title">
-          Your Mac connects directly to api.anthropic.com for Claude and to chatgpt.com for Codex. There is no TokenBar
+          Your computer connects directly to api.anthropic.com for Claude and to chatgpt.com for Codex. There is no TokenBar
           server in between.
         </title>
         <path class="arch__wire" d="M330 190C450 190 520 95 690 95"></path>
@@ -57,7 +57,7 @@ const facts = [
 
         <g class="arch__node arch__node--mac">
           <rect x="40" y="130" width="290" height="180" rx="20"></rect>
-          <text x="68" y="168" class="arch__mono">Your Mac</text>
+          <text x="68" y="168" class="arch__mono">Your computer</text>
           <text x="68" y="212" class="arch__t1">TokenBar</text>
           <text x="68" y="248" class="arch__t3">Reads sign-ins at refresh time</text>
           <text x="68" y="274" class="arch__t3">Keeps usage in memory only</text>
@@ -87,7 +87,7 @@ const facts = [
         </g>
         <g class="arch__node arch__node--mac">
           <rect x="20" y="30" width="320" height="170" rx="20"></rect>
-          <text x="46" y="68" class="arch__mono">Your Mac</text>
+          <text x="46" y="68" class="arch__mono">Your computer</text>
           <text x="46" y="112" class="arch__t1">TokenBar</text>
           <text x="46" y="146" class="arch__t3">Reads sign-ins at refresh time</text>
           <text x="46" y="172" class="arch__t3">Keeps usage in memory only</text>

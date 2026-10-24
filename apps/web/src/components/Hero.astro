@@ -1,6 +1,6 @@
 ---
 // Hero. The site's menu bar already holds TokenBar's status item; here its popover hangs
-// from it, like on a Mac. Scrolling pulls the popover out of the menu bar into depth.
+// from it, like in a real menu bar. Scrolling pulls the popover out of the menu bar into depth.
 import Popover from "./Popover.astro";
 import Icon from "./Icon.astro";
 import { links } from "../config";
@@ -25,13 +25,13 @@ import { links } from "../config";
 
     <div class="wrap hero__grid">
       <div class="hero__copy" data-hero-copy>
-        <p class="eyebrow" data-reveal>Open source · Native macOS</p>
+        <p class="eyebrow" data-reveal>Free · Open source · Native</p>
         <h1 id="hero-title" class="display hero__title" data-lines style="--d:1">
           <span class="line"><span>Your AI usage.</span></span>{" "}
           <span class="line"><span class="serif">One glance away.</span></span>
         </h1>
         <p class="lede hero__lede" data-reveal style="--d:4">
-          Track your AI usage limits directly from your macOS menu bar. Currently supports <strong>Claude</strong> and <strong>Codex</strong>.
+          Track your AI usage limits directly from your menu bar. Currently supports <strong>Claude</strong> and <strong>Codex</strong>.
         </p>
         <div class="actions" data-reveal style="--d:5">
           <a class="btn" href={links.download} data-magnetic>
