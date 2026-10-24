@@ -3,4 +3,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tokenbar.sh/sitemap.xml
+Sitemap: https://tokenbar.si/sitemap.xml

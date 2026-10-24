@@ -6,7 +6,7 @@ TokenBar is a free and open-source app for monitoring AI usage limits from the s
 
 TokenBar is built around AI usage in general, not around one vendor. Today it supports two providers, Claude and Codex, and its architecture lets more providers be added over time.
 
-Website: https://tokenbar.sh/
+Website: https://tokenbar.si/
 
 ## Key facts
 
@@ -94,7 +94,7 @@ There are no dates. Source: https://github.com/DerRafDev/tokenbar/blob/main/docs
 
 ## Canonical links
 
-- Website: https://tokenbar.sh/
+- Website: https://tokenbar.si/
 - GitHub: https://github.com/DerRafDev/tokenbar
 - Releases: https://github.com/DerRafDev/tokenbar/releases
 - Latest release: https://github.com/DerRafDev/tokenbar/releases/latest

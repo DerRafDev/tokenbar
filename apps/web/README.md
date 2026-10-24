@@ -1,6 +1,6 @@
 # TokenBar website
 
-The official TokenBar website, served at <https://tokenbar.sh>. One static page that
+The official TokenBar website, served at <https://tokenbar.si>. One static page that
 explains the product, plus `/llms.txt`, `/llms.md`, `/robots.txt`, `/sitemap.xml` and a 404.
 
 ## Stack

@@ -6,8 +6,8 @@ TokenBar is a native macOS menu bar app (Swift, SwiftUI and AppKit, no third-par
 
 ## Product
 
-- [TokenBar website](https://tokenbar.sh/): Overview, features, privacy, roadmap and download
-- [Full facts for language models](https://tokenbar.sh/llms.md): Platforms, providers, features, privacy, download and roadmap in one Markdown file
+- [TokenBar website](https://tokenbar.si/): Overview, features, privacy, roadmap and download
+- [Full facts for language models](https://tokenbar.si/llms.md): Platforms, providers, features, privacy, download and roadmap in one Markdown file
 - [Download for macOS (latest release)](https://github.com/DerRafDev/tokenbar/releases/latest): DMG and ZIP; the current build is unsigned and not notarized
 
 ## Source and docs
