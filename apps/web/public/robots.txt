@@ -1,0 +1,6 @@
+# TokenBar's website is public product information. All crawlers, including search and
+# AI crawlers, are welcome. There is nothing private here.
+User-agent: *
+Allow: /
+
+Sitemap: https://tokenbar.sh/sitemap.xml

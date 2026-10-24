@@ -1,0 +1,26 @@
+# TokenBar
+
+> TokenBar is a free, open-source (MIT) app that shows your AI usage limits in the system menu bar: how much of each plan limit you have used, and when it resets. macOS is available now; Windows is in development. It currently supports Claude and Codex. There is no TokenBar account, server, or telemetry.
+
+TokenBar is a native macOS menu bar app (Swift, SwiftUI and AppKit, no third-party runtime dependencies). It reads the sign-in that Claude Code or Codex already keeps on the Mac and asks each provider for plan usage directly. Both provider integrations are experimental, because neither provider publishes an API for plan limits.
+
+## Product
+
+- [TokenBar website](https://tokenbar.sh/): Overview, features, privacy, roadmap and download
+- [Full facts for language models](https://tokenbar.sh/llms.md): Platforms, providers, features, privacy, download and roadmap in one Markdown file
+- [Download for macOS (latest release)](https://github.com/DerRafDev/tokenbar/releases/latest): DMG and ZIP; the current build is unsigned and not notarized
+
+## Source and docs
+
+- [GitHub repository](https://github.com/DerRafDev/tokenbar): Source code and README
+- [Provider data sources](https://github.com/DerRafDev/tokenbar/blob/main/docs/providers.md): Where each provider's usage data comes from, and what is read
+- [Architecture](https://github.com/DerRafDev/tokenbar/blob/main/docs/architecture.md): Modules, domain model, refresh and security boundaries
+- [Roadmap](https://github.com/DerRafDev/tokenbar/blob/main/docs/roadmap.md): Shipped, in development, planned and exploring items
+- [Security policy](https://github.com/DerRafDev/tokenbar/blob/main/SECURITY.md): What TokenBar promises and how to report a vulnerability
+
+## Optional
+
+- [Adding a provider](https://github.com/DerRafDev/tokenbar/blob/main/docs/adding-a-provider.md): How new AI providers are added
+- [Contributing](https://github.com/DerRafDev/tokenbar/blob/main/CONTRIBUTING.md): Workflow and code style
+- [Issues](https://github.com/DerRafDev/tokenbar/issues): Bug reports and provider requests
+- [License (MIT)](https://github.com/DerRafDev/tokenbar/blob/main/LICENSE)

@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<BaseLayout title="Page not found — TokenBar" description="This page does not exist." noindex>
+  <Nav />
+  <main class="nf">
+    <p class="index"><b>404</b> Not found</p>
+    <h1 class="display">Nothing to<br /><span class="serif">see here.</span></h1>
+    <p class="lede">This page does not exist. Your limits are still where you left them.</p>
+    <a class="btn" href="/">Back to TokenBar</a>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .nf {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+    align-content: center;
+    min-height: 80svh;
+    max-width: calc(var(--max) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding: calc(var(--bar-h) + 64px) var(--gutter) 64px;
+  }
+</style>
