@@ -1,0 +1,123 @@
+---
+// 09. Community: three questions, each with one place to go.
+import Icon from "./Icon.astro";
+import { links } from "../config";
+
+const rows = [
+  { q: "Found a bug?", a: "Open an issue", href: links.newIssue },
+  { q: "Have an idea?", a: "Share it in an issue", href: links.newIssue },
+  { q: "Want to add a provider?", a: "Read the provider guide", href: links.addingProvider },
+];
+---
+
+<section id="community" class="section community" aria-labelledby="community-title">
+  <div class="wrap">
+    <div class="community__head">
+      <p class="index"><b>09</b> Community</p>
+      <h2 id="community-title" class="headline" data-lines>
+        <span class="line"><span>Built in public.</span></span>
+      </h2>
+    </div>
+    <ul class="asks" role="list">
+      {
+        rows.map((r, i) => (
+          <li data-reveal style={`--d:${i}`}>
+            <a href={r.href} rel="noopener" class="ask">
+              <span class="ask__q">{r.q}</span>
+              <span class="ask__a">
+                {r.a}
+                <Icon name="arrow" />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="community__foot" data-reveal>
+      <a class="btn btn--ghost" href={links.contributing} rel="noopener" data-magnetic>Contribute on GitHub</a>
+      <span>Security issue? <a class="link" href={links.security} rel="noopener">Report it privately</a>.</span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .community__head {
+    display: grid;
+    gap: 28px;
+    margin-bottom: 48px;
+  }
+
+  .asks {
+    border-top: 1px solid var(--line);
+  }
+
+  .ask {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    overflow: hidden;
+  }
+
+  .ask::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(90 216 255 / 0.08), transparent 70%);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.7s var(--ease-out);
+  }
+
+  .ask:hover::before,
+  .ask:focus-visible::before {
+    transform: none;
+  }
+
+  .ask__q {
+    position: relative;
+    font-size: clamp(1.75rem, 4.2vw, 3.5rem);
+    font-weight: 600;
+    font-stretch: 84%;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .ask__a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cyan);
+    font-weight: 500;
+  }
+
+  .ask__a :global(svg) {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .ask:hover .ask__a :global(svg) {
+    transform: translateX(6px);
+  }
+
+  .community__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+    margin-top: 40px;
+    color: var(--text-2);
+  }
+
+  @media (min-width: 900px) {
+    .ask {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 36px 8px;
+    }
+  }
+</style>

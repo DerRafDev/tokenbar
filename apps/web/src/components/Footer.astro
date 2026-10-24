@@ -1,0 +1,114 @@
+---
+import { Image } from "astro:assets";
+import icon from "../assets/icon.png";
+import { links } from "../config";
+
+const nav = [
+  { href: links.download, label: "Download" },
+  { href: links.repo, label: "GitHub" },
+  { href: "/#roadmap", label: "Roadmap" },
+  { href: links.issues, label: "Issues" },
+  { href: links.license, label: "License" },
+  { href: `${links.repo}/blob/main/SECURITY.md`, label: "Security" },
+];
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div class="footer__brand">
+      <a href="/#top" class="footer__logo">
+        <Image src={icon} alt="" width={28} height={28} densities={[1, 2]} loading="lazy" />
+        TokenBar
+      </a>
+      <p>AI usage limits in your menu bar. Open source under the MIT License.</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul role="list" class="footer__links">
+        {
+          nav.map((n) => (
+            <li>
+              <a class="link" href={n.href} {...(n.href.startsWith("http") ? { rel: "noopener" } : {})}>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="footer__legal">
+      TokenBar is not affiliated with Anthropic or OpenAI. Claude, ChatGPT and Codex, and the Claude and OpenAI logos, are
+      trademarks of their respective owners and are shown only to identify each provider.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 56px max(40px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    font-size: 0.9375rem;
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: 32px;
+  }
+
+  .footer__brand {
+    display: grid;
+    gap: 10px;
+    color: var(--text-2);
+  }
+
+  .footer__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    justify-self: start;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .footer__logo img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+  }
+
+  .footer__links .link {
+    background-size: 0 1px;
+    background-position: 100% 100%;
+    color: var(--text-2);
+  }
+
+  .footer__links .link:hover {
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    color: var(--text);
+  }
+
+  .footer__legal {
+    max-width: 80ch;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-3);
+  }
+
+  @media (min-width: 900px) {
+    .footer__inner {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+
+    .footer__legal {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

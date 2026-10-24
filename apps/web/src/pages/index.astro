@@ -1,34 +1,73 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import Problem from "../components/Problem.astro";
+import Product from "../components/Product.astro";
+import Providers from "../components/Providers.astro";
+import Resets from "../components/Resets.astro";
+import Native from "../components/Native.astro";
+import Privacy from "../components/Privacy.astro";
+import OpenSource from "../components/OpenSource.astro";
+import Roadmap from "../components/Roadmap.astro";
+import Community from "../components/Community.astro";
+import Download from "../components/Download.astro";
+import Footer from "../components/Footer.astro";
+import { links, seo } from "../config";
+
+const site = Astro.site!.href;
+
+// Only facts that hold today: macOS only (Windows is in development), free, MIT. No version,
+// ratings, or download counts, which would go stale or are not ours to claim.
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "TokenBar",
+    description:
+      "A free, open-source macOS menu bar app that shows your AI usage limits (session and weekly) and when they reset. Currently supports Claude and Codex.",
+    url: site,
+    image: new URL("/og.png", site).href,
+    applicationCategory: "UtilitiesApplication",
+    applicationSubCategory: "AI usage monitor",
+    operatingSystem: "macOS 14 or later",
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    license: "https://opensource.org/licenses/MIT",
+    downloadUrl: links.download,
+    installUrl: links.download,
+    softwareHelp: `${links.repo}#readme`,
+    sameAs: [links.repo],
+    author: { "@type": "Person", name: "Rafael Sordi" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "TokenBar",
+    url: site,
+  },
+];
 ---
 
-<BaseLayout
-  title="TokenBar — AI usage in your macOS menu bar"
-  description="TokenBar is a small native macOS app that shows your Claude and Codex plan usage limits, and when they reset, in the menu bar."
->
-  <main>
-    <h1>TokenBar</h1>
-    <p>Website coming soon.</p>
+<BaseLayout title={seo.title} description={seo.description} schema={schema}>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <Nav />
+  <main id="main">
+    <Hero />
+    <Problem />
+    <Product />
+    <Providers />
+    <Resets />
+    <Native />
+    <Privacy />
+    <OpenSource />
+    <Roadmap />
+    <Community />
+    <Download />
   </main>
+  <Footer />
 </BaseLayout>
 
-<style>
-  main {
-    display: grid;
-    place-content: center;
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: 0 16px;
-    text-align: center;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 2.5rem;
-  }
-
-  p {
-    margin: 0.5rem 0 0;
-    color: var(--muted);
-  }
-</style>
+<script>
+  import "../scripts/boot";
+</script>

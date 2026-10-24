@@ -1,0 +1,300 @@
+---
+// 03. Providers supported today. The two logos travel in from opposite edges and settle
+// into one menu bar item. The list below is the factual part: what each provider shows,
+// what it needs, and how more providers can be added.
+import ProviderLogo from "./ProviderLogo.astro";
+import StatusItem from "./StatusItem.astro";
+import { links } from "../config";
+---
+
+<section id="providers" class="section providers" data-providers aria-labelledby="providers-title">
+  <div class="wrap">
+    <p class="index"><b>03</b> Providers</p>
+
+    <div class="merge" aria-hidden="true" data-merge>
+      <span class="merge__logo merge__logo--l" data-merge-l><ProviderLogo name="claude" /></span>
+      <span class="merge__pill" data-merge-pill><StatusItem /></span>
+      <span class="merge__logo merge__logo--r" data-merge-r><ProviderLogo name="openai" template /></span>
+    </div>
+
+    <h2 id="providers-title" class="display providers__title" data-lines>
+      <span class="line"><span>Claude. Codex.</span></span>{" "}
+      <span class="line"><span class="serif">One place.</span></span>
+    </h2>
+
+    <div class="providers__intro">
+      <p class="tag tag--live">Currently supported</p>
+      <p class="body" data-reveal>
+        TokenBar is built around AI usage, not one vendor. Claude and Codex are the providers it supports today, side by
+        side in one menu bar item and one popover.
+      </p>
+    </div>
+
+    <ul class="plist" role="list">
+      <li class="pitem" data-reveal>
+        <div class="pitem__name">
+          <ProviderLogo name="claude" class="pitem__logo" />
+          <h3>Claude</h3>
+          <span class="tag">Pro · Max</span>
+        </div>
+        <dl class="pitem__facts">
+          <div>
+            <dt>Shows</dt>
+            <dd>Current session (5 h) and weekly limits, plus Opus and Sonnet weekly limits when your plan has them.</dd>
+          </div>
+          <div>
+            <dt>Needs</dt>
+            <dd>Claude Code signed in on the same Mac.</dd>
+          </div>
+        </dl>
+      </li>
+      <li class="pitem" data-reveal style="--d:1">
+        <div class="pitem__name">
+          <ProviderLogo name="openai" template class="pitem__logo" />
+          <h3>Codex</h3>
+          <span class="tag">ChatGPT plans</span>
+        </div>
+        <dl class="pitem__facts">
+          <div>
+            <dt>Shows</dt>
+            <dd>
+              Codex 5-hour and weekly limits, plus model-specific limits when your plan has them. These are Codex limits, not
+              ChatGPT chat message limits.
+            </dd>
+          </div>
+          <div>
+            <dt>Needs</dt>
+            <dd>Codex (CLI or app) signed in with ChatGPT on the same Mac.</dd>
+          </div>
+        </dl>
+      </li>
+      <li class="pitem pitem--next" data-reveal style="--d:2">
+        <div class="pitem__name">
+          <span class="pitem__plus" aria-hidden="true">+</span>
+          <h3>The next provider</h3>
+        </div>
+        <div class="pitem__facts">
+          <p>
+            Every provider implements one protocol and returns the same kind of usage snapshot, so adding one never touches
+            the menu bar, the popover, or the refresh logic. A new provider ships only once its data source is documented
+            and reliable.
+          </p>
+          <p class="pitem__links">
+            <a class="link" href={links.addingProvider} rel="noopener">How to add a provider</a>
+            <a class="link" href={links.providerRequest} rel="noopener">Request a provider</a>
+          </p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="note" role="note" data-reveal aria-label="About the integrations">
+      <p>
+        <strong>Both integrations are experimental.</strong> Neither Anthropic nor OpenAI publishes an API for plan limits,
+        so TokenBar uses the same undocumented endpoints that Claude Code and Codex use to show your usage. They may change
+        or stop working at any time. Every provider starts disabled, and TokenBar explains what it reads before you turn it
+        on. <a class="link" href={links.providers} rel="noopener">Read the data sources</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { scene, seg, easeOut, lerp } from "../scripts/motion";
+
+  const root = document.querySelector<HTMLElement>("[data-merge]");
+  const l = root?.querySelector<HTMLElement>("[data-merge-l]");
+  const r = root?.querySelector<HTMLElement>("[data-merge-r]");
+  const pill = root?.querySelector<HTMLElement>("[data-merge-pill]");
+
+  if (root && l && r && pill) {
+    scene(
+      root,
+      (p) => {
+        const t = easeOut(seg(p, 0.08, 0.5));
+        const spread = Math.min(window.innerWidth * 0.42, 620);
+        l.style.transform = `translate3d(${lerp(-spread, -0, t).toFixed(1)}px, 0, 0) rotate(${lerp(-90, 0, t).toFixed(1)}deg) scale(${lerp(1.6, 0.6, t).toFixed(3)})`;
+        r.style.transform = `translate3d(${lerp(spread, 0, t).toFixed(1)}px, 0, 0) rotate(${lerp(90, 0, t).toFixed(1)}deg) scale(${lerp(1.6, 0.6, t).toFixed(3)})`;
+        const merged = seg(p, 0.42, 0.56);
+        l.style.opacity = r.style.opacity = String(1 - merged);
+        pill.style.opacity = String(merged);
+        pill.style.transform = `scale(${lerp(0.7, 1, easeOut(merged)).toFixed(3)})`;
+      },
+      { pass: true },
+    );
+  }
+</script>
+
+<style>
+  .providers {
+    overflow: clip;
+  }
+
+  .merge {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: clamp(140px, 18vw, 220px);
+    margin-block: 40px 24px;
+  }
+
+  .merge > * {
+    grid-area: 1 / 1;
+  }
+
+  .merge__logo {
+    display: block;
+    width: clamp(72px, 9vw, 120px);
+    height: clamp(72px, 9vw, 120px);
+    will-change: transform, opacity;
+  }
+
+  .merge__logo :global(.plogo) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .merge__logo--l {
+    filter: drop-shadow(0 0 40px rgb(217 132 87 / 0.35));
+  }
+
+  .merge__logo--r {
+    color: #fff;
+    filter: drop-shadow(0 0 40px rgb(255 255 255 / 0.2));
+  }
+
+  .merge__pill {
+    padding: 0.5em 0.6em;
+    border-radius: 16px;
+    background: rgb(14 17 24 / 0.8);
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      0 0 0 8px rgb(255 255 255 / 0.02),
+      0 30px 80px -20px rgb(10 92 255 / 0.5);
+    font-size: clamp(1.5rem, 3.4vw, 2.75rem);
+  }
+
+  /* Static layout: the logos sit on both sides of the merged item. */
+  :global(html:not(.motion)) .merge__logo--l {
+    transform: translateX(min(-30vw, -220px)) scale(0.8);
+  }
+
+  :global(html:not(.motion)) .merge__logo--r {
+    transform: translateX(max(30vw, 220px)) scale(0.8);
+  }
+
+  .providers__title {
+    text-align: center;
+  }
+
+  .providers__title .serif {
+    color: var(--text-2);
+  }
+
+  .providers__intro {
+    display: grid;
+    justify-items: center;
+    gap: 20px;
+    margin: 48px auto 72px;
+    text-align: center;
+  }
+
+  .plist {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+
+  .pitem {
+    display: grid;
+    gap: 20px;
+    padding-block: 32px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pitem__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .pitem__name h3 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 600;
+    font-stretch: 85%;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .pitem :global(.pitem__logo) {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pitem__plus {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    color: var(--cyan);
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .pitem--next h3 {
+    color: var(--text-2);
+  }
+
+  .pitem__facts {
+    display: grid;
+    gap: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .pitem__facts > div {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 12px;
+  }
+
+  .pitem__facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding-top: 0.25em;
+  }
+
+  .pitem__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+
+  .note {
+    max-width: 78ch;
+    margin-top: 40px;
+    padding: 20px 22px;
+    border-radius: 14px;
+    background: rgb(255 255 255 / 0.025);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+
+  .note strong {
+    color: var(--text);
+  }
+
+  @media (min-width: 900px) {
+    .pitem {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 40px;
+      align-items: start;
+    }
+  }
+</style>

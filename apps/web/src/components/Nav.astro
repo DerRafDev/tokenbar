@@ -1,0 +1,371 @@
+---
+// The site navigation, drawn as a macOS menu bar: site links where an app's menus would be,
+// and TokenBar's own status item (sample data) on the right, so it stays one glance away
+// while you scroll. On small screens the links move into a <details> menu (works without JS).
+import { Image } from "astro:assets";
+import icon from "../assets/icon.png";
+import StatusItem from "./StatusItem.astro";
+import { links } from "../config";
+
+const items = [
+  { href: "/#product", label: "Features" },
+  { href: "/#privacy", label: "Privacy" },
+  { href: "/#roadmap", label: "Roadmap" },
+  { href: "/#open-source", label: "Open Source" },
+];
+---
+
+<header class="menubar" data-menubar>
+  <nav class="menubar__inner" aria-label="Main">
+    <a class="menubar__brand" href="/#top">
+      <Image src={icon} alt="" width={20} height={20} densities={[1, 2]} loading="eager" />
+      <span>TokenBar</span>
+    </a>
+
+    <ul class="menubar__menu" role="list">
+      {
+        items.map((item) => (
+          <li>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))
+      }
+      <li>
+        <a href={links.repo} rel="noopener">GitHub</a>
+      </li>
+    </ul>
+
+    <div class="menubar__right">
+      <a class="menubar__status" href="/#product" aria-label="TokenBar in the menu bar, sample data: Claude 42%, Codex 12%. Go to the product tour.">
+        <StatusItem />
+        <span class="menubar__tip" aria-hidden="true">Sample data</span>
+      </a>
+      <span class="menubar__clock" aria-hidden="true" data-clock>9:41 AM</span>
+      <a class="btn btn--sm menubar__cta" href={links.download} data-magnetic>Download</a>
+
+      <details class="menubar__more">
+        <summary aria-label="Menu">
+          <span aria-hidden="true"></span>
+        </summary>
+        <div class="menubar__sheet">
+          <ul role="list">
+            {
+              items.map((item) => (
+                <li>
+                  <a href={item.href}>{item.label}</a>
+                </li>
+              ))
+            }
+            <li><a href={links.repo} rel="noopener">GitHub</a></li>
+          </ul>
+          <a class="btn" href={links.download}>Download for macOS — Free</a>
+          <p>macOS available now · Windows in development</p>
+        </div>
+      </details>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-menubar]");
+  const clock = document.querySelector<HTMLElement>("[data-clock]");
+  const more = document.querySelector<HTMLDetailsElement>(".menubar__more");
+
+  // The clock shows the visitor's own time, like a real menu bar.
+  if (clock) {
+    const fmt = new Intl.DateTimeFormat("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" });
+    const render = (): void => {
+      clock.textContent = fmt.format(new Date()).replace(",", "");
+    };
+    render();
+    setInterval(render, 15_000);
+  }
+
+  // A denser, more opaque bar once the page scrolls.
+  if (bar) {
+    let scrolled = false;
+    const update = (): void => {
+      const next = window.scrollY > 8;
+      if (next !== scrolled) bar.classList.toggle("is-scrolled", (scrolled = next));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+  }
+
+  if (more) {
+    more.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) more.open = false;
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && more.open) {
+        more.open = false;
+        more.querySelector("summary")?.focus();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (more.open && !more.contains(e.target as Node)) more.open = false;
+    });
+  }
+</script>
+
+<style>
+  .menubar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--bar-h);
+    background: rgb(12 14 20 / 0.42);
+    -webkit-backdrop-filter: blur(22px) saturate(1.6);
+    backdrop-filter: blur(22px) saturate(1.6);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.06);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    transition: background-color 0.5s var(--ease-out);
+  }
+
+  .menubar.is-scrolled {
+    background: rgb(10 12 17 / 0.78);
+  }
+
+  :global(.motion) .menubar {
+    animation: bar-in 0.9s var(--ease-out) both;
+  }
+
+  @keyframes bar-in {
+    from {
+      transform: translate3d(0, -100%, 0);
+    }
+  }
+
+  .menubar__inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+  }
+
+  .menubar a {
+    text-decoration: none;
+  }
+
+  .menubar__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .menubar__brand img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .menubar__menu {
+    display: none;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .menubar__menu a,
+  .menubar__brand {
+    transition: background-color 0.2s;
+  }
+
+  .menubar__menu a {
+    display: block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: rgb(255 255 255 / 0.88);
+  }
+
+  .menubar__menu a:hover,
+  .menubar__brand:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  .menubar__right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .menubar__status {
+    position: relative;
+    display: inline-flex;
+    border-radius: 7px;
+    font-size: 0.8125rem;
+  }
+
+  .menubar__status:hover :global(.status) {
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .menubar__tip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgb(30 34 44 / 0.95);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+    font-size: 0.75rem;
+    color: var(--text-2);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -4px);
+    transition:
+      opacity 0.2s,
+      transform 0.3s var(--ease-out);
+  }
+
+  .menubar__status:hover .menubar__tip,
+  .menubar__status:focus-visible .menubar__tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .menubar__clock {
+    display: none;
+    padding: 0 8px;
+    color: rgb(255 255 255 / 0.9);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .menubar__cta {
+    display: none;
+    margin-left: 4px;
+  }
+
+  .menubar__more {
+    position: relative;
+  }
+
+  .menubar__more summary {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 32px;
+    border-radius: 7px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .menubar__more summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menubar__more summary:hover,
+  .menubar__more[open] summary {
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  .menubar__more summary span,
+  .menubar__more summary span::before {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .menubar__more summary span {
+    position: relative;
+    transform: translateY(-3px);
+  }
+
+  .menubar__more summary span::before {
+    content: "";
+    position: absolute;
+    transform: translateY(6px);
+  }
+
+  .menubar__more[open] summary span {
+    transform: rotate(45deg);
+  }
+
+  .menubar__more[open] summary span::before {
+    transform: rotate(-90deg);
+  }
+
+  .menubar__sheet {
+    position: fixed;
+    top: calc(var(--bar-h) + 8px);
+    right: 8px;
+    left: 8px;
+    display: grid;
+    gap: 18px;
+    padding: 12px 12px 18px;
+    border-radius: 16px;
+    background: rgb(22 25 33 / 0.96);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.12),
+      0 30px 60px -20px rgb(0 0 0 / 0.8);
+    font-family: var(--font-sans);
+    animation: sheet-in 0.45s var(--ease-out);
+  }
+
+  .menubar__sheet ul {
+    display: grid;
+  }
+
+  .menubar__sheet li a {
+    display: block;
+    padding: 12px 10px;
+    border-radius: 10px;
+    font-size: 1.375rem;
+    font-weight: 600;
+    font-stretch: 85%;
+    letter-spacing: -0.02em;
+  }
+
+  .menubar__sheet li a:hover {
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .menubar__sheet p {
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    text-align: center;
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+
+  @media (min-width: 560px) {
+    .menubar__cta {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .menubar__menu {
+      display: flex;
+    }
+
+    .menubar__more {
+      display: none;
+    }
+
+    .menubar__clock {
+      display: inline;
+    }
+
+    .menubar__inner {
+      padding-inline: 16px;
+    }
+  }
+</style>

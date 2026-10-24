@@ -1,0 +1,508 @@
+---
+// 08. Roadmap. A luminous path runs through the milestones. Scroll draws it and carries the
+// TokenBar icon along; milestones light up as it passes, and Windows emerges from the dark.
+// Without JavaScript the path is a plain line and every milestone is lit.
+import { Image } from "astro:assets";
+import icon from "../assets/icon.png";
+import { roadmap } from "../data/roadmap";
+import { links } from "../config";
+---
+
+<section id="roadmap" class="section roadmap" aria-labelledby="roadmap-title">
+  <div class="wrap">
+    <div class="roadmap__head">
+      <p class="index"><b>08</b> Roadmap</p>
+      <h2 id="roadmap-title" class="display" data-lines>
+        <span class="line"><span>Where it’s</span></span>{" "}
+        <span class="line"><span class="serif">going.</span></span>
+      </h2>
+      <p class="body" data-reveal>
+        From the <a class="link" href={links.roadmap} rel="noopener">public roadmap</a>. There are no dates: the order shows
+        how settled each item is, not when it ships.
+      </p>
+    </div>
+
+    <div class="road" data-road>
+      <svg class="road__svg" aria-hidden="true" data-road-svg>
+        <defs>
+          <linearGradient id="road-g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1000" data-road-grad>
+            <stop offset="0" stop-color="#9ae6ff"></stop>
+            <stop offset="0.45" stop-color="#5ad8ff"></stop>
+            <stop offset="0.8" stop-color="#0a84ff"></stop>
+            <stop offset="1" stop-color="#0a84ff" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path class="road__base" data-road-base></path>
+        <path class="road__lit" data-road-lit></path>
+      </svg>
+      <span class="road__traveler" aria-hidden="true" data-road-traveler>
+        <Image src={icon} alt="" width={48} height={48} densities={[1, 2]} />
+      </span>
+
+      <ol class="road__list" role="list">
+        {
+          roadmap.map((m, i) => (
+            <li class={`ms ms--${m.state} ms--${i % 2 ? "r" : "l"}`} data-ms>
+              <span class="ms__dot" data-dot />
+              <div class="ms__card">
+                <p class="ms__meta">
+                  <span class={`ms__state ms__state--${m.state}`}>{m.label}</span>
+                  {m.version && <span class="ms__version">{m.version}</span>}
+                  {m.platform && <span class:list={["tag", m.state === "shipped" ? "tag--live" : "tag--dev"]}>{m.platform}</span>}
+                </p>
+                <h3 class="ms__title">{m.title}</h3>
+                {m.text && <p class="ms__text">{m.text}</p>}
+                {m.items && (
+                  <ul class="ms__items" role="list">
+                    {m.items.map((it) => (
+                      <li>
+                        <strong>{it.title}</strong>
+                        {it.text && <span>{it.text}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="road__end" data-road-end>The path continues. <a class="link" href={links.providerRequest} rel="noopener">Suggest what’s next</a></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { scene, seg, motionEnabled } from "../scripts/motion";
+
+  const road = document.querySelector<HTMLElement>("[data-road]");
+  const svg = road?.querySelector<SVGSVGElement>("[data-road-svg]");
+  const base = road?.querySelector<SVGPathElement>("[data-road-base]");
+  const lit = road?.querySelector<SVGPathElement>("[data-road-lit]");
+  const grad = road?.querySelector<SVGLinearGradientElement>("[data-road-grad]");
+  const traveler = road?.querySelector<HTMLElement>("[data-road-traveler]");
+  const end = road?.querySelector<HTMLElement>("[data-road-end]");
+  const items = [...(road?.querySelectorAll<HTMLElement>("[data-ms]") ?? [])];
+
+  if (road && svg && base && lit && grad && traveler && end && motionEnabled()) {
+    road.classList.add("is-live");
+    let total = 0;
+    let dots: { x: number; y: number; el: HTMLElement }[] = [];
+    let endY = 0;
+
+    // Builds a smooth path through every milestone dot, then on to the end of the road.
+    const layout = (): void => {
+      const r = road.getBoundingClientRect();
+      dots = items.map((el) => {
+        const d = el.querySelector<HTMLElement>("[data-dot]")!.getBoundingClientRect();
+        return { x: d.left + d.width / 2 - r.left, y: d.top + d.height / 2 - r.top, el };
+      });
+      const e = end.getBoundingClientRect();
+      endY = e.top - r.top - 44;
+      const pts = [{ x: dots[0]!.x, y: 0 }, ...dots, { x: r.width / 2, y: endY }];
+      let d = `M${pts[0]!.x} ${pts[0]!.y}`;
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1]!;
+        const b = pts[i]!;
+        const k = (b.y - a.y) * 0.5;
+        d += ` C${a.x} ${a.y + k} ${b.x} ${b.y - k} ${b.x} ${b.y}`;
+      }
+      svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+      svg.setAttribute("width", String(r.width));
+      svg.setAttribute("height", String(r.height));
+      base.setAttribute("d", d);
+      lit.setAttribute("d", d);
+      grad.setAttribute("y2", String(endY));
+      total = lit.getTotalLength();
+      lit.style.strokeDasharray = `${total} ${total}`;
+    };
+
+    // The path only moves downward, so the length at a given height can be bisected.
+    const lengthAt = (y: number): number => {
+      let lo = 0;
+      let hi = total;
+      for (let i = 0; i < 22; i++) {
+        const mid = (lo + hi) / 2;
+        if (lit.getPointAtLength(mid).y < y) lo = mid;
+        else hi = mid;
+      }
+      return lo;
+    };
+
+    const update = (): void => {
+      if (!total) return;
+      const r = road.getBoundingClientRect();
+      const y = Math.min(Math.max(window.innerHeight * 0.55 - r.top, 0), endY);
+      const len = lengthAt(y);
+      const pt = lit.getPointAtLength(len);
+      lit.style.strokeDashoffset = String(total - len);
+      traveler.style.transform = `translate3d(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px, 0) translate(-50%, -50%)`;
+      traveler.classList.toggle("is-moving", y > 0 && y < endY);
+      for (const dot of dots) {
+        dot.el.classList.toggle("is-lit", y >= dot.y - 4);
+        // Distant milestones stay in the dark until the icon approaches them.
+        dot.el.style.setProperty("--near", seg(y, dot.y - window.innerHeight * 0.6, dot.y - 40).toFixed(3));
+      }
+    };
+
+    layout();
+    new ResizeObserver(() => {
+      layout();
+      update();
+    }).observe(road);
+    document.fonts?.ready.then(() => {
+      layout();
+      update();
+    });
+    scene(road, update, { pass: true });
+  }
+</script>
+
+<style>
+  .roadmap {
+    overflow: clip;
+  }
+
+  .roadmap__head {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+    margin-bottom: clamp(64px, 9vw, 120px);
+  }
+
+  .road {
+    position: relative;
+  }
+
+  /* Static path: a straight line through the dots. */
+  .road::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 11px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--cyan), var(--blue) 75%, transparent);
+  }
+
+  .road.is-live::before {
+    display: none;
+  }
+
+  .road__svg {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .road__base {
+    fill: none;
+    stroke: rgb(255 255 255 / 0.12);
+    stroke-width: 2;
+    stroke-dasharray: 2 8;
+  }
+
+  .road__lit {
+    fill: none;
+    stroke: url(#road-g);
+    stroke-width: 3;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 8px rgb(90 216 255 / 0.65));
+  }
+
+  .road__traveler {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    filter: drop-shadow(0 0 22px rgb(90 216 255 / 0.55));
+    will-change: transform;
+  }
+
+  .road.is-live .road__traveler {
+    display: block;
+  }
+
+  .road__traveler img {
+    width: 48px;
+    height: 48px;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .road__list {
+    position: relative;
+    display: grid;
+    gap: clamp(72px, 10vw, 160px);
+  }
+
+  .ms {
+    position: relative;
+    display: grid;
+    padding-left: 48px;
+  }
+
+  .ms__dot {
+    position: absolute;
+    top: 6px;
+    left: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.25);
+    transition:
+      box-shadow 0.6s var(--ease-out),
+      background-color 0.6s;
+  }
+
+  .ms__card {
+    display: grid;
+    gap: 14px;
+    max-width: 560px;
+  }
+
+  .ms__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ms__state {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .ms__state--shipped {
+    color: var(--ok);
+  }
+
+  .ms__state--development {
+    color: var(--cyan);
+  }
+
+  .ms__state--planned {
+    color: #a9c7ff;
+  }
+
+  .ms__state--exploring {
+    color: var(--text-3);
+  }
+
+  .ms__version {
+    padding: 2px 8px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-2);
+  }
+
+  .ms__title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 600;
+    font-stretch: 82%;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .ms__text {
+    max-width: 48ch;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .ms__items {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+
+  .ms__items li {
+    display: grid;
+    gap: 2px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.975rem;
+  }
+
+  .ms__items strong {
+    font-weight: 600;
+  }
+
+  .ms__items span {
+    color: var(--text-3);
+    font-size: 0.9rem;
+  }
+
+  .ms--shipped .ms__items strong::before {
+    content: "✓";
+    margin-right: 10px;
+    color: var(--ok);
+    font-family: var(--font-ui);
+  }
+
+  /* Windows: the large word that emerges as the icon approaches. */
+  .ms--development .ms__title {
+    font-size: clamp(4rem, 13vw, 12rem);
+    font-stretch: 78%;
+    letter-spacing: -0.055em;
+    line-height: 0.85;
+    background: linear-gradient(180deg, #ffffff 20%, #7fd6ff 70%, #1c6dff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ms--development .ms__card {
+    max-width: none;
+  }
+
+  /* Lit states, applied by the script while scrolling. */
+  :global(.motion) .road.is-live .ms__card {
+    opacity: calc(0.18 + var(--near, 0) * 0.82);
+    transform: translate3d(0, calc((1 - var(--near, 0)) * 24px), 0);
+    transition:
+      opacity 0.3s linear,
+      transform 0.3s linear;
+  }
+
+  :global(.motion) .road.is-live .ms--development .ms__title {
+    opacity: calc(0.04 + var(--near, 0) * 0.96);
+    filter: blur(calc((1 - var(--near, 0)) * 10px));
+    transform: scale(calc(0.94 + var(--near, 0) * 0.06));
+  }
+
+  .ms.is-lit .ms__dot,
+  :global(html:not(.motion)) .ms__dot {
+    background: var(--cyan);
+    box-shadow:
+      0 0 0 4px rgb(90 216 255 / 0.15),
+      0 0 22px rgb(90 216 255 / 0.8);
+  }
+
+  .ms--shipped.is-lit .ms__dot,
+  :global(html:not(.motion)) .ms--shipped .ms__dot {
+    background: var(--ok);
+    box-shadow:
+      0 0 0 4px rgb(110 231 168 / 0.15),
+      0 0 22px rgb(110 231 168 / 0.7);
+  }
+
+  .ms--exploring .ms__dot {
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.25);
+  }
+
+  .road__end {
+    position: relative;
+    margin-top: clamp(96px, 12vw, 180px);
+    padding-left: 48px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+  }
+
+  @media (min-width: 1024px) {
+    .road::before {
+      left: 50%;
+    }
+
+    .ms {
+      padding-left: 0;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ms__dot {
+      top: 8px;
+    }
+
+    .ms--l .ms__dot {
+      left: calc(50% - 8px - 80px);
+    }
+
+    .ms--r .ms__dot {
+      left: calc(50% - 8px + 80px);
+    }
+
+    /* Static line runs down the middle; keep the dots on it. */
+    .road:not(.is-live) .ms__dot {
+      left: calc(50% - 8px);
+    }
+
+    .ms--l .ms__card {
+      grid-column: 1;
+      justify-self: end;
+      padding-right: 140px;
+      text-align: right;
+    }
+
+    .ms--l .ms__meta {
+      justify-content: flex-end;
+    }
+
+    .ms--l .ms__text {
+      margin-left: auto;
+    }
+
+    .ms--r .ms__card {
+      grid-column: 2;
+      padding-left: 140px;
+    }
+
+    .ms--l .ms__items li {
+      justify-items: end;
+    }
+
+    .ms--l.ms--shipped .ms__items strong::before {
+      content: none;
+    }
+
+    .ms--l.ms--shipped .ms__items strong::after {
+      content: "✓";
+      margin-left: 10px;
+      color: var(--ok);
+      font-family: var(--font-ui);
+    }
+
+    /* Windows spans the whole road; the path runs behind the word. */
+    .ms--development .ms__card {
+      grid-column: 1 / -1;
+      justify-self: stretch;
+      justify-items: center;
+      padding: 0;
+      text-align: center;
+    }
+
+    .ms--development .ms__meta {
+      justify-content: center;
+    }
+
+    .ms--development .ms__dot {
+      top: -72px;
+      left: calc(50% - 8px);
+    }
+
+    .ms--development .ms__title {
+      font-size: clamp(6rem, 17vw, 16rem);
+      transform-origin: 50% 100%;
+    }
+
+    .ms--development .ms__text {
+      margin-inline: auto;
+    }
+
+    .road__end {
+      padding-left: 0;
+      text-align: center;
+    }
+  }
+</style>

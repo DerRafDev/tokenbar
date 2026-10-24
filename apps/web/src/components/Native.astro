@@ -1,0 +1,270 @@
+---
+// 05. Native. Typography carries this section: the stack TokenBar is built on, what it is
+// not built on, and a short spec sheet. Facts from README and docs/architecture.md.
+import StatusItem from "./StatusItem.astro";
+import { links, requirements } from "../config";
+
+const stack = [
+  { name: "Swift", note: "Swift 6, strict concurrency" },
+  { name: "SwiftUI + AppKit", note: "The system’s own UI frameworks" },
+  { name: "macOS", note: "A menu bar app, no Dock icon, no window" },
+];
+
+const nots = ["Electron", "Web views", "A browser wrapper", "Third-party code"];
+
+const specs = [
+  ["Requires", requirements],
+  ["Dependencies", "None. Foundation, SwiftUI, AppKit, Security, ServiceManagement, OSLog."],
+  ["Refresh", "Every 5 minutes by default (2–15), after wake, and when you open the popover. Never polls aggressively."],
+  ["Menu bar", "Rendered as a template image, so macOS tints it for light and dark menu bars."],
+  ["Login", "Opens at login if you want it to, through the system’s Login Items."],
+  ["Languages", "English and Portuguese (Brazil)."],
+];
+---
+
+<section id="native" class="section native" aria-labelledby="native-title">
+  <div class="wrap">
+    <div class="native__top">
+      <div class="native__intro">
+        <p class="index"><b>05</b> Native</p>
+        <h2 id="native-title" class="headline" data-lines>
+          <span class="line"><span>Built for the menu bar.</span></span>{" "}
+          <span class="line"><span class="serif">Not squeezed into it.</span></span>
+        </h2>
+      </div>
+
+      <ol class="stack" role="list">
+        {
+          stack.map((s, i) => (
+            <li class="stack__item" data-reveal style={`--d:${i * 2}`}>
+              <span class="stack__name">{s.name}</span>
+              <span class="stack__note">{s.note}</span>
+            </li>
+          ))
+        }
+        <li class="stack__item stack__item--app" data-reveal style="--d:6">
+          <span class="stack__result">
+            <StatusItem />
+          </span>
+          <span class="stack__note">TokenBar</span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="native__bottom">
+      <div class="nots">
+        <p class="eyebrow">What’s not inside</p>
+        <ul role="list">
+          {
+            nots.map((n, i) => (
+              <li data-reveal style={`--d:${i}`}>
+                <s>{n}</s>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <dl class="specs">
+        {
+          specs.map(([k, v], i) => (
+            <div data-reveal style={`--d:${i}`}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        }
+        <div data-reveal style="--d:6">
+          <dt>Source</dt>
+          <dd>
+            All logic lives in one Swift package, split into core, providers and UI.{" "}
+            <a class="link" href={links.architecture} rel="noopener">Architecture</a>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .native__top {
+    display: grid;
+    gap: 64px;
+  }
+
+  .native__intro {
+    display: grid;
+    gap: 28px;
+    align-content: start;
+  }
+
+  .stack {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+
+  .stack::before {
+    content: "";
+    position: absolute;
+    top: 0.6em;
+    bottom: 1.8em;
+    left: 7px;
+    width: 1px;
+    background: linear-gradient(180deg, var(--cyan), rgb(10 132 255 / 0.4) 70%, transparent);
+  }
+
+  .stack__item {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    padding: 0 0 28px 40px;
+  }
+
+  .stack__item::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 0.55em;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow:
+      inset 0 0 0 1.5px var(--cyan),
+      0 0 12px rgb(90 216 255 / 0.5);
+  }
+
+  .stack__name {
+    font-size: clamp(2.25rem, 5.6vw, 5rem);
+    font-weight: 600;
+    font-stretch: 80%;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .stack__note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  .stack__item--app {
+    padding-bottom: 0;
+  }
+
+  .stack__item--app::before {
+    background: var(--cyan);
+  }
+
+  .stack__result {
+    justify-self: start;
+    padding: 0.35em 0.4em;
+    border-radius: 14px;
+    background: rgb(14 17 24 / 0.9);
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      0 20px 60px -20px rgb(10 92 255 / 0.6);
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+  }
+
+  .native__bottom {
+    display: grid;
+    gap: 56px;
+    margin-top: clamp(80px, 10vw, 140px);
+  }
+
+  .nots {
+    display: grid;
+    gap: 20px;
+    align-content: start;
+  }
+
+  .nots ul {
+    display: grid;
+    gap: 4px;
+  }
+
+  .nots li {
+    font-size: clamp(1.75rem, 3.4vw, 3rem);
+    font-weight: 500;
+    font-stretch: 85%;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    color: var(--text-3);
+  }
+
+  .nots s {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .nots s::after {
+    content: "";
+    position: absolute;
+    left: -0.06em;
+    right: -0.06em;
+    top: 55%;
+    height: 0.07em;
+    background: var(--text-2);
+    transform-origin: 0 50%;
+  }
+
+  :global(.motion) .nots s::after {
+    transform: scaleX(0);
+    transition: transform 0.9s var(--ease-in-out);
+    transition-delay: calc(var(--d, 0) * 90ms + 400ms);
+  }
+
+  :global(.motion) .nots li.is-in s::after {
+    transform: none;
+  }
+
+  .specs {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+
+  .specs > div {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .specs dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding-top: 0.3em;
+  }
+
+  .specs dd {
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 559px) {
+    .specs > div {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .native__top {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      align-items: end;
+    }
+
+    .native__bottom {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 80px;
+    }
+  }
+</style>
