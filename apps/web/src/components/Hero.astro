@@ -83,10 +83,14 @@ import { links } from "../config";
         ax = 0;
         return;
       }
-      product.style.setProperty("--ax", "0px");
+      // Measure the popover where the layout puts it, not where the last frame moved it.
+      product.style.translate = "none";
+      tilt.style.transform = "none";
       const s = status.getBoundingClientRect();
       const t = tilt.getBoundingClientRect();
       ax = s.left + s.width / 2 - (t.left + t.width / 2);
+      // Near the screen edge it shifts left instead of overflowing, like a macOS popover.
+      ax = Math.min(ax, window.innerWidth - 16 - t.right);
       render();
     };
 
@@ -98,7 +102,9 @@ import { links } from "../config";
       const rx = e * 18 - py * 4;
       const ry = -e * 24 + px * 6;
       const scale = 1 + e * (big ? 0.1 : 0);
-      tilt.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(e * 2).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      // The whole figure moves sideways, so the caption stays under the popover.
+      product.style.translate = `${x.toFixed(1)}px 0`;
+      tilt.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(e * 2).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
       copy.style.opacity = String(1 - seg(p, 0.55, 1) * 0.75);
       if (rings) rings.style.transform = `rotate(${(p * 40).toFixed(2)}deg)`;
       status?.classList.toggle("is-on", hero.classList.contains("is-open") && p < 0.12);
