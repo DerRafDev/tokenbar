@@ -180,8 +180,10 @@ builds, and the popover labels demo data with a "Demo" badge.
 
 ## Security boundaries
 
-- Third-party credentials (Claude Code, Codex) are **read at fetch time** and never
-  copied, refreshed, or persisted by TokenBar.
+- Third-party credentials (Claude Code, Codex) are read from their owner's storage and never
+  refreshed or persisted by TokenBar. Codex is read at fetch time; Claude Code's token is kept
+  in memory (`ClaudeCredentialCache`) and read again only when its Keychain item changes or the
+  token expires or is rejected, so macOS does not ask on every refresh.
 - Credentials TokenBar owns go through `CredentialStore`: generic password items in
   the login Keychain, scoped to TokenBar's service, `AfterFirstUnlockThisDeviceOnly`,
   never synced to iCloud. Nothing sensitive goes in `UserDefaults`, files, or logs.

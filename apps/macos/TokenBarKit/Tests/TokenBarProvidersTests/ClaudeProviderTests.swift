@@ -111,7 +111,7 @@ struct ClaudeProviderTests {
     @Test func sendsTokenThatIsStillValid() async throws {
         let (provider, http) = provider(
             .response(status: 200, body: try Fixture.data("usage-pro")),
-            credentials: .valid(expiresAt: now.addingTimeInterval(60))
+            credentials: .valid(expiresAt: now.addingTimeInterval(5 * 60))
         )
         _ = try await provider.fetchUsage()
         #expect(http.requests.count == 1)

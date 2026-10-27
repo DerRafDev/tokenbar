@@ -2,10 +2,11 @@ import Foundation
 import Security
 import TokenBarCore
 
-/// The parts of Claude Code's sign-in that TokenBar needs, read fresh for every refresh.
+/// The parts of Claude Code's sign-in that TokenBar needs.
 ///
-/// Never stored, copied, refreshed, or logged by TokenBar. The description is redacted so the
-/// token cannot leak through string interpolation.
+/// Kept only in memory by ``ClaudeCredentialCache``; never written to disk, copied to another Keychain
+/// item, refreshed, or logged by TokenBar. The description is redacted so the token cannot leak through
+/// string interpolation.
 struct ClaudeCodeCredentials: Sendable, CustomStringConvertible {
     let accessToken: String
     let expiresAt: Date?
@@ -47,7 +48,11 @@ struct ClaudeCodeCredentials: Sendable, CustomStringConvertible {
 
 /// Where ``ClaudeProvider`` gets Claude Code's sign-in.
 protocol ClaudeCredentialSource: Sendable {
+    /// Reads the sign-in itself. macOS may ask the user for permission.
     func credentials() throws -> ClaudeCodeCredentials
+    /// When Claude Code last wrote its sign-in, read without the secret so macOS does not ask.
+    /// Throws ``ProviderError/notConnected`` when there is no sign-in; `nil` when it is unknown.
+    func modificationDate() throws -> Date?
 }
 
 /// Reads the generic password item Claude Code keeps in the login Keychain.
@@ -77,6 +82,27 @@ struct ClaudeCodeKeychain: ClaudeCredentialSource {
         default:
             // Includes errSecInteractionNotAllowed (Keychain locked): retried on the next refresh.
             throw ProviderError.unknown
+        }
+    }
+
+    func modificationDate() throws -> Date? {
+        // Attributes only: the item's data, and with it the permission prompt, is not touched.
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecReturnAttributes: true,
+            kSecMatchLimit: kSecMatchLimitOne,
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        switch status {
+        case errSecSuccess:
+            return (result as? [CFString: Any])?[kSecAttrModificationDate] as? Date
+        case errSecItemNotFound:
+            throw ProviderError.notConnected
+        default:
+            // Keychain locked or unavailable: the cache falls back to its own retry limit.
+            return nil
         }
     }
 }

@@ -100,15 +100,16 @@ item after you install an update. Signing and notarization are planned after 0.1
 Every provider starts **disabled**. TokenBar reads nothing until you enable one, and it
 shows what will be read before you confirm.
 
-- **Claude** reads Claude Code's sign-in from your Keychain on each refresh. macOS asks
-  for permission the first time; choose **Always Allow** so it does not ask on every
-  refresh. If you deny it, TokenBar stops asking until you refresh manually.
+- **Claude** reads Claude Code's sign-in from your Keychain and keeps it in memory while
+  TokenBar runs. It reads it again only when Claude Code renews it or it expires, so macOS
+  asks at most then; choose **Always Allow** so it does not ask at all. If you deny it,
+  TokenBar stops asking until you refresh manually.
 - **Codex** reads `~/.codex/auth.json` (or `$CODEX_HOME/auth.json`). Codex installations
   that keep their sign-in in the Keychain (`cli_auth_credentials_store = "keyring"`) are
   not supported yet.
 
 If a sign-in expires, run Claude Code or Codex once and TokenBar picks up the renewed
-sign-in on its next refresh. TokenBar never renews or copies tokens itself.
+sign-in on its next refresh. TokenBar never renews tokens or writes them to disk.
 
 ## Privacy
 
@@ -119,8 +120,9 @@ sign-in on its next refresh. TokenBar never renews or copies tokens itself.
 - No analytics, telemetry, crash reporting, tracking, or update checks.
 - No database or history: usage is kept in memory and never written to disk. Network
   responses are not cached and cookies are not stored.
-- Sign-ins are read when a refresh happens. TokenBar never stores, copies, or refreshes
-  them, and never logs tokens, account identifiers, or response bodies.
+- Sign-ins are read when a refresh needs them. TokenBar keeps the Claude Code token in
+  memory only, never writes sign-ins to disk or refreshes them, and never logs tokens,
+  account identifiers, or response bodies.
 - Preferences (refresh interval, enabled providers, menu bar mode) are stored in the
   usual macOS preferences file.
 
