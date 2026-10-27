@@ -8,10 +8,11 @@ import os
 /// not document it for other apps, so it can change or disappear. Everything Claude-specific lives
 /// in this folder; removing the provider means removing it from the app's provider registry.
 ///
-/// Per refresh: read Claude Code's Keychain item → `GET /api/oauth/usage` → map windows.
-/// The token is never stored, copied, refreshed, or logged. An expired token is reported as
-/// ``ProviderError/unauthorized`` without calling the endpoint; Claude Code renews it the next time
-/// it is used.
+/// Per refresh: Claude Code's sign-in (from memory, or its Keychain item when needed, see
+/// ``ClaudeCredentialCache``) → `GET /api/oauth/usage` → map windows.
+/// The token is kept in memory only, and never written to disk, refreshed, or logged. An expired or
+/// rejected token is reported as ``ProviderError/unauthorized`` without calling the endpoint; Claude
+/// Code renews it the next time it is used.
 public struct ClaudeProvider: UsageProvider {
     public let descriptor = ProviderDescriptor(
         id: "claude",
@@ -28,9 +29,10 @@ public struct ClaudeProvider: UsageProvider {
         ),
         accessDescription: String(
             localized: """
-                Requires Claude Code signed in on this Mac. On each refresh TokenBar reads Claude Code's \
-                sign-in from your Keychain (macOS asks for permission) and sends it only to api.anthropic.com. \
-                It is never stored, copied, or refreshed by TokenBar.
+                Requires Claude Code signed in on this Mac. TokenBar reads Claude Code's sign-in from your \
+                Keychain (macOS asks for permission) when it starts and when Claude Code renews it, keeps it \
+                in memory only while TokenBar runs, and sends it only to api.anthropic.com. It is never \
+                written to disk or refreshed by TokenBar.
                 """,
             bundle: .module
         )
@@ -38,7 +40,7 @@ public struct ClaudeProvider: UsageProvider {
 
     static let usageURL = URL(string: "https://api.anthropic.com/api/oauth/usage")!
 
-    private let credentials: any ClaudeCredentialSource
+    private let credentials: ClaudeCredentialCache
     private let http: any HTTPClient
     private let now: @Sendable () -> Date
     private let logger = Logger(subsystem: Log.subsystem, category: "claude")
@@ -52,21 +54,20 @@ public struct ClaudeProvider: UsageProvider {
         http: any HTTPClient,
         now: @escaping @Sendable () -> Date = { Date() }
     ) {
-        self.credentials = credentials
+        self.credentials = ClaudeCredentialCache(source: credentials, now: now)
         self.http = http
         self.now = now
     }
 
     public func fetchUsage() async throws -> UsageSnapshot {
-        let credentials = try credentials.credentials()
-        guard !credentials.isExpired(at: now()) else {
-            logger.info("Claude Code sign-in expired; not calling the endpoint")
-            throw ProviderError.unauthorized
-        }
+        let credentials = try await credentials.credentials()
 
         let (data, response) = try await http.send(Self.request(token: credentials.accessToken))
         // Only the status code is logged: the body and headers identify the account.
         logger.debug("Usage request finished with HTTP \(response.statusCode, privacy: .public)")
+        if Self.isTokenRejected(status: response.statusCode, body: data) {
+            await self.credentials.reject(credentials.accessToken)
+        }
         if let error = ProviderError(httpStatus: response.statusCode, retryAfter: response.retryAfter(now: now())) {
             throw error
         }
@@ -88,6 +89,19 @@ public struct ClaudeProvider: UsageProvider {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(HTTPHeaders.userAgent, forHTTPHeaderField: "User-Agent")
         return request
+    }
+
+    /// True when the endpoint refused the token itself, as opposed to the account or organization.
+    ///
+    /// Matches Claude Code: every invalid or expired token gets HTTP 401 (`authentication_error`); a
+    /// revoked one can get 403 with "OAuth token has been revoked". Other 403s (for example an
+    /// organization that does not allow OAuth) keep the token.
+    static func isTokenRejected(status: Int, body: Data) -> Bool {
+        switch status {
+        case 401: true
+        case 403: String(decoding: body, as: UTF8.self).contains("OAuth token has been revoked")
+        default: false
+        }
     }
 
     /// Display name for Claude Code's `subscriptionType`. Unknown values are not shown.
