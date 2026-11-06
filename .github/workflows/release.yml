@@ -63,7 +63,14 @@ jobs:
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
           NOTARY_KEY_PATH: ${{ runner.temp }}/notary.p8
-        run: scripts/release.sh
+          # EdDSA private key that signs the update archive for Sparkle. Required.
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$SPARKLE_PRIVATE_KEY" ]]; then
+            echo "::error::The SPARKLE_PRIVATE_KEY secret is missing (docs/releasing.md › Sparkle)"
+            exit 1
+          fi
+          scripts/release.sh
 
       - name: Create draft GitHub Release
         env:

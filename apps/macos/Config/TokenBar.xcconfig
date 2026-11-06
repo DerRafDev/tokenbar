@@ -13,6 +13,19 @@ INFOPLIST_KEY_LSUIElement = YES
 INFOPLIST_KEY_CFBundleDisplayName = TokenBar
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.utilities
 INFOPLIST_KEY_NSHumanReadableCopyright = © 2026 TokenBar contributors. MIT License.
+// Extra keys (Sparkle) that have no INFOPLIST_KEY_ setting. Merged into the generated plist.
+INFOPLIST_FILE = Config/Info.plist
+
+// Sparkle in-app updates (docs/releasing.md). The feed is the appcast.xml attached to the
+// latest published GitHub Release, so drafts and pre-releases are never offered.
+// `/$()/` keeps `//` from starting an xcconfig comment.
+SPARKLE_FEED_URL = https:/$()/github.com/DerRafDev/tokenbar/releases/latest/download/appcast.xml
+// Public half of the EdDSA key that signs update archives. Not a secret. The private key is
+// never in the repository: it lives in the release maintainer's Keychain and in the
+// SPARKLE_PRIVATE_KEY Actions secret. scripts/release.sh refuses to run while this is empty.
+SPARKLE_PUBLIC_ED_KEY =
+// Sparkle.framework is embedded in Contents/Frameworks.
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
 
 // App icon: TokenBar/AppIcon.icon (Icon Composer). Xcode also derives the .icns used before
 // macOS 26 from it. The original artwork is docs/assets/app-icon.png.

@@ -217,8 +217,12 @@ Claude Code hook ──curl──▶ LocalHookServer (127.0.0.1) ──▶ Claud
   never synced to iCloud. Nothing sensitive goes in `UserDefaults`, files, or logs.
 - Logging uses `os.Logger` with privacy annotations. Tokens, cookies, account IDs,
   authenticated URLs, and response bodies are never logged.
-- No TokenBar backend. The app talks only to provider endpoints.
-  *Usage data stays on your Mac.*
+- No TokenBar backend. The app talks only to provider endpoints, and to GitHub when the
+  user chooses **Check for Updates…**. *Usage data stays on your Mac.*
+- Updates (Sparkle) are checked only on request (`SUEnableAutomaticChecks` is off), without
+  system profiling. Each archive must carry an EdDSA signature that matches `SUPublicEDKey`
+  in the running app, checked before extraction (`SUVerifyUpdateBeforeExtraction`). The
+  private key never enters the repository. See [releasing.md](releasing.md#sparkle-in-app-updates).
 - The agent alerts prototype exists only in Debug builds and only when launched with
   `TOKENBAR_AGENT_HOOKS=1`. Its listener binds to 127.0.0.1, accepts small `POST`s, answers `200`
   with an empty body (so a hook never makes a decision for Claude Code), and stores and logs
@@ -229,6 +233,9 @@ Claude Code hook ──curl──▶ LocalHookServer (127.0.0.1) ──▶ Claud
 
 ## Dependencies
 
-None. Foundation, SwiftUI, AppKit, Security, ServiceManagement, and OSLog cover
+One: [Sparkle 2](https://sparkle-project.org) (Swift Package Manager, app target only), for
+in-app updates with the standard Mac dialogs. `TokenBarKit` does not depend on it; the
+popover sees only the `UpdateChecking` protocol, which `SoftwareUpdater` in the app target
+implements. Foundation, SwiftUI, AppKit, Security, ServiceManagement, and OSLog cover
 networking, JSON, Keychain, dates, and UI. The Debug-only agent listener uses Network. Lint and formatting use `swift format`,
 which ships with Xcode.

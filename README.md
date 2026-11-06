@@ -41,8 +41,11 @@ directly to the providers. There is no TokenBar server and no account.
 - **Honest when data is old.** If a refresh fails, you keep the last values with an
   "outdated" mark instead of an error screen.
 - **Opens at login**, if you want it to.
+- **Updates itself when you ask.** Gear menu › **Check for Updates…** installs a new
+  version and relaunches TokenBar. It never checks on its own.
 - **English and Portuguese (Brazil).**
-- **Native and light.** SwiftUI and AppKit, no Electron, no web views, no third-party code.
+- **Native and light.** SwiftUI and AppKit, no Electron. The only third-party code is
+  [Sparkle](https://sparkle-project.org), the standard Mac framework for in-app updates.
 
 ## Supported providers
 
@@ -95,6 +98,23 @@ Because the build is unsigned, macOS may ask again for access to Claude Code's K
 item after you install an update. Signing and notarization are planned after 0.1.0
 ([roadmap](docs/roadmap.md)).
 
+### Updating
+
+Click the menu bar icon, open the gear menu, and choose **Check for Updates…**
+(**Buscar atualizações…** in Portuguese). If a new version exists, TokenBar shows what
+changed; click **Install Update**, then **Install and Relaunch**. Your preferences and
+enabled providers are kept. If you are up to date, TokenBar says so.
+
+> [!NOTE]
+> **Coming from TokenBar 0.1.0?** Versions before the updater cannot update themselves.
+> Install the first version with **Check for Updates…** by hand, once: quit TokenBar,
+> download the new DMG from the [latest release](https://github.com/DerRafDev/tokenbar/releases/latest),
+> and drag TokenBar to Applications, replacing the old copy. Your preferences are kept.
+> Every later version installs from the gear menu.
+
+Updates are verified before they are installed: each one is signed with the project's
+EdDSA key, and TokenBar refuses an update whose signature does not match.
+
 ### Enabling a provider
 
 Every provider starts **disabled**. TokenBar reads nothing until you enable one, and it
@@ -116,8 +136,11 @@ sign-in on its next refresh. TokenBar never renews tokens or writes them to disk
 **Your usage data stays on your Mac.**
 
 - TokenBar sends requests only to `api.anthropic.com` (Claude) and `chatgpt.com` (Codex),
-  and only for the providers you enabled.
-- No analytics, telemetry, crash reporting, tracking, or update checks.
+  and only for the providers you enabled, plus GitHub when you check for updates.
+- No analytics, telemetry, crash reporting, or tracking.
+- Update checks happen only when you choose **Check for Updates…**. TokenBar then
+  downloads the release feed from GitHub (`github.com` and its download servers), and
+  the update itself if you install it. No information about you or your Mac is sent.
 - No database or history: usage is kept in memory and never written to disk. Network
   responses are not cached and cookies are not stored.
 - Sign-ins are read when a refresh needs them. TokenBar keeps the Claude Code token in
@@ -142,7 +165,8 @@ From the repository root:
 scripts/test.sh       # build and test TokenBarKit
 scripts/format.sh     # format all Swift sources in place
 scripts/lint.sh       # check formatting and lint rules (what CI runs)
-scripts/release.sh    # build the DMG and ZIP into dist/ (see docs/releasing.md)
+scripts/release.sh    # build the DMG, ZIP and appcast into dist/ (see docs/releasing.md)
+scripts/test-update.sh build   # local in-app update test (see docs/releasing.md)
 ```
 
 Every build runs the real providers. To work on the UI without accounts, launch a Debug
