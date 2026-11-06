@@ -26,6 +26,9 @@ SPARKLE_FEED_URL = https:/$()/github.com/DerRafDev/tokenbar/releases/latest/down
 SPARKLE_PUBLIC_ED_KEY =
 // Sparkle.framework is embedded in Contents/Frameworks.
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
+// The only binary copied in a copy phase is Sparkle, which ships signed and cannot be
+// stripped; leaving this on only produced a "not stripping binary" warning.
+COPY_PHASE_STRIP = NO
 
 // App icon: TokenBar/AppIcon.icon (Icon Composer). Xcode also derives the .icns used before
 // macOS 26 from it. The original artwork is docs/assets/app-icon.png.
