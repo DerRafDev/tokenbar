@@ -15,6 +15,7 @@ merged pull requests.
 | Item | Status |
 |---|---|
 | **Windows app** | Being planned. No release date and no download yet. |
+| **In-app updates** (Sparkle, gear menu › Check for Updates…) | Built and tested locally with release builds. Ships with the first release after 0.1.0, once the release signing key is configured. 0.1.0 users install that release by hand once ([README › Updating](../README.md#updating)). |
 
 ## After 0.1.0
 

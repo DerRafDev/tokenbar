@@ -41,8 +41,9 @@ directly to the providers. There is no TokenBar server and no account.
 - **Honest when data is old.** If a refresh fails, you keep the last values with an
   "outdated" mark instead of an error screen.
 - **Opens at login**, if you want it to.
-- **Updates itself when you ask.** Gear menu › **Check for Updates…** installs a new
-  version and relaunches TokenBar. It never checks on its own.
+- **Updates itself when you ask** (from the first release after 0.1.0). Gear menu ›
+  **Check for Updates…** installs a new version and relaunches TokenBar. It never checks
+  on its own.
 - **English and Portuguese (Brazil).**
 - **Native and light.** SwiftUI and AppKit, no Electron. The only third-party code is
   [Sparkle](https://sparkle-project.org), the standard Mac framework for in-app updates.
@@ -100,17 +101,31 @@ item after you install an update. Signing and notarization are planned after 0.1
 
 ### Updating
 
-Click the menu bar icon, open the gear menu, and choose **Check for Updates…**
-(**Buscar atualizações…** in Portuguese). If a new version exists, TokenBar shows what
-changed; click **Install Update**, then **Install and Relaunch**. Your preferences and
-enabled providers are kept. If you are up to date, TokenBar says so.
-
 > [!NOTE]
-> **Coming from TokenBar 0.1.0?** Versions before the updater cannot update themselves.
-> Install the first version with **Check for Updates…** by hand, once: quit TokenBar,
-> download the new DMG from the [latest release](https://github.com/DerRafDev/tokenbar/releases/latest),
-> and drag TokenBar to Applications, replacing the old copy. Your preferences are kept.
-> Every later version installs from the gear menu.
+> In-app updates are not in a release yet. TokenBar 0.1.0 has no updater; the first
+> release after 0.1.0 will be the first one that has it.
+
+**Where it is:** click the TokenBar icon in the menu bar, then the **gear** button at the
+bottom right of the popover, and choose **Check for Updates…** (**Buscar atualizações…**
+in Portuguese), just above **Quit TokenBar**.
+
+If a new version exists, TokenBar shows what changed. Click **Install Update** (**Instalar
+Atualização**), then **Install and Relaunch** (**Instalar e Reabrir**). TokenBar quits,
+installs the new version and opens again, with your preferences and enabled providers
+kept. If you already have the latest version, it says so. TokenBar never checks on its
+own; it only looks for updates when you choose this item.
+
+**Coming from TokenBar 0.1.0?** 0.1.0 has no **Check for Updates…** and cannot update
+itself. Install the first version with the updater by hand, once:
+
+1. Quit TokenBar (gear menu › **Quit TokenBar**).
+2. Download the new DMG from the [latest release](https://github.com/DerRafDev/tokenbar/releases/latest).
+3. Open it and drag **TokenBar** to **Applications**, choosing **Replace**.
+4. Open TokenBar. If that release is unsigned, approve it again with **Open Anyway** as in
+   the installation steps above.
+
+Your preferences and enabled providers are kept. From then on, every new version installs
+from the gear menu.
 
 Updates are verified before they are installed: each one is signed with the project's
 EdDSA key, and TokenBar refuses an update whose signature does not match.

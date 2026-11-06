@@ -19,22 +19,24 @@ $EDITOR docs/release-notes/v0.2.0.md          # user-facing notes for the GitHub
 git commit -am "chore(release): prepare TokenBar 0.2.0"
 # open PR → CI green → merge
 git switch main && git pull
-scripts/test-update.sh build                  # in-app update test, see below
-gh workflow run release.yml --ref main        # dry run: review its artifact, see below
-# run the manual checklist: docs/release-checklist.md
-git tag v0.2.0 && git push origin v0.2.0
+scripts/test-update.sh build                  # 1. in-app update test (Testing an update locally)
+gh workflow run release.yml --ref main        # 2. dry run in Actions (Dry run)
+# 3. download and check the dry run's zip and appcast.xml
+# 4. run the manual checklist: docs/release-checklist.md
+git tag v0.2.0 && git push origin v0.2.0      # 5. builds again and creates a draft
+# 6. review the draft (Reviewing the draft), then publish it as the latest release
 ```
 
-The [Release workflow](../.github/workflows/release.yml) then runs:
+The [Release workflow](../.github/workflows/release.yml) has two jobs:
 
 ```text
-build:          verify tag → tests → archive → sign (app + Sparkle) → notarize app → staple → zip + dmg → sign + notarize dmg → EdDSA-sign zip → appcast.xml → SHA256SUMS → upload dist/ artifact
-draft-release:  download that artifact → draft GitHub Release
+build:          [tag only: verify tag] → tests → archive → sign (app + Sparkle) → notarize app → staple → zip + dmg → sign + notarize dmg → EdDSA-sign zip → appcast.xml → SHA256SUMS → upload dist/ artifact
+draft-release:  [tag only] download that artifact → draft GitHub Release
 ```
 
-It creates a **draft**. Its notes come from `docs/release-notes/<tag>.md` (GitHub's
-generated notes when that file is missing). Review the draft and its artifacts, then
-publish it on GitHub. Nothing is published automatically.
+A tag push runs both and ends with a **draft**. Its notes come from
+`docs/release-notes/<tag>.md` (GitHub's generated notes when that file is missing). A
+manual run (dry run) runs only `build`. Nothing is published automatically.
 
 **Publishing is what ships the update.** Installed copies read
 `releases/latest/download/appcast.xml`, which is the `appcast.xml` attached to the latest
@@ -109,14 +111,40 @@ With Developer ID and notarization configured, also `spctl -a -vv app/TokenBar.a
 (`source=Notarized Developer ID`) and `xcrun stapler validate app/TokenBar.app`.
 
 A dry run proves the pipeline and the inputs, but the tag push builds again, so the draft's
-files are new bytes (new signatures and timestamps). Check the draft's `appcast.xml` the
-same way before publishing.
+files are new bytes (new signatures and timestamps). Review the draft too.
+
+## Reviewing the draft
+
+The tag push ends with a draft release whose assets are the `build` job's `dist/`. Drafts
+are visible only to maintainers and invisible to installed copies. Before publishing:
+
+```sh
+gh release view v0.2.0                         # draft: true; notes; asset list
+gh release download v0.2.0 -D draft/           # zip, dmg, appcast.xml, SHA256SUMS.txt
+cd draft/
+```
+
+Run the same checks as for a dry run (checksums, `appcast.xml` fields, `sign_update
+--verify`, `SUPublicEDKey`, `codesign`). Also check:
+
+- The asset file names on the draft match the file name in the `enclosure` URL, character
+  for character, and the tag in that URL is the draft's tag. After publishing, that URL
+  is where installed copies download the update.
+- `appcast.xml` is attached; without it, `releases/latest/download/appcast.xml` returns 404
+  after publishing and every update check shows an error.
+- The notes on the draft and in the appcast's `<description>` say the same thing.
+
+Then publish from the draft's page (*Edit*). For an unsigned build, untick *Set as a
+pre-release* and tick *Set as the latest release*. Publishing is the moment the update
+reaches users; to stop a bad release afterwards, edit it back to a draft or a pre-release,
+which removes it from the feed.
 
 ## Secrets
 
 Configure in *Settings → Secrets and variables → Actions*. The signing and notarization
-secrets are optional: without them the release is ad-hoc signed, its artifacts are suffixed `-unsigned`, and the draft
-is marked prerelease. macOS Gatekeeper blocks unsigned apps on first launch.
+secrets are optional: without them the release is ad-hoc signed, its artifacts are
+suffixed `-unsigned`, and the draft is marked prerelease. macOS Gatekeeper blocks unsigned
+apps on first launch.
 
 To ship an unsigned build as the main release (as 0.1.0 does), untick *Set as a
 pre-release* and tick *Set as the latest release* before publishing the draft. GitHub's
@@ -201,9 +229,9 @@ $bin/generate_keys -x sparkle-key.txt # exports the private key to a file, for t
 ### Signing, notarization and the first updater release
 
 What the project has today: the pipeline signs with Developer ID, uses the hardened runtime,
-notarizes and staples the app and the DMG, but only when the secrets exist. None are
-configured and this Mac has no Developer ID identity, so 0.1.0 and any release built now is
-ad-hoc signed (`-unsigned`).
+notarizes and staples the app and the DMG, but only when the secrets exist. No Developer ID
+or notary secrets are configured in the repository yet, so 0.1.0 and any release built now
+is ad-hoc signed (`-unsigned`).
 
 The updater works either way. Sparkle accepts an update when its EdDSA signature matches,
 even if the Apple signing identity changes, so going from an ad-hoc build to a Developer ID
@@ -217,6 +245,9 @@ macOS asks again for Claude's Keychain item after each unsigned update.
 What is missing to ship the first version with the updater:
 
 - [ ] `SPARKLE_PUBLIC_ED_KEY` committed and `SPARKLE_PRIVATE_KEY` secret set (above). Required.
+- [ ] The Sparkle changes, including the `workflow_dispatch` trigger, merged into `main`, so
+      the dry run can be started.
+- [ ] A dry run on `main` passed and its zip and `appcast.xml` check out (Dry run).
 - [ ] Optional but recommended: the Developer ID and notary secrets. With them, the release
       script re-signs Sparkle's helpers (`Autoupdate`, `Updater.app`, the XPC services) with
       the Developer ID and the hardened runtime, as notarization requires. This path cannot be
@@ -249,14 +280,14 @@ preference. A second TokenBar icon appears in the menu bar; it is the test copy.
    says `0.91.0`, and `defaults read io.github.derrafdev.TokenBar.updatetest` still has
    `menuBarDisplay = detailed`.
 2. **No update.** `scripts/test-update.sh install`, `scripts/test-update.sh feed none`,
-   check again → "You're up to date!".
+   check again → "You're up to date!" ("O app está atualizado!" in Portuguese).
 3. **Bad signature.** `scripts/test-update.sh install`, `scripts/test-update.sh feed bad-signature`,
-   check, **Install Update** → Sparkle refuses ("The update is improperly signed…") and
+   check, **Install Update** → Sparkle downloads the zip, refuses it with an error, and
    0.90.0 stays installed.
 
 `scripts/test-update.sh feed update` restores the good feed. `scripts/test-update.sh clean`
 quits the test app and deletes it with its preferences.
 
-To test the actual release candidate instead of the test builds, build it with
-`scripts/release.sh` and check that `dist/appcast.xml` has the right version, download URL
-and notes, and that `sign_update --verify dist/TokenBar-<version>.zip <signature>` passes.
+These are test builds. The release candidate itself is checked with the dry run in Actions
+([Dry run](#dry-run-build-a-release-without-publishing)). Without Actions, `scripts/release.sh`
+builds the same files into `dist/` with the key in your Keychain, and the same checks apply.

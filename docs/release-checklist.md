@@ -85,8 +85,11 @@ defaults delete io.github.derrafdev.TokenBar   # TokenBar's preferences only
 ## Before publishing
 
 - [ ] README demo (`docs/assets/demo.gif`) matches the app as released.
-- [ ] Draft release: notes are right, artifacts are `TokenBar-<version>.dmg`, `.zip`,
-      `appcast.xml` and `SHA256SUMS.txt`, and the version matches the tag.
+- [ ] Draft release: notes are right, artifacts are `TokenBar-<version>[-unsigned].dmg`,
+      `.zip`, `appcast.xml` and `SHA256SUMS.txt`, and the version matches the tag.
+- [ ] Draft's `appcast.xml` checked as in
+      [releasing.md › Reviewing the draft](releasing.md#reviewing-the-draft): signature
+      verifies, `length` matches, and the `enclosure` URL names this tag and this zip.
 - [ ] Publishing as *latest* offers this version to every installed TokenBar that checks for
       updates. An unsigned draft starts as a pre-release: untick it and tick *Set as the
       latest release*.

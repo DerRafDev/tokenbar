@@ -9,8 +9,8 @@ the few boundaries that exist and why each one does.
 tokenbar/
 ├── apps/
 │   ├── macos/                     # The native macOS app
-│   │   ├── TokenBar.xcodeproj     # Thin app target: entry point, Info.plist, signing
-│   │   ├── TokenBar/              # App sources (composition root only)
+│   │   ├── TokenBar.xcodeproj     # Thin app target: entry point, Info.plist, signing, Sparkle
+│   │   ├── TokenBar/              # App sources: composition root and the Sparkle updater
 │   │   └── TokenBarKit/           # Swift package with all logic and all tests
 │   └── web/                       # The official website (static Astro site, own npm project)
 ├── docs/                          # Architecture, providers, releasing, roadmap
