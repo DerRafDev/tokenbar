@@ -76,8 +76,11 @@ defaults delete io.github.derrafdev.TokenBar   # TokenBar's preferences only
       (Portuguese). Before publishing, a check against the public feed says you are up to
       date, because the latest release is older. (Until the first updater release is
       published, it shows an error instead: 0.1.0 has no `appcast.xml`.)
-- [ ] `dist/appcast.xml`: version, build number, download URL
-      (`…/releases/download/v<version>/TokenBar-<version>[-unsigned].zip`) and notes are right.
+- [ ] Dry run of the Release workflow on `main` passed and its artifact checks out
+      ([releasing.md › Dry run](releasing.md#dry-run-build-a-release-without-publishing)):
+      checksums, appcast version, build number, download URL
+      (`…/releases/download/v<version>/TokenBar-<version>[-unsigned].zip`), length, notes,
+      EdDSA signature, and `SUPublicEDKey` in the app.
 
 ## Before publishing
 

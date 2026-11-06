@@ -20,6 +20,7 @@ git commit -am "chore(release): prepare TokenBar 0.2.0"
 # open PR → CI green → merge
 git switch main && git pull
 scripts/test-update.sh build                  # in-app update test, see below
+gh workflow run release.yml --ref main        # dry run: review its artifact, see below
 # run the manual checklist: docs/release-checklist.md
 git tag v0.2.0 && git push origin v0.2.0
 ```
@@ -27,7 +28,8 @@ git tag v0.2.0 && git push origin v0.2.0
 The [Release workflow](../.github/workflows/release.yml) then runs:
 
 ```text
-verify tag → tests → archive → sign (app + Sparkle) → notarize app → staple → zip + dmg → sign + notarize dmg → EdDSA-sign zip → appcast.xml → SHA256SUMS → draft GitHub Release
+build:          verify tag → tests → archive → sign (app + Sparkle) → notarize app → staple → zip + dmg → sign + notarize dmg → EdDSA-sign zip → appcast.xml → SHA256SUMS → upload dist/ artifact
+draft-release:  download that artifact → draft GitHub Release
 ```
 
 It creates a **draft**. Its notes come from `docs/release-notes/<tag>.md` (GitHub's
@@ -41,10 +43,79 @@ the moment you publish (as latest), every TokenBar that checks for updates is of
 
 GitHub Releases are the changelog; there is no separate `CHANGELOG.md`.
 
+## Dry run: build a release without publishing
+
+Running the Release workflow by hand (`workflow_dispatch`) runs the same `build` job as a tag
+push, with the same secrets and the same `scripts/release.sh`, and stops after uploading
+`dist/` as an Actions artifact. It creates no tag and no release, and does not change the
+update feed (installed copies only read releases that are published). The job has a
+read-only token; only the tag-only `draft-release` job can write to the repository.
+
+**Before you can run it:**
+
+- The workflow file with `workflow_dispatch` must be on the **default branch** (`main`).
+  GitHub offers *Run workflow* and accepts `gh workflow run` only for workflows that exist
+  there. Once it is merged, you can run it on any branch or tag; the run uses the workflow
+  file and the code of the ref you choose. Until then, not even this branch can trigger it.
+- The ref must have `SPARKLE_PUBLIC_ED_KEY` set, and the `SPARKLE_PRIVATE_KEY` secret must
+  exist; otherwise the run fails, as a tag release would.
+
+**Run it**, either in the browser (*Actions › Release › Run workflow*, pick the branch, *Run
+workflow*) or:
+
+```sh
+gh workflow run release.yml --ref main         # or a release branch
+gh run watch "$(gh run list --workflow release.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+```
+
+The run summary shows the version and commit it built (`Building TokenBar 0.2.0 from main
+(abc1234)`), and the artifact `TokenBar-<version>-<commit>`, kept for 14 days.
+
+**Download and check it:**
+
+```sh
+run=$(gh run list --workflow release.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run download "$run" -D review/              # unpacks to review/TokenBar-<version>-<commit>/
+cd review/TokenBar-*/
+ls                                             # TokenBar-<v>[-unsigned].zip, .dmg, appcast.xml, SHA256SUMS.txt
+shasum -a 256 -c SHA256SUMS.txt                # zip and dmg match their checksums
+xmllint --noout appcast.xml                    # well-formed
+grep -E 'sparkle:(version|shortVersionString|minimumSystemVersion)|enclosure' appcast.xml
+```
+
+In `appcast.xml`, check:
+
+- `sparkle:shortVersionString` is the version, and `sparkle:version` the build number, both
+  higher than the release currently published.
+- The `enclosure` URL is
+  `https://github.com/DerRafDev/tokenbar/releases/download/v<version>/<the zip's file name>`.
+  It only resolves once that release is published; a 404 now is expected.
+- `length` equals `stat -f %z TokenBar-<version>*.zip`.
+- The release notes in `<description>` are `docs/release-notes/v<version>.md`.
+
+Then check the zip's signature, and that the app inside trusts your production key:
+
+```sh
+bin=~/Documents/programming/tokenbar/build/SourcePackages/artifacts/sparkle/Sparkle/bin
+sig=$(sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p' appcast.xml)
+$bin/sign_update --verify TokenBar-*.zip "$sig"      # uses the key in your Keychain; silent on success
+ditto -x -k TokenBar-*.zip app/
+plutil -extract SUPublicEDKey raw app/TokenBar.app/Contents/Info.plist   # = $bin/generate_keys -p
+plutil -extract SUFeedURL raw app/TokenBar.app/Contents/Info.plist      # the public feed
+codesign --verify --deep --strict --verbose=2 app/TokenBar.app
+```
+
+With Developer ID and notarization configured, also `spctl -a -vv app/TokenBar.app`
+(`source=Notarized Developer ID`) and `xcrun stapler validate app/TokenBar.app`.
+
+A dry run proves the pipeline and the inputs, but the tag push builds again, so the draft's
+files are new bytes (new signatures and timestamps). Check the draft's `appcast.xml` the
+same way before publishing.
+
 ## Secrets
 
-Configure in *Settings → Secrets and variables → Actions*. All are optional: without
-them the release is ad-hoc signed, its artifacts are suffixed `-unsigned`, and the draft
+Configure in *Settings → Secrets and variables → Actions*. The signing and notarization
+secrets are optional: without them the release is ad-hoc signed, its artifacts are suffixed `-unsigned`, and the draft
 is marked prerelease. macOS Gatekeeper blocks unsigned apps on first launch.
 
 To ship an unsigned build as the main release (as 0.1.0 does), untick *Set as a
