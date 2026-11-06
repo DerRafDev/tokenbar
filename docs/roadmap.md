@@ -29,6 +29,10 @@ Candidates, not commitments. Each needs evidence that it works reliably before i
 | **Automatic updates** | Would add the first network request not made for a provider. Needs a privacy-preserving design. |
 | **More providers** (Gemini, Cursor, Copilot, …) | Only with a reliable, documented-enough source. Start with a section in [providers.md](providers.md). |
 | **Menu bar customization** | Driven by dogfooding feedback. |
+| **Agent alerts: Claude Code questions** | Debug-only prototype ([agents.md](agents.md)). Validated with real sessions: structured questions (`AskUserQuestion`) in the menu bar and popover, `2 → 1 → usage` as they are answered, and **Go to Session** in Terminal.app. Before a release: listener authentication, installing and removing hooks from Settings with consent, and a safe edit of `~/.claude/settings.json`. |
+| **Agent alerts: more environments** | Exact targets for iTerm2, VS Code, and tmux (today: open the app, or nothing). Each needs a verified way to find and show the session. |
+| **Agent alerts: Codex** | Needs a verified signal for when a Codex session asks the user something and when it is answered. |
+| **Agent alerts: approvals** | Not counted: Claude Code sends no event when the user approves (only when the command finishes) or denies. Needs a reliable signal that the user has decided. |
 
 ## Not planned
 

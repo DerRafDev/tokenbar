@@ -178,6 +178,34 @@ scheme enables it, so ⌘R never silently runs on mock data. Demo mode keeps its
 separate defaults suite, so it never changes real preferences. Mock code is wrapped in `#if DEBUG` and absent from Release
 builds, and the popover labels demo data with a "Demo" badge.
 
+## Agent alerts (Debug prototype)
+
+Debug builds launched with `TOKENBAR_AGENT_HOOKS=1` show Claude Code sessions waiting for an
+answer to a structured question (`AskUserQuestion`). Details, validation status and limits:
+[agents.md](agents.md); how to try it: [testing-agent-alerts.md](testing-agent-alerts.md).
+
+```text
+Claude Code hook ──curl──▶ LocalHookServer (127.0.0.1) ──▶ ClaudeHookMapper ──▶ AgentActivityStore ──▶ MenuBarLabel / Agents page
+  (command, exit 0)          TokenBarProviders              origin check          TokenBarCore            TokenBarUI
+                                                                                      │
+                                                     AgentSessionNavigator ◀── "Go to Session" / "Open <App>"
+                                                     + MacAgentNavigationEnvironment (sysctl, Apple Events to Terminal)
+```
+
+- **Transport:** Claude Code `command` hooks post each payload with `/usr/bin/curl` to a listener
+  bound to the loopback interface, and always exit 0, so Claude Code shows no error or delay while
+  TokenBar is closed. `http` hooks were rejected because they print an error on every event then.
+- **State:** one entry per session (provider + session ID). A question is resolved by its
+  `PostToolUse`, the next prompt, the end of the turn, the end of the session, or **Dismiss**
+  (Esc on a question sends no event).
+- **Conversation vs. place:** the session ID names the conversation; `AgentOrigin` names where it
+  is open (app, and for Terminal.app the tab's TTY plus the Claude Code process ID and start
+  time). Navigation decisions live in `AgentSessionNavigator` (Core, tested with a fake
+  environment); system calls live in `MacAgentNavigationEnvironment` (Providers). The UI only
+  shows the action the navigator offers.
+- **Not yet:** listener authentication, installing hooks from the app, Codex, and exact targets
+  outside Terminal.app.
+
 ## Security boundaries
 
 - Third-party credentials (Claude Code, Codex) are read from their owner's storage and never
@@ -191,9 +219,16 @@ builds, and the popover labels demo data with a "Demo" badge.
   authenticated URLs, and response bodies are never logged.
 - No TokenBar backend. The app talks only to provider endpoints.
   *Usage data stays on your Mac.*
+- The agent alerts prototype exists only in Debug builds and only when launched with
+  `TOKENBAR_AGENT_HOOKS=1`. Its listener binds to 127.0.0.1, accepts small `POST`s, answers `200`
+  with an empty body (so a hook never makes a decision for Claude Code), and stores and logs
+  nothing from the payload. It has no authentication yet: any local process can post a fake
+  question. Debug builds carry the Apple Events entitlement so **Go to Session** can select a
+  Terminal tab after the user allows it in System Settings › Privacy & Security › Automation;
+  Release builds do not. TokenBar never types into a session or reopens a conversation.
 
 ## Dependencies
 
 None. Foundation, SwiftUI, AppKit, Security, ServiceManagement, and OSLog cover
-networking, JSON, Keychain, dates, and UI. Lint and formatting use `swift format`,
+networking, JSON, Keychain, dates, and UI. The Debug-only agent listener uses Network. Lint and formatting use `swift format`,
 which ships with Xcode.

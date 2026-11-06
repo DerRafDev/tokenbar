@@ -1,8 +1,13 @@
 /* Portuguese (Brazil). Keys are the English source strings used in code. */
 
 "%@ used" = "%@ usado";
+"%lld questions waiting for an answer" = "%lld perguntas aguardando resposta";
+"1 question waiting for an answer" = "1 pergunta aguardando resposta";
 "Access was not allowed. Refresh to be asked again." = "Acesso não permitido. Atualize para ser perguntado de novo.";
+"Agents (%lld)" = "Agentes (%lld)";
+"Agents" = "Agentes";
 "Allow TokenBar in Login Items to open it at login." = "Permita o TokenBar em Itens de Início para abri-lo ao iniciar sessão.";
+"Already answered or cancelled? Remove it from the list." = "Já respondeu ou cancelou? Remova da lista.";
 "Cancel" = "Cancelar";
 "Checking…" = "Verificando…";
 "Configure Providers…" = "Configurar provedores…";
@@ -10,6 +15,7 @@
 "Current session" = "Sessão atual";
 "Demo" = "Demo";
 "Detailed" = "Detalhado";
+"Dismiss" = "Dispensar";
 "Display" = "Exibição";
 "Each provider's current session. Switches to Minimal when there are too many providers to fit." = "A sessão atual de cada provedor. Muda para Mínimo quando há provedores demais para caber.";
 "Enable %@" = "Ativar %@";
@@ -18,22 +24,27 @@
 "Enabled" = "Ativado";
 "Experimental" = "Experimental";
 "General" = "Geral";
+"Go to Session" = "Ir para a sessão";
 "Hides details" = "Oculta os detalhes";
 "Loading…" = "Carregando…";
 "Menu Bar" = "Barra de menus";
 "Minimal" = "Mínimo";
 "Month" = "Mês";
 "Monthly" = "Uso mensal";
+"No agent is waiting for you." = "Nenhum agente está esperando por você.";
 "No providers are available in this version yet." = "Ainda não há provedores disponíveis nesta versão.";
 "No providers enabled" = "Nenhum provedor ativado";
 "No usage limits reported." = "Nenhum limite de uso informado.";
 "Not connected" = "Não conectado";
 "Not connected. See Settings › Providers for what's needed." = "Não conectado. Veja em Ajustes › Provedores o que é necessário.";
 "Not updated yet" = "Ainda não atualizado";
+"now" = "agora";
 "Off" = "Desativado";
 "Only the provider whose current session is most used." = "Apenas o provedor com a sessão atual mais usada.";
+"Open %@" = "Abrir %@";
 "Open at login" = "Abrir ao iniciar sessão";
 "Open Login Items…" = "Abrir Itens de Início…";
+"Page" = "Página";
 "Providers" = "Provedores";
 "Quit TokenBar" = "Encerrar TokenBar";
 "Refresh every" = "Atualizar a cada";
@@ -48,12 +59,15 @@
 "Show in menu bar" = "Mostrar na barra de menus";
 "Show usage in menu bar" = "Mostrar uso na barra de menus";
 "Shows details" = "Mostra os detalhes";
+"Shows the window and tab where the question is open." = "Mostra a janela e a aba onde a pergunta está aberta.";
 "Sign-in expired. Sign in again to resume updates." = "Login expirado. Entre novamente para retomar as atualizações.";
 "Something went wrong." = "Algo deu errado.";
 "The service returned an error (%lld)." = "O serviço retornou um erro (%lld).";
 "The service took too long to respond." = "O serviço demorou demais para responder.";
 "The two main limits of each provider, such as 15/12 for session and week." = "Os dois limites principais de cada provedor, como 15/12 para sessão e semana.";
+"This session is no longer open." = "Esta sessão não está mais aberta.";
 "Today" = "Hoje";
+"TokenBar can't find the exact window, so it opens the app." = "O TokenBar não encontra a janela exata, então abre o app.";
 "Too many requests. Trying again at %@." = "Muitas solicitações. Nova tentativa às %@.";
 "Too many requests. Will retry later." = "Muitas solicitações. Tentaremos novamente mais tarde.";
 "Turn on a provider to see its usage limits here." = "Ative um provedor para ver os limites de uso aqui.";
@@ -61,6 +75,9 @@
 "Updated %@ ago" = "Atualizado há %@";
 "Updated just now" = "Atualizado agora";
 "Updating…" = "Atualizando…";
+"Usage" = "Uso";
+"Waiting for an answer" = "Aguardando resposta";
+"Waiting for you" = "Esperando por você";
 "Week" = "Semana";
 "Weekly" = "Uso semanal";
 "When off, the menu bar shows only the TokenBar icon." = "Quando desativado, a barra de menus mostra apenas o ícone do TokenBar.";
