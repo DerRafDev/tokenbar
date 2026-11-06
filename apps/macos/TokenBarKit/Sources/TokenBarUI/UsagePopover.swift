@@ -5,9 +5,12 @@ import TokenBarCore
 /// provider at a time can be expanded to show its details.
 public struct UsagePopover: View {
     let store: UsageStore
+    let agents: AgentActivityStore?
+    let navigator: AgentSessionNavigator?
     let formatter: UsageFormatter
 
     @State private var isVisible = false
+    @State private var tab = PopoverTab.usage
     /// The provider the user expanded, or `nil` when they collapsed it. Only read once
     /// ``hasChosenExpansion`` is true; until then a lone provider starts expanded.
     @State private var expandedID: ProviderID?
@@ -15,9 +18,17 @@ public struct UsagePopover: View {
     @Environment(\.openSettings) private var openSettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(store: UsageStore, formatter: UsageFormatter = UsageFormatter()) {
+    public init(
+        store: UsageStore,
+        agents: AgentActivityStore? = nil,
+        navigator: AgentSessionNavigator? = nil,
+        formatter: UsageFormatter = UsageFormatter()
+    ) {
         self.store = store
+        self.agents = agents
+        self.navigator = navigator
         self.formatter = formatter
+        _tab = State(initialValue: PopoverTab.initial(pendingCount: agents?.pendingCount ?? 0))
     }
 
     public var body: some View {
@@ -40,6 +51,7 @@ public struct UsagePopover: View {
             WindowVisibilityObserver { visible in
                 isVisible = visible
                 if visible {
+                    tab = PopoverTab.initial(pendingCount: agents?.pendingCount ?? 0)
                     Task { await store.refreshAll(.popoverOpened) }
                 }
             }
@@ -47,6 +59,28 @@ public struct UsagePopover: View {
     }
 
     private func content(now: Date) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let agents {
+                tabPicker(waiting: agents.pendingCount)
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.bottom, Spacing.small)
+            }
+            if let agents, tab == .agents {
+                AgentsSection(
+                    store: agents, navigator: navigator, descriptors: store.descriptors, now: now, formatter: formatter)
+            } else {
+                usage(now: now)
+            }
+            Divider()
+                .padding(.horizontal, Spacing.small)
+                .padding(.top, Spacing.small)
+                .padding(.bottom, Spacing.small)
+            footer(now: now)
+                .padding(.horizontal, Spacing.small)
+        }
+    }
+
+    private func usage(now: Date) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if store.enabledDescriptors.isEmpty {
                 emptyState
@@ -64,13 +98,23 @@ public struct UsagePopover: View {
                     )
                 }
             }
-            Divider()
-                .padding(.horizontal, Spacing.small)
-                .padding(.top, Spacing.small)
-                .padding(.bottom, Spacing.small)
-            footer(now: now)
-                .padding(.horizontal, Spacing.small)
         }
+    }
+
+    private func tabPicker(waiting: Int) -> some View {
+        Picker(String(localized: "Page", bundle: .module), selection: $tab) {
+            Text("Usage", bundle: .module).tag(PopoverTab.usage)
+            Group {
+                if waiting > 0 {
+                    Text("Agents (\(waiting))", bundle: .module)
+                } else {
+                    Text("Agents", bundle: .module)
+                }
+            }
+            .tag(PopoverTab.agents)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 
     private var expanded: ProviderID? {

@@ -14,11 +14,21 @@ import TokenBarCore
 public struct MenuBarLabel: View {
     let store: UsageStore
     let settings: AppSettings
+    let agents: AgentActivityStore?
     let formatter: UsageFormatter
+    /// Follows the menu bar's appearance, which the agent indicator needs because it is not a
+    /// template image.
+    @Environment(\.colorScheme) private var colorScheme
 
-    public init(store: UsageStore, settings: AppSettings, formatter: UsageFormatter = UsageFormatter()) {
+    public init(
+        store: UsageStore,
+        settings: AppSettings,
+        agents: AgentActivityStore? = nil,
+        formatter: UsageFormatter = UsageFormatter()
+    ) {
         self.store = store
         self.settings = settings
+        self.agents = agents
         self.formatter = formatter
     }
 
@@ -27,7 +37,11 @@ public struct MenuBarLabel: View {
 
     public var body: some View {
         let snapshots = settings.showsUsageInMenuBar ? self.snapshots : []
-        if let image = Self.image(for: snapshots, mode: settings.menuBarDisplay, formatter: formatter) {
+        // Sessions waiting for an answer take over the menu bar until none is left.
+        if let indicator = agentIndicator {
+            Image(nsImage: Self.renderIndicator(indicator.text, colorScheme: colorScheme))
+                .accessibilityLabel(indicator.spoken)
+        } else if let image = Self.image(for: snapshots, mode: settings.menuBarDisplay, formatter: formatter) {
             Image(nsImage: image)
                 .accessibilityLabel(
                     snapshots.map {
@@ -40,6 +54,13 @@ public struct MenuBarLabel: View {
             Image(systemName: "gauge.with.dots.needle.33percent")
                 .accessibilityLabel(Text(verbatim: "TokenBar"))
         }
+    }
+
+    private var agentIndicator: AgentIndicator.Label? {
+        guard let agents else { return nil }
+        let names = Dictionary(
+            store.descriptors.map { ($0.id, $0.displayName) }, uniquingKeysWith: { first, _ in first })
+        return AgentIndicator.label(for: agents.pending, names: names, compact: settings.menuBarDisplay == .minimal)
     }
 
     /// Enabled providers shown in the menu bar that have data, in display order.
@@ -125,6 +146,29 @@ public struct MenuBarLabel: View {
         renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
         let image = renderer.nsImage ?? NSImage()
         image.isTemplate = true
+        return image
+    }
+
+    /// Amber, so a waiting question stands out from usage numbers in light and dark menu bars.
+    static let attentionColor = Color(red: 1.0, green: 0.72, blue: 0.0)
+
+    /// "● Claude · 2" with an amber dot. Not a template image, since macOS would drop the color;
+    /// the text takes the menu bar's own text color instead.
+    static func renderIndicator(_ text: String, colorScheme: ColorScheme) -> NSImage {
+        let content = HStack(spacing: 5) {
+            Circle()
+                .fill(attentionColor)
+                .frame(width: 7, height: 7)
+            Text(verbatim: text)
+                .font(.system(size: 12, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(colorScheme == .dark ? Color.white : Color.black.opacity(0.85))
+        }
+        .padding(.vertical, 1)
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
+        let image = renderer.nsImage ?? NSImage()
+        image.isTemplate = false
         return image
     }
 

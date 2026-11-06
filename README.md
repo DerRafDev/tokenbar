@@ -149,6 +149,16 @@ Every build runs the real providers. To work on the UI without accounts, launch 
 build with `TOKENBAR_DEMO=1` (listed, unchecked, in the scheme's environment variables).
 Demo data is labeled "Demo" and does not exist in Release builds.
 
+### Experimental: Claude Code question alerts
+
+Debug builds include a prototype that shows when a Claude Code session is waiting for your answer
+to a question: `● Claude · 2` in the menu bar, an **Agents** page in the popover, and
+**Go to Session** to bring the Terminal.app tab with the question to the front. It is off unless
+you launch with `TOKENBAR_AGENT_HOOKS=1` (listed, unchecked, in the scheme) and set up Claude Code
+hooks in a test folder by hand. It is not part of Release builds. To try it, follow
+[docs/testing-agent-alerts.md](docs/testing-agent-alerts.md); design and limits are in
+[docs/agents.md](docs/agents.md).
+
 The repository also holds the TokenBar website in `apps/web`, a separate static site
 with its own [README](apps/web/README.md). The app never needs it to build.
 

@@ -1,6 +1,14 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "NSAppleEventsUsageDescription" : {
+      "comment" : "Debug builds only: shown when the agent prototype first asks to control Terminal (Go to Session).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "TokenBar brings the Terminal tab with a waiting Claude Code question to the front. It never types into the session." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O TokenBar traz para a frente a aba do Terminal com uma pergunta pendente do Claude Code. Ele nunca digita na sessão." } }
+      }
+    },
     "NSHumanReadableCopyright" : {
       "comment" : "Also declares the app's supported languages: macOS only uses a translation in TokenBarKit if the app bundle itself has that language.",
       "extractionState" : "manual",

@@ -26,6 +26,8 @@ struct DemoModeTests {
         let launchArguments = try xml.nodes(forXPath: "//LaunchAction//CommandLineArgument[@isEnabled='YES']/@argument")
 
         #expect(!launchVariables.contains { $0.stringValue == DemoMode.environmentKey })
+        // The agent hooks prototype opens a local port, so it must be opted into as well.
+        #expect(!launchVariables.contains { $0.stringValue == "TOKENBAR_AGENT_HOOKS" })
         #expect(!launchArguments.contains { $0.stringValue?.contains("Mock") == true })
     }
 }

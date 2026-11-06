@@ -32,3 +32,8 @@ DEVELOPMENT_TEAM =
 ENABLE_USER_SCRIPT_SANDBOXING = YES
 DEAD_CODE_STRIPPING = YES
 COMBINE_HIDPI_IMAGES = YES
+
+// Debug only: the agent prototype ("Go to Session") selects a Terminal tab with an Apple Event.
+// Release builds send no Apple Events and carry neither the entitlement nor the prompt text.
+CODE_SIGN_ENTITLEMENTS[config=Debug] = Config/TokenBar-Debug.entitlements
+INFOPLIST_KEY_NSAppleEventsUsageDescription[config=Debug] = TokenBar brings the Terminal tab with a waiting Claude Code question to the front. It never types into the session.
