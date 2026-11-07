@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings: AppSettings
     let store: UsageStore
     let launchAtLogin = LaunchAtLogin()
+    let updater = SoftwareUpdater()
     /// Sessions waiting for the user. `nil` unless agent monitoring runs (Debug prototype).
     let agents: AgentActivityStore?
     /// Brings a waiting session's window to the front. `nil` with ``agents``.

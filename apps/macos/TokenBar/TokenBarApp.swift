@@ -8,7 +8,12 @@ struct TokenBarApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            UsagePopover(store: appDelegate.store, agents: appDelegate.agents, navigator: appDelegate.navigator)
+            UsagePopover(
+                store: appDelegate.store,
+                agents: appDelegate.agents,
+                navigator: appDelegate.navigator,
+                updates: appDelegate.updater
+            )
         } label: {
             MenuBarLabel(store: appDelegate.store, settings: appDelegate.settings, agents: appDelegate.agents)
         }

@@ -41,8 +41,12 @@ directly to the providers. There is no TokenBar server and no account.
 - **Honest when data is old.** If a refresh fails, you keep the last values with an
   "outdated" mark instead of an error screen.
 - **Opens at login**, if you want it to.
+- **Updates itself when you ask** (from the first release after 0.1.0). Gear menu ›
+  **Check for Updates…** installs a new version and relaunches TokenBar. It never checks
+  on its own.
 - **English and Portuguese (Brazil).**
-- **Native and light.** SwiftUI and AppKit, no Electron, no web views, no third-party code.
+- **Native and light.** SwiftUI and AppKit, no Electron. The only third-party code is
+  [Sparkle](https://sparkle-project.org), the standard Mac framework for in-app updates.
 
 ## Supported providers
 
@@ -95,6 +99,37 @@ Because the build is unsigned, macOS may ask again for access to Claude Code's K
 item after you install an update. Signing and notarization are planned after 0.1.0
 ([roadmap](docs/roadmap.md)).
 
+### Updating
+
+> [!NOTE]
+> In-app updates are not in a release yet. TokenBar 0.1.0 has no updater; the first
+> release after 0.1.0 will be the first one that has it.
+
+**Where it is:** click the TokenBar icon in the menu bar, then the **gear** button at the
+bottom right of the popover, and choose **Check for Updates…** (**Buscar atualizações…**
+in Portuguese), just above **Quit TokenBar**.
+
+If a new version exists, TokenBar shows what changed. Click **Install Update** (**Instalar
+Atualização**), then **Install and Relaunch** (**Instalar e Reabrir**). TokenBar quits,
+installs the new version and opens again, with your preferences and enabled providers
+kept. If you already have the latest version, it says so. TokenBar never checks on its
+own; it only looks for updates when you choose this item.
+
+**Coming from TokenBar 0.1.0?** 0.1.0 has no **Check for Updates…** and cannot update
+itself. Install the first version with the updater by hand, once:
+
+1. Quit TokenBar (gear menu › **Quit TokenBar**).
+2. Download the new DMG from the [latest release](https://github.com/DerRafDev/tokenbar/releases/latest).
+3. Open it and drag **TokenBar** to **Applications**, choosing **Replace**.
+4. Open TokenBar. If that release is unsigned, approve it again with **Open Anyway** as in
+   the installation steps above.
+
+Your preferences and enabled providers are kept. From then on, every new version installs
+from the gear menu.
+
+Updates are verified before they are installed: each one is signed with the project's
+EdDSA key, and TokenBar refuses an update whose signature does not match.
+
 ### Enabling a provider
 
 Every provider starts **disabled**. TokenBar reads nothing until you enable one, and it
@@ -116,8 +151,11 @@ sign-in on its next refresh. TokenBar never renews tokens or writes them to disk
 **Your usage data stays on your Mac.**
 
 - TokenBar sends requests only to `api.anthropic.com` (Claude) and `chatgpt.com` (Codex),
-  and only for the providers you enabled.
-- No analytics, telemetry, crash reporting, tracking, or update checks.
+  and only for the providers you enabled, plus GitHub when you check for updates.
+- No analytics, telemetry, crash reporting, or tracking.
+- Update checks happen only when you choose **Check for Updates…**. TokenBar then
+  downloads the release feed from GitHub (`github.com` and its download servers), and
+  the update itself if you install it. No information about you or your Mac is sent.
 - No database or history: usage is kept in memory and never written to disk. Network
   responses are not cached and cookies are not stored.
 - Sign-ins are read when a refresh needs them. TokenBar keeps the Claude Code token in
@@ -142,7 +180,8 @@ From the repository root:
 scripts/test.sh       # build and test TokenBarKit
 scripts/format.sh     # format all Swift sources in place
 scripts/lint.sh       # check formatting and lint rules (what CI runs)
-scripts/release.sh    # build the DMG and ZIP into dist/ (see docs/releasing.md)
+scripts/release.sh    # build the DMG, ZIP and appcast into dist/ (see docs/releasing.md)
+scripts/test-update.sh build   # local in-app update test (see docs/releasing.md)
 ```
 
 Every build runs the real providers. To work on the UI without accounts, launch a Debug

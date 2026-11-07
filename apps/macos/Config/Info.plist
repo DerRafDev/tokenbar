@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- Keys Xcode cannot generate from INFOPLIST_KEY_* settings. Xcode merges this file with the
+     generated Info.plist. Values come from build settings in TokenBar.xcconfig. -->
+<dict>
+	<!-- Sparkle (in-app updates). See docs/releasing.md. -->
+	<key>SUFeedURL</key>
+	<string>$(SPARKLE_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>$(SPARKLE_PUBLIC_ED_KEY)</string>
+	<!-- Updates are checked only from the gear menu, never in the background. -->
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+	<!-- Check the EdDSA signature of the download before unpacking it. -->
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
+</dict>
+</plist>

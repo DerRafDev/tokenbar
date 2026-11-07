@@ -1,32 +1,55 @@
 name: Release
 
+# Two ways in:
+#   - Pushing a tag vX.Y.Z builds the release and creates a *draft* GitHub Release.
+#   - Running it by hand (workflow_dispatch) builds the same release and only uploads dist/
+#     as an Actions artifact, for review: no tag, no release, no change to the update feed.
+# Both run the same `build` job (scripts/release.sh). See docs/releasing.md.
 on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Release
+  build:
+    name: Build
     runs-on: macos-26
     timeout-minutes: 60
+    # Read-only token: this job holds the signing secrets, so it gets no write access.
+    permissions:
+      contents: read
     env:
       HAS_SIGNING: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 != '' }}
       HAS_NOTARY: ${{ secrets.NOTARY_KEY_P8_BASE64 != '' }}
+    outputs:
+      artifact: ${{ steps.version.outputs.artifact }}
+      signed: ${{ steps.version.outputs.signed }}
     steps:
       - uses: actions/checkout@v7
 
-      - name: Check tag matches app version
+      - name: Read app version
+        id: version
         run: |
           version=$(sed -n 's/^MARKETING_VERSION = //p' apps/macos/Config/Version.xcconfig)
-          if [[ "v$version" != "$GITHUB_REF_NAME" ]]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match MARKETING_VERSION $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "artifact=TokenBar-$version-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "signed=$HAS_SIGNING" >> "$GITHUB_OUTPUT"
+          echo "::notice::Building TokenBar $version from $GITHUB_REF_NAME (${GITHUB_SHA::7}), triggered by $GITHUB_EVENT_NAME"
+
+      - name: Check tag matches app version
+        if: github.event_name == 'push'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [[ "v$VERSION" != "$GITHUB_REF_NAME" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match MARKETING_VERSION $VERSION"
             exit 1
           fi
 
@@ -63,20 +86,55 @@ jobs:
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
           NOTARY_KEY_PATH: ${{ runner.temp }}/notary.p8
-        run: scripts/release.sh
-
-      - name: Create draft GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
+          # EdDSA private key that signs the update archive for Sparkle. Required.
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          flags=(--draft --title "TokenBar ${GITHUB_REF_NAME#v}")
-          notes="docs/release-notes/$GITHUB_REF_NAME.md"
-          if [[ -f "$notes" ]]; then flags+=(--notes-file "$notes"); else flags+=(--generate-notes); fi
-          if [[ "$HAS_SIGNING" != "true" ]]; then flags+=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" dist/* "${flags[@]}"
+          if [[ -z "$SPARKLE_PRIVATE_KEY" ]]; then
+            echo "::error::The SPARKLE_PRIVATE_KEY secret is missing (docs/releasing.md › Sparkle)"
+            exit 1
+          fi
+          scripts/release.sh
+
+      # dist/: TokenBar-<version>[-unsigned].zip (the signed update archive), .dmg,
+      # appcast.xml and SHA256SUMS.txt. The draft release below is made from this same artifact.
+      - name: Upload dist/ as an artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.version.outputs.artifact }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Clean up signing material
         if: always()
         run: |
           security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
           rm -f "$RUNNER_TEMP/notary.p8"
+
+  draft-release:
+    name: Draft GitHub Release
+    # Tag pushes only. A manual run ends after the build job uploads its artifact.
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.build.outputs.artifact }}
+          path: dist
+
+      - name: Create draft GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SIGNED: ${{ needs.build.outputs.signed }}
+        run: |
+          flags=(--draft --title "TokenBar ${GITHUB_REF_NAME#v}")
+          notes="docs/release-notes/$GITHUB_REF_NAME.md"
+          if [[ -f "$notes" ]]; then flags+=(--notes-file "$notes"); else flags+=(--generate-notes); fi
+          if [[ "$SIGNED" != "true" ]]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/* "${flags[@]}"

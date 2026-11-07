@@ -67,8 +67,29 @@ defaults delete io.github.derrafdev.TokenBar   # TokenBar's preferences only
 - [ ] Quit from the popover's gear menu and reopen: enabled providers, menu bar mode and
       refresh interval are kept, and Claude does not prompt again.
 
+## Updates
+
+- [ ] `scripts/test-update.sh build` and its three scenarios pass (update installs, relaunches
+      and keeps preferences; "up to date"; bad signature refused). See
+      [releasing.md › Testing an update locally](releasing.md#testing-an-update-locally).
+- [ ] Gear menu shows **Check for Updates…** (English) and **Buscar atualizações…**
+      (Portuguese). Before publishing, a check against the public feed says you are up to
+      date, because the latest release is older. (Until the first updater release is
+      published, it shows an error instead: 0.1.0 has no `appcast.xml`.)
+- [ ] Dry run of the Release workflow on `main` passed and its artifact checks out
+      ([releasing.md › Dry run](releasing.md#dry-run-build-a-release-without-publishing)):
+      checksums, appcast version, build number, download URL
+      (`…/releases/download/v<version>/TokenBar-<version>[-unsigned].zip`), length, notes,
+      EdDSA signature, and `SUPublicEDKey` in the app.
+
 ## Before publishing
 
 - [ ] README demo (`docs/assets/demo.gif`) matches the app as released.
-- [ ] Draft release: notes are right, artifacts are `TokenBar-<version>.dmg`, `.zip` and
-      `SHA256SUMS.txt`, and the version matches the tag.
+- [ ] Draft release: notes are right, artifacts are `TokenBar-<version>[-unsigned].dmg`,
+      `.zip`, `appcast.xml` and `SHA256SUMS.txt`, and the version matches the tag.
+- [ ] Draft's `appcast.xml` checked as in
+      [releasing.md › Reviewing the draft](releasing.md#reviewing-the-draft): signature
+      verifies, `length` matches, and the `enclosure` URL names this tag and this zip.
+- [ ] Publishing as *latest* offers this version to every installed TokenBar that checks for
+      updates. An unsigned draft starts as a pre-release: untick it and tick *Set as the
+      latest release*.

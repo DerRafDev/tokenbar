@@ -9,6 +9,7 @@
 "Allow TokenBar in Login Items to open it at login." = "Permita o TokenBar em Itens de Início para abri-lo ao iniciar sessão.";
 "Already answered or cancelled? Remove it from the list." = "Já respondeu ou cancelou? Remova da lista.";
 "Cancel" = "Cancelar";
+"Check for Updates…" = "Buscar atualizações…";
 "Checking…" = "Verificando…";
 "Configure Providers…" = "Configurar provedores…";
 "Could not change this setting. Try again in System Settings › General › Login Items." = "Não foi possível alterar este ajuste. Tente novamente em Ajustes do Sistema › Geral › Itens de Início.";

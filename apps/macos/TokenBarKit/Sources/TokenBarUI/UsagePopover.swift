@@ -7,6 +7,8 @@ public struct UsagePopover: View {
     let store: UsageStore
     let agents: AgentActivityStore?
     let navigator: AgentSessionNavigator?
+    /// Offers *Check for Updates…* in the gear menu when set.
+    let updates: (any UpdateChecking)?
     let formatter: UsageFormatter
 
     @State private var isVisible = false
@@ -22,11 +24,13 @@ public struct UsagePopover: View {
         store: UsageStore,
         agents: AgentActivityStore? = nil,
         navigator: AgentSessionNavigator? = nil,
+        updates: (any UpdateChecking)? = nil,
         formatter: UsageFormatter = UsageFormatter()
     ) {
         self.store = store
         self.agents = agents
         self.navigator = navigator
+        self.updates = updates
         self.formatter = formatter
         _tab = State(initialValue: PopoverTab.initial(pendingCount: agents?.pendingCount ?? 0))
     }
@@ -169,6 +173,12 @@ public struct UsagePopover: View {
                     showSettings()
                 }
                 .keyboardShortcut(",")
+                if let updates {
+                    Button(String(localized: "Check for Updates…", bundle: .module)) {
+                        updates.checkForUpdates()
+                    }
+                    .disabled(!updates.canCheckForUpdates)
+                }
                 Divider()
                 Button(String(localized: "Quit TokenBar", bundle: .module)) {
                     NSApp.terminate(nil)
